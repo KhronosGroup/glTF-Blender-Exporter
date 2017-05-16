@@ -275,6 +275,32 @@ def get_camera_index(glTF, name):
     return -1
 
 
+def get_light_index(glTF, name):
+    if glTF.get('extensions') is None:
+        return -1
+    
+    extensions = glTF['extensions']
+        
+    if extensions.get('KHR_lights') is None:
+        return -1
+    
+    khr_lights = extensions['KHR_lights']
+
+    if khr_lights.get('lights') is None:
+        return -1
+
+    lights = khr_lights['lights']
+
+    index = 0
+    for light in lights:
+        if light['name'] == name:
+            return index
+        
+        index += 1
+
+    return -1
+
+
 def get_node_index(glTF, name):
     if glTF.get('nodes') is None:
         return -1

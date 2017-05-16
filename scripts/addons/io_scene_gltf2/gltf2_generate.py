@@ -533,11 +533,13 @@ def generate_lights(operator,
         light_type = {}
         
         if blender_light.type == 'SUN':
-            light['directional'] = light_type 
+            light['type'] = 'directional' 
         elif blender_light.type == 'POINT':
             light['point'] = light_type
+            light['type'] = 'point' 
         elif blender_light.type == 'SPOT':
             light['spot'] = light_type
+            light['type'] = 'spot' 
         else:
             continue
 
@@ -555,7 +557,7 @@ def generate_lights(operator,
                 light_type['fallOffAngle'] = blender_light.spot_size
                 light_type['fallOffExponent'] = 128.0 * blender_light.spot_blend
 
-        light_type['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy, blender_light.color[2] * blender_light.energy]
+        light['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy, blender_light.color[2] * blender_light.energy]
         
         #
         
@@ -578,11 +580,9 @@ def generate_lights(operator,
 
         light = {}
         
-        light_type = {}
-        
-        light['ambient'] = light_type
+        light['type'] = 'ambient' 
 
-        light_type['color'] = [blender_scene.world.ambient_color[0], blender_scene.world.ambient_color[1], blender_scene.world.ambient_color[2]]
+        light['color'] = [blender_scene.world.ambient_color[0], blender_scene.world.ambient_color[1], blender_scene.world.ambient_color[2]]
         
         #
         
@@ -976,7 +976,18 @@ def generate_nodes(operator,
                 camera = get_camera_index(glTF, blender_object.data.name)
                 
                 if camera >= 0:
+                    # TODO: Add correction node for camera, as default direction is different to Blender.
                     node['camera'] = camera
+
+
+        if export_settings['gltf_lights']:
+            if blender_object.type == 'LAMP':
+                light = get_light_index(glTF, blender_object.data.name)
+                if light >= 0:
+                    khr_lights = {'light' : light}
+                    extensions = {'KHR_lights' : khr_lights}
+                    # TODO: Add correction node for light, as default direction is different to Blender.
+                    node['extensions'] = extensions
 
         # TODO: Morph target 'weights'.
 
@@ -1489,6 +1500,15 @@ def generate_scenes(operator,
         if len(nodes) > 0:
             scene['nodes'] = nodes
                 
+        #
+
+        if export_settings['gltf_lights']:
+            light = get_light_index(glTF, 'Ambient_' + blender_scene.name)
+            if light >= 0:
+                khr_lights = {'light' : light}
+                extensions = {'KHR_lights' : khr_lights}
+                scene['extensions'] = extensions
+
         #
 
         scene['name'] = blender_scene.name
