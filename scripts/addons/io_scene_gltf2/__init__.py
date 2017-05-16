@@ -134,6 +134,12 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_lights = BoolProperty(
+            name='Export lights',
+            description='',
+            default=False
+    )
+
     export_selected = BoolProperty(
             name='Export selected only',
             description='',
@@ -185,6 +191,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_materials'] = self.export_materials
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
+        export_settings['gltf_lights'] = self.export_lights
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
@@ -217,6 +224,7 @@ class ExportGLTF2_Base():
         layout.prop(self, 'export_materials')
         layout.prop(self, 'export_colors')
         layout.prop(self, 'export_cameras')
+        layout.prop(self, 'export_lights')
         
         layout.prop(self, 'export_selected')
         layout.prop(self, 'export_apply')

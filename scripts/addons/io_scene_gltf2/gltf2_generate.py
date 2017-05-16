@@ -513,6 +513,102 @@ def generate_cameras(operator,
         glTF['cameras'] = cameras
 
 
+def generate_lights(operator,
+                    context,
+                    export_settings,
+                    glTF):
+    lights = []
+
+    #
+    #
+    
+    for blender_light in bpy.data.lamps:
+
+        #
+        # Property: light
+        #
+
+        light = {}
+        
+        light_type = {}
+        
+        if blender_light.type == 'SUN':
+            light['directional'] = light_type 
+        elif blender_light.type == 'POINT':
+            light['point'] = light_type
+        elif blender_light.type == 'SPOT':
+            light['spot'] = light_type
+        else:
+            continue
+
+        if blender_light.type == 'POINT' or blender_light.type == 'SPOT':
+            if blender_light.falloff_type == 'CONSTANT':
+                light_type['constantAttenuation'] = 1.0
+            elif blender_light.falloff_type == 'INVERSE_LINEAR':
+                light_type['linearAttenuation'] = 1.0
+            elif blender_light.falloff_type == 'INVERSE_SQUARE':
+                light_type['quadraticAttenuation'] = 1.0
+            else:
+                continue
+            
+            if blender_light.type == 'SPOT':
+                light_type['fallOffAngle'] = blender_light.spot_size
+                light_type['fallOffExponent'] = 128.0 * blender_light.spot_blend
+
+        light_type['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy, blender_light.color[2] * blender_light.energy]
+        
+        #
+        
+        light['name'] = blender_light.name
+        
+        #
+        #
+        
+        lights.append(light)
+        
+    #
+    #
+    #
+    
+    for blender_scene in bpy.data.scenes:
+
+        #
+        # Property: light
+        #
+
+        light = {}
+        
+        light_type = {}
+        
+        light['ambient'] = light_type
+
+        light_type['color'] = [blender_scene.world.ambient_color[0], blender_scene.world.ambient_color[1], blender_scene.world.ambient_color[2]]
+        
+        #
+        
+        light['name'] = 'Ambient_' + blender_scene.name
+        
+        #
+        #
+        
+        lights.append(light)
+    
+    #
+    #
+
+    if len (lights) > 0:
+        if glTF.get('extensions') is None:
+            glTF['extensions'] = {}
+            
+        extensions = glTF['extensions']
+        
+        extensions_lights = {}
+
+        extensions['KHR_lights'] = extensions_lights
+        
+        extensions_lights['lights'] = lights
+
+
 def generate_meshes(operator,
                   context,
                   export_settings,
@@ -1441,6 +1537,9 @@ def generate_glTF(operator,
 
     if export_settings['gltf_cameras']:
         generate_cameras(operator, context, export_settings, glTF)
+        
+    if export_settings['gltf_lights']:
+        generate_lights(operator, context, export_settings, glTF)        
     
     #
     
