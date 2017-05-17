@@ -938,6 +938,11 @@ def generate_nodes(operator,
                   context,
                   export_settings,
                   glTF):
+    
+    correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(90.0)))
+    
+    #
+    
     nodes = []
     
     skins = []
@@ -976,8 +981,15 @@ def generate_nodes(operator,
                 camera = get_camera_index(glTF, blender_object.data.name)
                 
                 if camera >= 0:
-                    # TODO: Add correction node for camera, as default direction is different to Blender.
-                    node['camera'] = camera
+                    # Add correction node for camera, as default direction is different to Blender.
+                    correction_node = {}
+                    
+                    correction_node['name'] = 'Correction_' + blender_object.name
+                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2], correction_quaternion[3], correction_quaternion[0]]
+                    
+                    correction_node['camera'] = camera
+                    
+                    nodes.append(correction_node)
 
 
         if export_settings['gltf_lights']:
@@ -986,8 +998,16 @@ def generate_nodes(operator,
                 if light >= 0:
                     khr_lights = {'light' : light}
                     extensions = {'KHR_lights' : khr_lights}
-                    # TODO: Add correction node for light, as default direction is different to Blender.
-                    node['extensions'] = extensions
+                    
+                    # Add correction node for light, as default direction is different to Blender.
+                    correction_node = {}
+                    
+                    correction_node['name'] = 'Correction_' + blender_object.name
+                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2], correction_quaternion[3], correction_quaternion[0]]
+                    
+                    correction_node['extensions'] = extensions
+                    
+                    nodes.append(correction_node)
 
         # TODO: Morph target 'weights'.
 
@@ -1111,6 +1131,20 @@ def generate_nodes(operator,
         #
 
         children = []
+        
+        # Camera
+        if export_settings['gltf_cameras']:
+            if blender_object.type == 'CAMERA':
+                child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
+                if child_index >= 0:
+                    children.append(child_index)
+
+        # Light
+        if export_settings['gltf_lights']:
+            if blender_object.type == 'LIGHT':
+                child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
+                if child_index >= 0:
+                    children.append(child_index)
 
         # Nodes
         for blender_child_node in blender_object.children:
