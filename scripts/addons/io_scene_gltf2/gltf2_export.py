@@ -115,9 +115,9 @@ def save(operator,
         else:
             zeros_bin = 0
 
-        length = 12 + length_gtlf
+        length = 12 + 8 + length_gtlf
         if length_bin > 0:
-            length += length_bin
+            length += 8 + length_bin
         
         # Header (Version 2)
         file.write('glTF'.encode())
