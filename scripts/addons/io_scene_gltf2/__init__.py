@@ -275,4 +275,4 @@ def unregister():
     bpy.utils.unregister_module(__name__)
 
     bpy.types.INFO_MT_file_export.remove(menu_func_export_gltf)
-    bpy.types.INFO_MT_file_export.append(menu_func_export_glb)
+    bpy.types.INFO_MT_file_export.remove(menu_func_export_glb)
