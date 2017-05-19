@@ -1316,7 +1316,7 @@ def generate_materials(operator,
     #
     #
     
-    for currentMaterial in filtered_materials:
+    for blender_material in filtered_materials:
         # 
         # Property: material
         #
@@ -1325,9 +1325,9 @@ def generate_materials(operator,
 
         #
         
-        if currentMaterial.node_tree is not None:
+        if blender_material.node_tree is not None:
         
-            for currentNode in currentMaterial.node_tree.nodes:
+            for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
     
                     if currentNode.node_tree.name == 'glTF Metal Roughness':
@@ -1481,15 +1481,41 @@ def generate_materials(operator,
                     #
                     
                     if get_scalar(currentNode.inputs['Use COLOR_0'].default_value, 0.0) < 0.5:
-                        export_settings['gltf_use_no_color'].append(currentMaterial.name)
+                        export_settings['gltf_use_no_color'].append(blender_material.name)
 
         else:
-            # TODO: Common Material or conversion to PBR Material.
-            print_console('DUMMY', 'Blender Render Store Material')
+            # 
+            # Property: commonPhong
+            #
+            
+            # TODO: Add selection, which common material to use.
+
+            commonPhong = {}
+            
+            material['extensions'] = { 'KHR_materials_common' : { 'commonPhong' : commonPhong } }
+            
+            commonPhong['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
+            
+            alpha = 1.0
+            if blender_material.use_transparency:
+                alpha = blender_material.alpha 
+
+            commonPhong['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
+
+            commonPhong['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
+
+            shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
+
+            commonPhong['shininessFactor'] = shininessFactor
+            
+            #
+            #
+            
+            # TODO: Emissive, textures and other parameters.
 
         #
 
-        material['name'] = currentMaterial.name
+        material['name'] = blender_material.name
 
         #
         #
