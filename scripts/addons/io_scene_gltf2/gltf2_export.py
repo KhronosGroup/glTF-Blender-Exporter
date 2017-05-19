@@ -101,14 +101,14 @@ def save(operator,
         glTF_data = glTF_encoded.encode()
         binary = export_settings['gltf_binary']
 
-        length_gtlf = len(glTF_data) + 8
+        length_gtlf = len(glTF_data)
         zeros_gltf = 4 - (length_gtlf % 4)
         if zeros_gltf != 4:
             length_gtlf += zeros_gltf
         else:
             zeros_gltf = 0
         
-        length_bin = len(binary) + 8
+        length_bin = len(binary)
         zeros_bin = 4 - (length_bin % 4)
         if zeros_bin != 4:
             length_bin += zeros_bin
