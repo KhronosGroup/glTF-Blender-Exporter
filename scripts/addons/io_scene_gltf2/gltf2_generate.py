@@ -1290,8 +1290,14 @@ def generate_textures(operator,
 
             texture['source'] = get_image_index(export_settings, get_uri(blenderTexture.image.filepath))
         else:
-            # TODO: Common Material or conversion to PBR Material.
-            print_console('DUMMY', 'Blender Render Store Texture')
+            magFilter = 9729
+            wrap = 10497
+            if blenderTexture.texture.extension == 'CLIP':
+                wrap = 33071
+
+            texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
+
+            texture['source'] = get_image_index(export_settings, get_uri(blenderTexture.texture.image.filepath))
 
         #
         #
@@ -1508,10 +1514,12 @@ def generate_materials(operator,
 
             commonPhong['shininessFactor'] = shininessFactor
             
+            print_console('DUMMY', 'Add common material textures')
+
             #
             #
-            
-            # TODO: Emissive, textures and other parameters.
+
+            print_console('DUMMY', 'Add material textures and parameters')
 
         #
 
