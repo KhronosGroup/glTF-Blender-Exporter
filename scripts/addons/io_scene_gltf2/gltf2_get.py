@@ -126,6 +126,31 @@ def get_image_index(export_settings, uri):
     return -1
 
 
+def get_texture_index_by_filepath(export_settings, glTF, filepath):
+    if filepath is None:
+        return -1
+    
+    uri = get_uri(filepath)
+
+    if export_settings['gltf_uri'] is None:
+        return -1
+
+    if glTF.get('textures') is None:
+        return -1
+
+    image_uri = export_settings['gltf_uri']        
+
+    index = 0
+    for texture in glTF['textures']:
+        current_image_uri = image_uri[texture['source']]
+        if current_image_uri == uri:
+            return index
+        
+        index += 1
+
+    return -1
+
+
 def get_texture_index(export_settings, glTF, name, shader_node_group):
     if shader_node_group is None:
         return -1
@@ -149,25 +174,7 @@ def get_texture_index(export_settings, glTF, name, shader_node_group):
     if from_node.image is None or from_node.image.size[0] == 0 or from_node.image.size[1] == 0:
         return -1
 
-    uri = get_uri(from_node.image.filepath)
-
-    if export_settings['gltf_uri'] is None:
-        return -1
-
-    if glTF.get('textures') is None:
-        return -1
-
-    image_uri = export_settings['gltf_uri']        
-
-    index = 0
-    for texture in glTF['textures']:
-        current_image_uri = image_uri[texture['source']]
-        if current_image_uri == uri:
-            return index
-        
-        index += 1
-
-    return -1
+    return get_texture_index_by_filepath(export_settings, glTF, from_node.image.filepath)
 
 
 def get_texcoord_index(glTF, name, shader_node_group):

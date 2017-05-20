@@ -1495,6 +1495,7 @@ def generate_materials(operator,
             #
             
             # TODO: Add selection, which common material to use.
+            # TODO: Add additional parameters.
 
             commonPhong = {}
             
@@ -1513,13 +1514,75 @@ def generate_materials(operator,
             shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
 
             commonPhong['shininessFactor'] = shininessFactor
+
+            #
             
-            print_console('DUMMY', 'Add common material textures')
-
+            material['emissiveFactor'] = [blender_material.emit * blender_material.diffuse_color[0], blender_material.emit * blender_material.diffuse_color[1], blender_material.emit * blender_material.diffuse_color[2]]
+            
             #
-            #
-
-            print_console('DUMMY', 'Add material textures and parameters')
+            
+            for texture_slot in blender_material.texture_slots:
+                if texture_slot and texture_slot.texture and texture_slot.texture.type == 'IMAGE' and texture_slot.texture.image is not None:
+                    #
+                    # Diffuse texture
+                    #
+                    if texture_slot.use_map_color_diffuse:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            diffuseTexture = {
+                                'index' : index
+                            }
+                            commonPhong['diffuseTexture'] = diffuseTexture
+                    #
+                    # Specular texture
+                    #
+                    if texture_slot.use_map_color_spec:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            specularTexture = {
+                                'index' : index
+                            }
+                            commonPhong['specularTexture'] = specularTexture
+                    #
+                    # Shininess texture
+                    #
+                    if texture_slot.use_map_hardness:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            shininessTexture = {
+                                'index' : index
+                            }
+                            commonPhong['shininessTexture'] = shininessTexture
+                    #
+                    # Ambient texture
+                    #
+                    if texture_slot.use_map_ambient:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            ambientTexture = {
+                                'index' : index
+                            }
+                            commonPhong['ambientTexture'] = ambientTexture
+                    #
+                    # Emissive texture
+                    #
+                    if texture_slot.use_map_emit:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            emissiveTexture = {
+                                'index' : index
+                            }
+                            material['emissiveTexture'] = emissiveTexture
+                    #
+                    # Normal texture
+                    #
+                    if texture_slot.use_map_normal:
+                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                        if index >= 0:
+                            normalTexture = {
+                                'index' : index
+                            }
+                            material['normalTexture'] = normalTexture
 
         #
 
