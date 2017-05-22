@@ -1289,20 +1289,27 @@ def generate_textures(operator,
             texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
 
             texture['source'] = get_image_index(export_settings, get_uri(blenderTexture.image.filepath))
+            
+            #
+            #
+    
+            textures.append(texture)
+            
         else:
-            magFilter = 9729
-            wrap = 10497
-            if blenderTexture.texture.extension == 'CLIP':
-                wrap = 33071
+            if export_settings['gltf_common'] != '-':
+                magFilter = 9729
+                wrap = 10497
+                if blenderTexture.texture.extension == 'CLIP':
+                    wrap = 33071
+    
+                texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
+    
+                texture['source'] = get_image_index(export_settings, get_uri(blenderTexture.texture.image.filepath))
 
-            texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
-
-            texture['source'] = get_image_index(export_settings, get_uri(blenderTexture.texture.image.filepath))
-
-        #
-        #
-
-        textures.append(texture)
+                #
+                #
+        
+                textures.append(texture)
 
     #
     #
@@ -1489,109 +1496,119 @@ def generate_materials(operator,
                     if get_scalar(currentNode.inputs['Use COLOR_0'].default_value, 0.0) < 0.5:
                         export_settings['gltf_use_no_color'].append(blender_material.name)
 
+                    #
+            
+                    material['name'] = blender_material.name
+            
+                    #
+                    #
+            
+                    materials.append(material)
+
         else:
-            # 
-            # Property: commonPhong
-            #
+            if export_settings['gltf_common'] != '-':
+                # 
+                # Property: Common Material
+                #
+    
+                common = {}
+                
+                material['extensions'] = { 'KHR_materials_common' : { export_settings['gltf_common'] : common } }
+                
+                common['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
+                
+                alpha = 1.0
+                if blender_material.use_transparency:
+                    alpha = blender_material.alpha 
+
+                if export_settings['gltf_common'] != 'commonConstant':
+                    common['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
+        
+                    if export_settings['gltf_common'] != 'commonLambert':
+                        common['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
             
-            # TODO: Add selection, which common material to use.
-            # TODO: Add additional parameters.
-
-            commonPhong = {}
+                        shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
             
-            material['extensions'] = { 'KHR_materials_common' : { 'commonPhong' : commonPhong } }
-            
-            commonPhong['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
-            
-            alpha = 1.0
-            if blender_material.use_transparency:
-                alpha = blender_material.alpha 
+                        common['shininessFactor'] = shininessFactor
+    
+                #
+                
+                material['emissiveFactor'] = [blender_material.emit * blender_material.diffuse_color[0], blender_material.emit * blender_material.diffuse_color[1], blender_material.emit * blender_material.diffuse_color[2]]
+                
+                #
+                
+                for texture_slot in blender_material.texture_slots:
+                    if texture_slot and texture_slot.texture and texture_slot.texture.type == 'IMAGE' and texture_slot.texture.image is not None:
+                        if export_settings['gltf_common'] != 'commonConstant':
+                            #
+                            # Diffuse texture
+                            #
+                            if texture_slot.use_map_color_diffuse:
+                                index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                                if index >= 0:
+                                    diffuseTexture = {
+                                        'index' : index
+                                    }
+                                    common['diffuseTexture'] = diffuseTexture
+                            if export_settings['gltf_common'] != 'commonLambert':                                #
+                                # Specular texture
+                                #
+                                if texture_slot.use_map_color_spec:
+                                    index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                                    if index >= 0:
+                                        specularTexture = {
+                                            'index' : index
+                                        }
+                                        common['specularTexture'] = specularTexture
+                                #
+                                # Shininess texture
+                                #
+                                if texture_slot.use_map_hardness:
+                                    index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                                    if index >= 0:
+                                        shininessTexture = {
+                                            'index' : index
+                                        }
+                                        common['shininessTexture'] = shininessTexture
+                        #
+                        # Ambient texture
+                        #
+                        if texture_slot.use_map_ambient:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                ambientTexture = {
+                                    'index' : index
+                                }
+                                common['ambientTexture'] = ambientTexture
+                        #
+                        # Emissive texture
+                        #
+                        if texture_slot.use_map_emit:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                emissiveTexture = {
+                                    'index' : index
+                                }
+                                material['emissiveTexture'] = emissiveTexture
+                        #
+                        # Normal texture
+                        #
+                        if texture_slot.use_map_normal:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                normalTexture = {
+                                    'index' : index
+                                }
+                                material['normalTexture'] = normalTexture
 
-            commonPhong['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
-
-            commonPhong['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
-
-            shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
-
-            commonPhong['shininessFactor'] = shininessFactor
-
-            #
-            
-            material['emissiveFactor'] = [blender_material.emit * blender_material.diffuse_color[0], blender_material.emit * blender_material.diffuse_color[1], blender_material.emit * blender_material.diffuse_color[2]]
-            
-            #
-            
-            for texture_slot in blender_material.texture_slots:
-                if texture_slot and texture_slot.texture and texture_slot.texture.type == 'IMAGE' and texture_slot.texture.image is not None:
-                    #
-                    # Diffuse texture
-                    #
-                    if texture_slot.use_map_color_diffuse:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            diffuseTexture = {
-                                'index' : index
-                            }
-                            commonPhong['diffuseTexture'] = diffuseTexture
-                    #
-                    # Specular texture
-                    #
-                    if texture_slot.use_map_color_spec:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            specularTexture = {
-                                'index' : index
-                            }
-                            commonPhong['specularTexture'] = specularTexture
-                    #
-                    # Shininess texture
-                    #
-                    if texture_slot.use_map_hardness:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            shininessTexture = {
-                                'index' : index
-                            }
-                            commonPhong['shininessTexture'] = shininessTexture
-                    #
-                    # Ambient texture
-                    #
-                    if texture_slot.use_map_ambient:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            ambientTexture = {
-                                'index' : index
-                            }
-                            commonPhong['ambientTexture'] = ambientTexture
-                    #
-                    # Emissive texture
-                    #
-                    if texture_slot.use_map_emit:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            emissiveTexture = {
-                                'index' : index
-                            }
-                            material['emissiveTexture'] = emissiveTexture
-                    #
-                    # Normal texture
-                    #
-                    if texture_slot.use_map_normal:
-                        index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                        if index >= 0:
-                            normalTexture = {
-                                'index' : index
-                            }
-                            material['normalTexture'] = normalTexture
-
-        #
-
-        material['name'] = blender_material.name
-
-        #
-        #
-
-        materials.append(material)
+                #
+        
+                material['name'] = blender_material.name
+        
+                #
+                #
+        
+                materials.append(material)
 
     #
     #

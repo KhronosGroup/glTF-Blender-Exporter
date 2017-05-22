@@ -105,26 +105,29 @@ def filter_apply(export_settings):
                 if isinstance(currentNode, bpy.types.ShaderNodeTexImage) and currentNode.image is not None and currentNode not in filtered_textures:
                     filtered_textures.append(currentNode)
         else:
-            for currentTextureSlot in currentMaterial.texture_slots:
-                if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE' and currentTextureSlot.texture.image is not None:
-                    if currentTextureSlot not in filtered_textures:
-                        accept = False
-                        if currentTextureSlot.use_map_color_diffuse:
-                            accept = True
-                        if currentTextureSlot.use_map_color_spec:
-                            accept = True
-                        if currentTextureSlot.use_map_hardness:
-                            accept = True
-                        if currentTextureSlot.use_map_ambient:
-                            accept = True
-
-                        if currentTextureSlot.use_map_emit:
-                            accept = True
-                        if currentTextureSlot.use_map_normal:
-                            accept = True
-                            
-                        if accept:
-                            filtered_textures.append(currentTextureSlot) 
+            if export_settings['gltf_common'] != '-':
+                for currentTextureSlot in currentMaterial.texture_slots:
+                    if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE' and currentTextureSlot.texture.image is not None:
+                        if currentTextureSlot not in filtered_textures:
+                            accept = False
+                            if currentTextureSlot.use_map_ambient:
+                                accept = True
+                            if export_settings['gltf_common'] != 'commonConstant':
+                                if currentTextureSlot.use_map_color_diffuse:
+                                    accept = True
+                                if export_settings['gltf_common'] != 'commonLambert':
+                                    if currentTextureSlot.use_map_color_spec:
+                                        accept = True
+                                    if currentTextureSlot.use_map_hardness:
+                                        accept = True
+    
+                            if currentTextureSlot.use_map_emit:
+                                accept = True
+                            if currentTextureSlot.use_map_normal:
+                                accept = True
+                                
+                            if accept:
+                                filtered_textures.append(currentTextureSlot) 
  
     export_settings['filtered_textures'] = filtered_textures                
 

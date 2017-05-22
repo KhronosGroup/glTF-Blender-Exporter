@@ -134,12 +134,6 @@ class ExportGLTF2_Base():
             default=True
     )
 
-    export_lights = BoolProperty(
-            name='Export lights',
-            description='',
-            default=False
-    )
-
     export_selected = BoolProperty(
             name='Export selected only',
             description='',
@@ -170,6 +164,28 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_experimental = BoolProperty(
+            name='Show experimental',
+            description='',
+            default=False
+    )
+
+    export_lights = BoolProperty(
+            name='Export lights',
+            description='',
+            default=False
+    )
+
+    export_common = EnumProperty(
+        name='Common material',
+        items=(('-', 'No export', ''),
+        ('commonConstant', 'Constant', ''),
+        ('commonLambert', 'Lambert', ''),
+        ('commonPhong', 'Phong', ''),
+        ('commonBlinn', 'Blinn', '')),
+        default='-'
+    )
+
     #
 
     def execute(self, context):
@@ -191,12 +207,18 @@ class ExportGLTF2_Base():
         export_settings['gltf_materials'] = self.export_materials
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
-        export_settings['gltf_lights'] = self.export_lights
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
         export_settings['gltf_current_frame'] = self.export_current_frame
         export_settings['gltf_skins'] = self.export_skins
+        
+        if self.export_experimental:
+            export_settings['gltf_lights'] = self.export_lights
+            export_settings['gltf_common'] = self.export_common
+        else:
+            export_settings['gltf_lights'] = False
+            export_settings['gltf_common'] = '-'
         
         export_settings['gltf_uri'] = []
         export_settings['gltf_binary'] = bytearray()
@@ -224,7 +246,6 @@ class ExportGLTF2_Base():
         layout.prop(self, 'export_materials')
         layout.prop(self, 'export_colors')
         layout.prop(self, 'export_cameras')
-        layout.prop(self, 'export_lights')
         
         layout.prop(self, 'export_selected')
         layout.prop(self, 'export_apply')
@@ -233,6 +254,12 @@ class ExportGLTF2_Base():
         if not self.export_animations:
             layout.prop(self, 'export_current_frame')
         layout.prop(self, 'export_skins')
+
+        layout.prop(self, 'export_experimental')
+        if self.export_experimental:
+            layout.prop(self, 'export_lights')
+            layout.prop(self, 'export_common')
+
 
 class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
     '''Export scene as glTF 2.0 file'''
