@@ -597,6 +597,9 @@ def generate_lights(operator,
     #
 
     if len (lights) > 0:
+        create_extensionUsed(operator, context, export_settings, glTF, 'KHR_lights')
+        create_extensionRequired(operator, context, export_settings, glTF, 'KHR_lights')
+
         if glTF.get('extensions') is None:
             glTF['extensions'] = {}
             
@@ -1325,6 +1328,8 @@ def generate_materials(operator,
     filtered_materials = export_settings['filtered_materials']
                   
     materials = []
+    
+    KHR_materials_common_Used = False
 
     #
     #
@@ -1507,13 +1512,15 @@ def generate_materials(operator,
 
         else:
             if export_settings['gltf_common'] != '-':
+                KHR_materials_common_Used = True
+                
                 # 
                 # Property: Common Material
                 #
     
-                common = {}
+                common = { 'type' : export_settings['gltf_common'] }
                 
-                material['extensions'] = { 'KHR_materials_common' : { export_settings['gltf_common'] : common } }
+                material['extensions'] = { 'KHR_materials_common' : common }
                 
                 common['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
                 
@@ -1614,6 +1621,10 @@ def generate_materials(operator,
     #
 
     if len (materials) > 0:
+        if KHR_materials_common_Used:
+            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_common')
+            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_common')
+
         glTF['materials'] = materials
 
 
