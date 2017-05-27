@@ -100,7 +100,7 @@ def filter_apply(export_settings):
     filtered_textures = []
 
     for currentMaterial in filtered_materials:
-        if currentMaterial.node_tree:
+        if currentMaterial.node_tree and currentMaterial.use_nodes:
             for currentNode in currentMaterial.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeTexImage) and currentNode.image is not None and currentNode not in filtered_textures:
                     filtered_textures.append(currentNode)
