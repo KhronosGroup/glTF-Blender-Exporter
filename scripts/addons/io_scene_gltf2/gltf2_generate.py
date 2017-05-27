@@ -1144,7 +1144,7 @@ def generate_nodes(operator,
 
         # Light
         if export_settings['gltf_lights']:
-            if blender_object.type == 'LIGHT':
+            if blender_object.type == 'LAMP':
                 child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
                 if child_index >= 0:
                     children.append(child_index)
