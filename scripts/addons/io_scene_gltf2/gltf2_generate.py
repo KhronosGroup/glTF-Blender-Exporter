@@ -665,6 +665,8 @@ def generate_meshes(operator,
                 # Meshes/primitives without material are allowed.
                 if material >= 0:
                     primitive['material'] = material
+                else:
+                    print_console('WARNING', 'Material ' + internal_primitive['material'] + ' not found.')
                 
             #
             #
@@ -942,7 +944,7 @@ def generate_nodes(operator,
                   export_settings,
                   glTF):
     
-    correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(90.0)))
+    correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(-90.0)))
     
     #
     
@@ -1343,7 +1345,7 @@ def generate_materials(operator,
 
         #
         
-        if blender_material.node_tree is not None:
+        if blender_material.node_tree is not None and blender_material.use_nodes:
         
             for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):

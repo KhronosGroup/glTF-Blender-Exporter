@@ -35,7 +35,7 @@ def get_used_materials():
     materials = []
 
     for currentMaterial in bpy.data.materials:
-        if currentMaterial.node_tree:
+        if currentMaterial.node_tree and currentMaterial.use_nodes:
             for currentNode in currentMaterial.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
                     if currentNode.node_tree.name == 'glTF Metal Roughness':
@@ -61,21 +61,21 @@ def get_material_requires_texcoords(glTF, index):
     
     # General
     
-    if glTF.get('emissiveTexture') is not None:
+    if material.get('emissiveTexture') is not None:
         return True
     
-    if glTF.get('normalTexture') is not None:
+    if material.get('normalTexture') is not None:
         return True
     
-    if glTF.get('occlusionTexture') is not None:
+    if material.get('occlusionTexture') is not None:
         return True
     
     # Metal roughness
     
-    if glTF.get('baseColorTexture') is not None:
+    if material.get('baseColorTexture') is not None:
         return True
     
-    if glTF.get('metallicRoughnessTexture') is not None:
+    if material.get('metallicRoughnessTexture') is not None:
         return True
     
     # TODO: Specular Glossiness Material.
@@ -98,15 +98,15 @@ def get_material_requires_normals(glTF, index):
     
     # General
     
-    if glTF.get('normalTexture') is not None:
+    if material.get('normalTexture') is not None:
         return True
     
     # Metal roughness
     
-    if glTF.get('baseColorTexture') is not None:
+    if material.get('baseColorTexture') is not None:
         return True
     
-    if glTF.get('metallicRoughnessTexture') is not None:
+    if material.get('metallicRoughnessTexture') is not None:
         return True
     
     # TODO: Specular Glossiness Material.
