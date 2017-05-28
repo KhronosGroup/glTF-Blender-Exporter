@@ -530,32 +530,32 @@ def generate_lights(operator,
 
         light = {}
         
-        light_type = {}
-        
         if blender_light.type == 'SUN':
             light['type'] = 'directional' 
         elif blender_light.type == 'POINT':
-            light['point'] = light_type
             light['type'] = 'point' 
         elif blender_light.type == 'SPOT':
-            light['spot'] = light_type
             light['type'] = 'spot' 
         else:
             continue
 
         if blender_light.type == 'POINT' or blender_light.type == 'SPOT':
             if blender_light.falloff_type == 'CONSTANT':
-                light_type['constantAttenuation'] = 1.0
+                light['constantAttenuation'] = 1.0
             elif blender_light.falloff_type == 'INVERSE_LINEAR':
-                light_type['linearAttenuation'] = 1.0
+                light['linearAttenuation'] = 1.0 / blender_light.distance
             elif blender_light.falloff_type == 'INVERSE_SQUARE':
-                light_type['quadraticAttenuation'] = 1.0
+                light['quadraticAttenuation'] = 1.0 / blender_light.distance
+            elif blender_light.falloff_type == 'INVERSE_COEFFICIENTS':
+                light['constantAttenuation'] = blender_light.constant_coefficient * 1.0
+                light['linearAttenuation'] = blender_light.linear_coefficient * 1.0 / blender_light.distance
+                light['quadraticAttenuation'] = blender_light.quadratic_coefficient *  1.0 / blender_light.distance
             else:
                 continue
             
             if blender_light.type == 'SPOT':
-                light_type['fallOffAngle'] = blender_light.spot_size
-                light_type['fallOffExponent'] = 128.0 * blender_light.spot_blend
+                light['fallOffAngle'] = blender_light.spot_size
+                light['fallOffExponent'] = 128.0 * blender_light.spot_blend
 
         light['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy, blender_light.color[2] * blender_light.energy]
         
