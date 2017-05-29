@@ -186,6 +186,12 @@ class ExportGLTF2_Base():
         default='-'
     )
 
+    export_displacement = BoolProperty(
+            name='Export displacement',
+            description='',
+            default=False
+    )
+
     #
 
     def execute(self, context):
@@ -216,9 +222,11 @@ class ExportGLTF2_Base():
         if self.export_experimental:
             export_settings['gltf_lights'] = self.export_lights
             export_settings['gltf_common'] = self.export_common
+            export_settings['gltf_displacement'] = self.export_displacement
         else:
             export_settings['gltf_lights'] = False
             export_settings['gltf_common'] = '-'
+            export_settings['gltf_displacement'] = False
         
         export_settings['gltf_uri'] = []
         export_settings['gltf_binary'] = bytearray()
@@ -259,6 +267,7 @@ class ExportGLTF2_Base():
         if self.export_experimental:
             layout.prop(self, 'export_lights')
             layout.prop(self, 'export_common')
+            layout.prop(self, 'export_displacement')
 
 
 class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):

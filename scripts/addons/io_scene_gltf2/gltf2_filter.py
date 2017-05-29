@@ -104,6 +104,7 @@ def filter_apply(export_settings):
             for currentNode in currentMaterial.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeTexImage) and currentNode.image is not None and currentNode not in filtered_textures:
                     filtered_textures.append(currentNode)
+                    # TODO: Displacement.
         else:
             if export_settings['gltf_common'] != '-':
                 for currentTextureSlot in currentMaterial.texture_slots:
@@ -125,6 +126,10 @@ def filter_apply(export_settings):
                                 accept = True
                             if currentTextureSlot.use_map_normal:
                                 accept = True
+
+                            if export_settings['gltf_displacement']:
+                                if currentTextureSlot.use_map_displacement:
+                                    accept = True
                                 
                             if accept:
                                 filtered_textures.append(currentTextureSlot) 

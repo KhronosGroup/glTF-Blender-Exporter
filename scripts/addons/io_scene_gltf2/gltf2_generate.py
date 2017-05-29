@@ -1332,6 +1332,7 @@ def generate_materials(operator,
     materials = []
     
     KHR_materials_common_Used = False
+    KHR_materials_displacement_Used = False
 
     #
     #
@@ -1413,6 +1414,8 @@ def generate_materials(operator,
                     if currentNode.node_tree.name == 'glTF Specular Glossiness':
                         # TODO: Specular Glossiness
                         print_console('DUMMY', 'Specular Glossiness Store Material')
+                        
+                    # TODO: Displacement.
     
                     #
                     # Emissive texture
@@ -1609,6 +1612,28 @@ def generate_materials(operator,
                                     'index' : index
                                 }
                                 material['normalTexture'] = normalTexture
+                                
+                        #
+                        # Displacement textue
+                        #
+                        if export_settings['gltf_displacement']:
+                            if texture_slot.use_map_displacement:
+                                index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                                if index >= 0:
+                                    extensions = material['extensions']
+
+                                    # 
+                                    
+                                    displacementTexture = {
+                                        'index' : index,
+                                        'strength' : texture_slot.displacement_factor 
+                                    }
+                                     
+                                    extensions['KHR_materials_displacement'] = {'displacementTexture' : displacementTexture}
+                                    
+                                    #
+                                    
+                                    KHR_materials_displacement_Used = True
 
                 #
         
@@ -1626,6 +1651,10 @@ def generate_materials(operator,
         if KHR_materials_common_Used:
             create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_common')
             create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_common')
+            
+        if KHR_materials_displacement_Used:
+            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_displacement')
+            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_displacement')
 
         glTF['materials'] = materials
 
