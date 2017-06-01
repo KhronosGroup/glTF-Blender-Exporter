@@ -102,8 +102,8 @@ def save(operator,
         binary = export_settings['gltf_binary']
 
         length_gtlf = len(glTF_data)
-        zeros_gltf = (4 - (length_gtlf & 3)) & 3
-        length_gtlf += zeros_gltf
+        spaces_gltf = (4 - (length_gtlf & 3)) & 3
+        length_gtlf += spaces_gltf
 
         length_bin = len(binary)
         zeros_bin = (4 - (length_bin & 3)) & 3
@@ -122,7 +122,7 @@ def save(operator,
         file.write(struct.pack("I", length_gtlf)) 
         file.write('JSON'.encode())
         file.write(glTF_data)
-        for i in range(0, zeros_gltf):
+        for i in range(0, spaces_gltf):
             file.write(' '.encode())
 
         # Chunk 1 (BIN)
