@@ -102,18 +102,12 @@ def save(operator,
         binary = export_settings['gltf_binary']
 
         length_gtlf = len(glTF_data)
-        zeros_gltf = 4 - (length_gtlf % 4)
-        if zeros_gltf != 4:
-            length_gtlf += zeros_gltf
-        else:
-            zeros_gltf = 0
-        
+        zeros_gltf = (4 - (length_gtlf & 3)) & 3
+        length_gtlf += zeros_gltf
+
         length_bin = len(binary)
-        zeros_bin = 4 - (length_bin % 4)
-        if zeros_bin != 4:
-            length_bin += zeros_bin
-        else:
-            zeros_bin = 0
+        zeros_bin = (4 - (length_bin & 3)) & 3
+        length_bin += zeros_bin
 
         length = 12 + 8 + length_gtlf
         if length_bin > 0:
@@ -129,7 +123,7 @@ def save(operator,
         file.write('JSON'.encode())
         file.write(glTF_data)
         for i in range(0, zeros_gltf):
-            file.write('\0'.encode())
+            file.write(' '.encode())
 
         # Chunk 1 (BIN)
         if length_bin > 0:
