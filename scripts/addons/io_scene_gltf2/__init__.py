@@ -134,6 +134,12 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_hidden = BoolProperty(
+            name='Export hidden objects',
+            description='',
+            default=False
+    )
+
     export_selected = BoolProperty(
             name='Export selected only',
             description='',
@@ -213,6 +219,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_materials'] = self.export_materials
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
+        export_settings['gltf_hidden'] = self.export_hidden
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
@@ -239,35 +246,50 @@ class ExportGLTF2_Base():
 
         #
 
+        col = layout.box().column()
+        col.label('Embedding:', icon='PACKAGE')
         if self.export_format == 'ASCII':
-            layout.prop(self, 'export_embed_buffers')
-            layout.prop(self, 'export_embed_images')
-            layout.prop(self, 'export_strip')
-        
-        layout.prop(self, 'export_indices')
-        
-        layout.prop(self, 'export_texcoords')
-        layout.prop(self, 'export_normals')
+            col.prop(self, 'export_embed_buffers')
+            col.prop(self, 'export_embed_images')
+            col.prop(self, 'export_strip')
+
+        col = layout.box().column()
+        col.label('Nodes:', icon='OOPS')
+        col.prop(self, 'export_hidden')
+        col.prop(self, 'export_selected')
+
+        col = layout.box().column()
+        col.label('Meshes:', icon='MESH_DATA')
+        col.prop(self, 'export_apply')
+        col.prop(self, 'export_indices')
+
+        col = layout.box().column()
+        col.label('Attributes:', icon='SURFACE_DATA')
+        col.prop(self, 'export_texcoords')
+        col.prop(self, 'export_normals')
         if self.export_normals:
-            layout.prop(self, 'export_tangents')
-            
-        layout.prop(self, 'export_materials')
-        layout.prop(self, 'export_colors')
-        layout.prop(self, 'export_cameras')
-        
-        layout.prop(self, 'export_selected')
-        layout.prop(self, 'export_apply')
+            col.prop(self, 'export_tangents')
+        col.prop(self, 'export_colors')
 
-        layout.prop(self, 'export_animations')
+        col = layout.box().column()
+        col.label('Objects:', icon='OBJECT_DATA')
+        col.prop(self, 'export_materials')
+        col.prop(self, 'export_cameras')
+
+        col = layout.box().column()
+        col.label('Animation:', icon='OUTLINER_DATA_POSE')
+        col.prop(self, 'export_animations')
         if not self.export_animations:
-            layout.prop(self, 'export_current_frame')
-        layout.prop(self, 'export_skins')
+            col.prop(self, 'export_current_frame')
+        col.prop(self, 'export_skins')
 
-        layout.prop(self, 'export_experimental')
+        col = layout.box().column()
+        col.label('Experimental:', icon='RADIO')
+        col.prop(self, 'export_experimental')
         if self.export_experimental:
-            layout.prop(self, 'export_lights')
-            layout.prop(self, 'export_common')
-            layout.prop(self, 'export_displacement')
+            col.prop(self, 'export_lights')
+            col.prop(self, 'export_common')
+            col.prop(self, 'export_displacement')
 
 
 class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
