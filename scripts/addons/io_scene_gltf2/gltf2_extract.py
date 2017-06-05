@@ -281,6 +281,9 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     # Create primitive for each material.
     #
     for blender_material in blender_mesh.materials:
+        if blender_material is None:
+            continue
+        
         primitive = {
             'material' : blender_material.name,
             'indices' : [],
