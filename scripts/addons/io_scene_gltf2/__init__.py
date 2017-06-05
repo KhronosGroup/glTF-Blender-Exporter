@@ -134,12 +134,6 @@ class ExportGLTF2_Base():
             default=True
     )
 
-    export_hidden = BoolProperty(
-            name='Export hidden objects',
-            description='',
-            default=False
-    )
-
     export_selected = BoolProperty(
             name='Export selected only',
             description='',
@@ -219,7 +213,6 @@ class ExportGLTF2_Base():
         export_settings['gltf_materials'] = self.export_materials
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
-        export_settings['gltf_hidden'] = self.export_hidden
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
@@ -255,7 +248,6 @@ class ExportGLTF2_Base():
 
         col = layout.box().column()
         col.label('Nodes:', icon='OOPS')
-        col.prop(self, 'export_hidden')
         col.prop(self, 'export_selected')
 
         col = layout.box().column()
