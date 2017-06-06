@@ -4,9 +4,38 @@
 Blender glTF 2.0 Exporter
 =========================
 
-Important
----------
-This is a developer preview version and not all functions are yet implemented, tested and documented.    
+Introduction
+------------
+This is the offical Khronos Blender glTF 2.0 exporter. This repository mainly contains Python scripts to export the internal Blender data structure to glTF 2.0. Furthermore, node groups are provided, which do simulate the Physically-Based Rendering (PBR) materials using the Cycles renderer. Finally, several Blender scenes are provided, which do demonstrate each feature individually. 
+
+Feature matrix
+--------------
+Following table shows the current status of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).  
+The last three columns describe in combination the maturity of the exported feature:  
+As soon as a feature is implemented, documented and tested, the exported feature data can be considered as production quality.
+
+|Feature export     |Core |Extension|Experimental | |Implemented|Documented|Tested|
+|-------------------|:---:|:-------:|:-----------:|-|:---------:|:--------:|:----:|
+|Embed images       |  X  |         |             | |     X     |          |      |
+|Embed buffers      |  X  |         |             | |     X     |          |      |
+|Filtered objects   |  X  |         |             | |   Partly  |          |      |
+|Apply modifiers    |  X  |         |             | |     X     |          |      |
+|Indices type       |  X  |         |             | |     X     |          |      |
+|Vertices           |  X  |         |             | |     X     |          |      |
+|Normals            |  X  |         |             | |     X     |          |      |
+|Tangents           |  X  |         |             | |     X     |          |      |
+|Texture Coordinates|  X  |         |             | |     X     |          |      |
+|Colors             |  X  |         |             | |     X     |          |      |
+|Cameras            |  X  |         |             | |     X     |          |      |
+|Materials PBR MR   |  X  |         |             | |     X     |          |      |
+|Animations         |  X  |         |             | |     X     |          |      |
+|Skinning           |  X  |         |             | |     X     |          |      |
+|Morph targets      |  X  |         |             | |           |          |      |
+|GLB                |  X  |         |             | |     X     |          |      |
+|Materials PBR SG   |     |    X    |             | |           |          |      |
+|Lights             |     |         |      X      | |     X     |          |      |
+|Materials Common   |     |         |      X      | |     X     |          |      |
+|Materials Displace |     |         |      X      | |     X     |          |      |
 
 Folders
 -------
