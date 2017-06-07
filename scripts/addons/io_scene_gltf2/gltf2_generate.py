@@ -1524,12 +1524,20 @@ def generate_materials(operator,
                 common['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
                 
                 alpha = 1.0
+                alphaMode = 'OPAQUE'
                 if blender_material.use_transparency:
-                    alpha = blender_material.alpha 
+                    alpha = blender_material.alpha
+                    if blender_material.transparency_method == 'MASK':
+                        alphaMode = 'MASK'
+                    else:
+                        alphaMode = 'BLEND'
 
                 if export_settings['gltf_common'] != 'commonConstant':
                     common['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
         
+                    if alphaMode != 'OPAQUE': 
+                        material['alphaMode'] = alphaMode
+    
                     if export_settings['gltf_common'] != 'commonLambert':
                         common['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
             
