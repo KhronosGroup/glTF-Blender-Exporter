@@ -417,7 +417,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             #
 
-            if vertex.groups is not None and len(vertex.groups) > 0:
+            if vertex.groups is not None and len(vertex.groups) > 0 and export_settings['gltf_skins']:
                 joint = []
                 weight = []
                 bone_count = 0
@@ -496,19 +496,20 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                                 found = False
                                 break
 
-                for bone_index in range(0, bone_max):
-                    joint = joints[bone_index]
-                    weight = weights[bone_index]
-                                        
-                    joint_id = 'JOINTS_' + str(bone_index)
-                    weight_id = 'WEIGHTS_' + str(bone_index)
-                    for i in range(0, 4):
-                        if attributes[joint_id][current_new_index * 4 + i] != joint[i]:
-                            found = False
-                            break
-                        if attributes[weight_id][current_new_index * 4 + i] != weight[i]:
-                            found = False
-                            break
+                if export_settings['gltf_skins']:
+                    for bone_index in range(0, bone_max):
+                        joint = joints[bone_index]
+                        weight = weights[bone_index]
+                                            
+                        joint_id = 'JOINTS_' + str(bone_index)
+                        weight_id = 'WEIGHTS_' + str(bone_index)
+                        for i in range(0, 4):
+                            if attributes[joint_id][current_new_index * 4 + i] != joint[i]:
+                                found = False
+                                break
+                            if attributes[weight_id][current_new_index * 4 + i] != weight[i]:
+                                found = False
+                                break
                 
                 if found:
                     indices.append(current_new_index)
@@ -551,20 +552,21 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     
                     attributes[color_id].extend(colors[color_index])
 
-            for bone_index in range(0, bone_max):
-                joint_id = 'JOINTS_' + str(bone_index)
-                
-                if attributes.get(joint_id) is None:
-                    attributes[joint_id] = []
-                
-                attributes[joint_id].extend(joints[bone_index])
-
-                weight_id = 'WEIGHTS_' + str(bone_index)
-                
-                if attributes.get(weight_id) is None:
-                    attributes[weight_id] = []
-                
-                attributes[weight_id].extend(weights[bone_index])
+            if export_settings['gltf_skins']:
+                for bone_index in range(0, bone_max):
+                    joint_id = 'JOINTS_' + str(bone_index)
+                    
+                    if attributes.get(joint_id) is None:
+                        attributes[joint_id] = []
+                    
+                    attributes[joint_id].extend(joints[bone_index])
+    
+                    weight_id = 'WEIGHTS_' + str(bone_index)
+                    
+                    if attributes.get(weight_id) is None:
+                        attributes[weight_id] = []
+                    
+                    attributes[weight_id].extend(weights[bone_index])
     
     #
     # Add primitive plus split them if needed.
@@ -595,9 +597,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 texcoords.append(primitive['attributes']['COLOR_' + str(color_index)])
         joints = []
         weights = []
-        for bone_index in range(0, bone_max):
-            joints.append(primitive['attributes']['JOINTS_' + str(bone_index)])
-            weights.append(primitive['attributes']['WEIGHTS_' + str(bone_index)])
+        if export_settings['gltf_skins']:
+            for bone_index in range(0, bone_max):
+                joints.append(primitive['attributes']['JOINTS_' + str(bone_index)])
+                weights.append(primitive['attributes']['WEIGHTS_' + str(bone_index)])
             
         #
         
@@ -649,14 +652,15 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for color in colors:
                     pending_attributes['COLOR_' + str(color_index)] = color
                     color_index += 1 
-            joint_index = 0
-            for joint in joints:
-                pending_attributes['JOINTS_' + str(joint_index)] = joint
-                joint_index += 1 
-            weight_index = 0
-            for weight in weights:
-                pending_attributes['WEIGHTS_' + str(weight_index)] = weight
-                weight_index += 1 
+            if export_settings['gltf_skins']:
+                joint_index = 0
+                for joint in joints:
+                    pending_attributes['JOINTS_' + str(joint_index)] = joint
+                    joint_index += 1 
+                weight_index = 0
+                for weight in weights:
+                    pending_attributes['WEIGHTS_' + str(weight_index)] = weight
+                    weight_index += 1 
             
             pending_indices = pending_primitive['indices']
             

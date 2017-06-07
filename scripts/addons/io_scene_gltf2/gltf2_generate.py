@@ -393,35 +393,32 @@ def generate_animations(operator,
         #
         #
         
-        matrix_correction = mathutils.Matrix.Identity(4)
+        correction_matrix_local = mathutils.Matrix.Identity(4)
         matrix_basis = mathutils.Matrix.Identity(4)
         
-        generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, matrix_correction, matrix_basis)
+        generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, correction_matrix_local, matrix_basis)
         
         if export_settings['gltf_skins']:
             if blender_object.type == 'ARMATURE' and len(blender_object.pose.bones) > 0:
                 
-                matrix_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) * blender_object.matrix_local
+                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) * blender_object.matrix_local
 
                 for blender_bone in blender_object.pose.bones:
                     
                     matrix_basis = blender_bone.matrix_basis
                     
                     #
-                    
-                    matrix_correction = mathutils.Matrix.Identity(4)
-                    
+
+                    correction_matrix_local = mathutils.Matrix.Identity(4)
+                
                     if blender_bone.parent is None:
-                        matrix_correction = matrix_basis_change
-                                    
-                    matrix_correction = matrix_correction * blender_bone.bone.matrix_local
-                                    
-                    if blender_bone.parent is not None:
-                        matrix_correction = blender_bone.parent.bone.matrix_local.inverted() * matrix_correction
+                        correction_matrix_local = axis_basis_change * blender_bone.bone.matrix_local
+                    else:
+                        correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
                     
                     #
                     
-                    generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, matrix_correction, matrix_basis)
+                    generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, correction_matrix_local, matrix_basis)
         
     #
     #
@@ -1058,19 +1055,16 @@ def generate_nodes(operator,
                 #
                 #
                 
-                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) * blender_object.matrix_basis 
+                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) 
                 
-                correction_matrix = mathutils.Matrix.Identity(4)
+                correction_matrix_local = mathutils.Matrix.Identity(4)
                 
                 if blender_bone.parent is None:
-                    correction_matrix = axis_basis_change
-                    
-                correction_matrix = correction_matrix * blender_bone.bone.matrix_local
-                    
-                if blender_bone.parent is not None:
-                    correction_matrix = blender_bone.parent.bone.matrix_local.inverted() * correction_matrix
+                    correction_matrix_local = axis_basis_change * blender_object.matrix_local * blender_bone.bone.matrix_local
+                else:
+                    correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
                 
-                generate_node_parameter(operator, context, export_settings, glTF, correction_matrix * blender_bone.matrix_basis, node, 'JOINT')
+                generate_node_parameter(operator, context, export_settings, glTF, correction_matrix_local * blender_bone.matrix_basis, node, 'JOINT')
         
                 #
         
@@ -1084,8 +1078,8 @@ def generate_nodes(operator,
                 #
                 #
                 
-                inverse_bind_matrix = axis_basis_change * blender_bone.bone.matrix_local
-                inverse_bind_matrix.invert()
+                inverse_bind_matrix = axis_basis_change * blender_object.matrix_local * blender_bone.bone.matrix_local
+                inverse_bind_matrix = inverse_bind_matrix.inverted()
                 
                 for column in range(0, 4):
                     for row in range(0, 4):

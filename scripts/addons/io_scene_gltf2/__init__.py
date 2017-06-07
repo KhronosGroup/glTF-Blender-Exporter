@@ -164,12 +164,6 @@ class ExportGLTF2_Base():
             default=True
     )
 
-    export_experimental = BoolProperty(
-            name='Show experimental',
-            description='',
-            default=False
-    )
-
     export_lights = BoolProperty(
             name='Export lights',
             description='',
@@ -219,14 +213,9 @@ class ExportGLTF2_Base():
         export_settings['gltf_current_frame'] = self.export_current_frame
         export_settings['gltf_skins'] = self.export_skins
         
-        if self.export_experimental:
-            export_settings['gltf_lights'] = self.export_lights
-            export_settings['gltf_common'] = self.export_common
-            export_settings['gltf_displacement'] = self.export_displacement
-        else:
-            export_settings['gltf_lights'] = False
-            export_settings['gltf_common'] = '-'
-            export_settings['gltf_displacement'] = False
+        export_settings['gltf_lights'] = self.export_lights
+        export_settings['gltf_common'] = self.export_common
+        export_settings['gltf_displacement'] = self.export_displacement
         
         export_settings['gltf_uri'] = []
         export_settings['gltf_binary'] = bytearray()
@@ -277,11 +266,9 @@ class ExportGLTF2_Base():
 
         col = layout.box().column()
         col.label('Experimental:', icon='RADIO')
-        col.prop(self, 'export_experimental')
-        if self.export_experimental:
-            col.prop(self, 'export_lights')
-            col.prop(self, 'export_common')
-            col.prop(self, 'export_displacement')
+        col.prop(self, 'export_lights')
+        col.prop(self, 'export_common')
+        col.prop(self, 'export_displacement')
 
 
 class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
