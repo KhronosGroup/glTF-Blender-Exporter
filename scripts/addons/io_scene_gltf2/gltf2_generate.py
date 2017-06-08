@@ -1345,7 +1345,7 @@ def generate_materials(operator,
             for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
     
-                    if currentNode.node_tree.name == 'glTF Metal Roughness':
+                    if currentNode.node_tree.name == 'glTF Metallic Roughness':
                         # 
                         # Property: pbrMetallicRoughness
                         #
