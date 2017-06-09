@@ -121,8 +121,6 @@ def generate_animations_parameter(operator,
         
     #
 
-    profile_start()
-    
     if location.count(None) < 3:
         
         sampler_name = prefix + action.name + "_translation"
@@ -177,12 +175,8 @@ def generate_animations_parameter(operator,
             
             samplers.append(sampler)  
 
-    profile_end('Translation')         
-
     #
     #
-    
-    profile_start()
     
     rotation_data = None
     interpolation = None
@@ -249,13 +243,9 @@ def generate_animations_parameter(operator,
         sampler['name'] = sampler_name
         
         samplers.append(sampler) 
-
-    profile_end('Rotation')
     
     #
     #
-    
-    profile_start()
     
     if scale.count(None) < 3:
         sampler_name = prefix + action.name + "_scale"
@@ -309,8 +299,6 @@ def generate_animations_parameter(operator,
             sampler['name'] = sampler_name
             
             samplers.append(sampler)  
-
-    profile_end('Scale')
 
     #
     #
@@ -416,6 +404,54 @@ def generate_animations(operator,
             if blender_object.type == 'ARMATURE' and len(blender_object.pose.bones) > 0:
                 
                 axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) * blender_object.matrix_local
+                
+                # Precalculate joint animation data.
+                
+                start = None
+                end = None
+                
+                for blender_action in bpy.data.actions:
+                    for blender_fcurve in blender_action.fcurves:
+                        if blender_fcurve is None:
+                            continue
+                        
+                        if start == None:
+                            start = blender_fcurve.range()[0]
+                        else:
+                            start = min(start, blender_fcurve.range()[0])
+                            
+                        if end == None:
+                            end = blender_fcurve.range()[1]
+                        else:
+                            end = max(end, blender_fcurve.range()[1])
+
+                for frame in range(int(start), int(end) + 1):
+                    bpy.context.scene.frame_set(frame)
+                    
+                    for blender_bone in blender_object.pose.bones:
+                    
+                        matrix_basis = blender_bone.matrix_basis
+                        
+                        #
+    
+                        correction_matrix_local = mathutils.Matrix.Identity(4)
+                    
+                        if blender_bone.parent is None:
+                            correction_matrix_local = axis_basis_change * blender_bone.bone.matrix_local
+                        else:
+                            correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
+                            
+                        #
+                        if not export_settings['gltf_joint_cache'].get(blender_bone.name):
+                            export_settings['gltf_joint_cache'][blender_bone.name] = {}
+                        
+                        matrix = correction_matrix_local * matrix_basis 
+            
+                        tmp_location, tmp_rotation, tmp_scale = matrix.decompose()
+                        
+                        export_settings['gltf_joint_cache'][blender_bone.name][float(frame)] = [tmp_location, tmp_rotation, tmp_scale]
+                        
+                #
 
                 for blender_bone in blender_object.pose.bones:
                     
