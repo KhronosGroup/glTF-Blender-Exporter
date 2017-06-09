@@ -339,7 +339,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         #
         
         primitive = None
-        if blender_polygon.material_index < 0 or blender_polygon.material_index >= len(blender_mesh.materials):
+        if blender_polygon.material_index < 0 or blender_polygon.material_index >= len(blender_mesh.materials) or blender_mesh.materials[blender_polygon.material_index] is None:
             primitive = material_name_to_primitives['']
         else:
             primitive = material_name_to_primitives[blender_mesh.materials[blender_polygon.material_index].name]
@@ -434,14 +434,21 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     
                     vertex_group_index = group_element.group
                     
-                    vertex_group_name = blender_vertex_groups[vertex_group_index].name 
+                    vertex_group_name = blender_vertex_groups[vertex_group_index].name
                     
-                    joint_index = export_settings['group_index'][vertex_group_name]
+                    #
+                    
+                    joint_index = 0
+                    joint_weight = 0.0 
+                    
+                    if export_settings['group_index'].get(vertex_group_name) is not None:
+                        joint_index = export_settings['group_index'][vertex_group_name]
+                        joint_weight = group_element.weight
                     
                     #
                     
                     joint.append(joint_index)
-                    weight.append(group_element.weight)
+                    weight.append(joint_weight)
                     
                 if len(joint) > 0:
                     bone_count += 1
