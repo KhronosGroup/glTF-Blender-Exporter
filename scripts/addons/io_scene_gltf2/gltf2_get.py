@@ -70,7 +70,7 @@ def get_material_requires_texcoords(glTF, index):
     if material.get('occlusionTexture') is not None:
         return True
     
-    # Metal roughness
+    # Metallic roughness
     
     if material.get('baseColorTexture') is not None:
         return True
@@ -78,9 +78,27 @@ def get_material_requires_texcoords(glTF, index):
     if material.get('metallicRoughnessTexture') is not None:
         return True
     
-    # TODO: Specular Glossiness Material.
+    # Specular glossiness
     
-    # TODO: Common Material.
+    if material.get('diffuseTexture') is not None:
+        return True
+
+    if material.get('specularGlossinessTexture') is not None:
+        return True
+    
+    # Common Material
+
+    if material.get('diffuseTexture') is not None:
+        return True
+
+    if material.get('specularTexture') is not None:
+        return True
+
+    if material.get('shininessTexture') is not None:
+        return True
+    
+    if material.get('ambientTexture') is not None:
+        return True
 
     return False
 
@@ -109,9 +127,27 @@ def get_material_requires_normals(glTF, index):
     if material.get('metallicRoughnessTexture') is not None:
         return True
     
-    # TODO: Specular Glossiness Material.
+    # Specular glossiness
     
-    # TODO: Common Material.
+    if material.get('diffuseTexture') is not None:
+        return True
+
+    if material.get('specularGlossinessTexture') is not None:
+        return True
+    
+    # Common Material
+
+    if material.get('diffuseTexture') is not None:
+        return True
+
+    if material.get('specularTexture') is not None:
+        return True
+
+    if material.get('shininessTexture') is not None:
+        return True
+    
+    if material.get('ambientTexture') is not None:
+        return True
 
     return False
 

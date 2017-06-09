@@ -1325,6 +1325,7 @@ def generate_materials(operator,
                   
     materials = []
     
+    KHR_materials_pbrSpecularGlossiness_Used = False
     KHR_materials_common_Used = False
     KHR_materials_displacement_Used = False
 
@@ -1406,8 +1407,67 @@ def generate_materials(operator,
                             pbrMetallicRoughness['metallicRoughnessTexture'] = metallicRoughnessTexture
                             
                     if currentNode.node_tree.name == 'glTF Specular Glossiness':
-                        # TODO: Specular Glossiness
-                        print_console('DUMMY', 'Specular Glossiness Store Material')
+                        KHR_materials_pbrSpecularGlossiness_Used = True
+                        
+                        # 
+                        # Property: Specular Glossiness Material
+                        #
+            
+                        pbrSpecularGlossiness = {}
+                        
+                        material['extensions'] = { 'KHR_materials_pbrSpecularGlossiness' : pbrSpecularGlossiness }
+                        
+                        #
+                        # Diffuse texture
+                        #
+                        index = get_texture_index(export_settings, glTF, 'Diffuse', currentNode)
+                        if index >= 0:
+                            diffuseTexture = {
+                                'index' : index
+                            }
+    
+                            texCoord = get_texcoord_index(glTF, 'Diffuse', currentNode)
+                            if texCoord > 0:
+                                diffuseTexture['texCoord'] = texCoord
+                            
+                            pbrSpecularGlossiness['diffuseTexture'] = diffuseTexture
+    
+                        #
+                        # Diffuse factor
+                        #
+                        diffuseFactor = get_vec4(currentNode.inputs['DiffuseFactor'].default_value, [1.0, 1.0, 1.0, 1.0])
+                        if diffuseFactor[0] != 1.0 or diffuseFactor[1] != 1.0 or diffuseFactor[2] != 1.0 or diffuseFactor[3] != 1.0:
+                            pbrSpecularGlossiness['diffuseFactor'] = diffuseFactor
+
+                        #
+                        # Specular texture
+                        #
+                        index_a = get_texture_index(export_settings, glTF, 'Specular', currentNode)
+                        index_b = get_texture_index(export_settings, glTF, 'Glossiness', currentNode)
+                        if index_a >= 0 and index_b >= 0 and index_a == index_b:
+                            specularGlossinessTexture = {
+                                'index' : index_a
+                            }
+    
+                            texCoord = get_texcoord_index(glTF, 'Specular', currentNode)
+                            if texCoord > 0:
+                                specularGlossinessTexture['texCoord'] = texCoord
+                            
+                            pbrSpecularGlossiness['specularGlossinessTexture'] = specularGlossinessTexture
+
+                        #
+                        # Specular factor
+                        #
+                        specularFactor = get_vec3(currentNode.inputs['SpecularFactor'].default_value, [1.0, 1.0, 1.0])
+                        if specularFactor[0] != 1.0 or specularFactor[1] != 1.0 or specularFactor[2] != 1.0:
+                            pbrSpecularGlossiness['specularFactor'] = specularFactor
+
+                        #
+                        # Glossiness factor
+                        #
+                        glossinessFactor = get_scalar(currentNode.inputs['GlossinessFactor'].default_value, 1.0)
+                        if glossinessFactor != 1.0:
+                            pbrSpecularGlossiness['glossinessFactor'] = glossinessFactor
                         
                     # TODO: Displacement.
     
@@ -1650,6 +1710,10 @@ def generate_materials(operator,
     #
 
     if len (materials) > 0:
+        if KHR_materials_pbrSpecularGlossiness_Used:
+            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
+            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
+            
         if KHR_materials_common_Used:
             create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_common')
             create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_common')

@@ -36,7 +36,7 @@ As soon as a feature is implemented, documented and tested, the exported feature
 |Skinning           |  X  |         |             | |     X     |          |      |
 |Morph targets      |  X  |         |             | |           |          |      |
 |GLB                |  X  |         |             | |     X     |          |      |
-|Materials PBR SG   |     |    X    |             | |           |          |      |
+|Materials PBR SG   |     |    X    |             | |     X     |          |      |
 |Lights             |     |         |      X      | |     X     |          |      |
 |Materials Common   |     |         |      X      | |     X     |          |      |
 |Materials Displace |     |         |      X      | |     X     |          |      |
