@@ -8,6 +8,10 @@ Introduction
 ------------
 This is the offical Khronos Blender glTF 2.0 exporter. This repository mainly contains Python scripts to export the internal Blender data structure to glTF 2.0. Furthermore, node groups are provided, which do simulate the Physically-Based Rendering (PBR) materials using the Cycles renderer. Finally, several Blender scenes are provided, which do demonstrate each feature individually. 
 
+Installation
+------------
+See [scripts/](scripts/).
+
 Feature matrix
 --------------
 Following table shows the current status of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).  
