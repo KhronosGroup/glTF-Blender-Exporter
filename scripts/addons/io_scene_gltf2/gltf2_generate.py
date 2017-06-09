@@ -77,9 +77,11 @@ def generate_animations_parameter(operator,
     prefix = ""
     postfix = ""
     
-    node_type = 'NODE' 
+    node_type = 'NODE'
+    used_node_name = blender_node_name 
     if blender_bone_name is not None:
         node_type = 'JOINT'
+        used_node_name = blender_bone_name
 
     #
         
@@ -96,7 +98,7 @@ def generate_animations_parameter(operator,
         'rotation_quaternion' : rotation_quaternion,
         'scale' : scale,
     }
-
+    
     # Gather fcurves by transform
     for blender_fcurve in action.fcurves:
         node_name = get_node(blender_fcurve.data_path)
@@ -115,10 +117,11 @@ def generate_animations_parameter(operator,
         if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale']:
             continue
         
-                    
-        data[data_path][blender_fcurve.array_index] = blender_fcurve 
-    
+        data[data_path][blender_fcurve.array_index] = blender_fcurve
+        
     #
+
+    profile_start()
     
     if location.count(None) < 3:
         
@@ -136,7 +139,7 @@ def generate_animations_parameter(operator,
             if interpolation == 'CONVERSION_NEEDED':
                 sampler['interpolation'] = 'LINEAR'
             
-            translation_data = animate_location(export_settings, location, interpolation, node_type, matrix_correction, matrix_basis)
+            translation_data = animate_location(export_settings, location, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
             
             #
             
@@ -174,8 +177,12 @@ def generate_animations_parameter(operator,
             
             samplers.append(sampler)  
 
+    profile_end('Translation')         
+
     #
     #
+    
+    profile_start()
     
     rotation_data = None
     interpolation = None
@@ -185,15 +192,15 @@ def generate_animations_parameter(operator,
     if get_index(samplers, sampler_name) == -1:
         if rotation_axis_angle.count(None) < 4:
             interpolation = animate_get_interpolation(rotation_axis_angle)
-            rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, matrix_correction, matrix_basis)
+            rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
         if rotation_euler.count(None) < 3:
             interpolation = animate_get_interpolation(rotation_euler)
-            rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, matrix_correction, matrix_basis)
+            rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
 
         if rotation_quaternion.count(None) < 4:
             interpolation = animate_get_interpolation(rotation_quaternion)
-            rotation_data = animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, matrix_correction, matrix_basis)
+            rotation_data = animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
     if rotation_data is not None:
         
@@ -243,9 +250,12 @@ def generate_animations_parameter(operator,
         
         samplers.append(sampler) 
 
-        
+    profile_end('Rotation')
+    
     #
     #
+    
+    profile_start()
     
     if scale.count(None) < 3:
         sampler_name = prefix + action.name + "_scale"
@@ -262,7 +272,7 @@ def generate_animations_parameter(operator,
             if interpolation == 'CONVERSION_NEEDED':
                 sampler['interpolation'] = 'LINEAR'
             
-            scale_data = animate_scale(export_settings, scale, interpolation, node_type, matrix_correction, matrix_basis)
+            scale_data = animate_scale(export_settings, scale, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
 
             #
 
@@ -300,6 +310,8 @@ def generate_animations_parameter(operator,
             
             samplers.append(sampler)  
 
+    profile_end('Scale')
+
     #
     #
     
@@ -328,6 +340,8 @@ def generate_animations_parameter(operator,
             write_transform[1] = True
         if data_path == 'scale':
             write_transform[2] = True
+
+    #
 
     write_transform_index = 0
     for path in ['translation', 'rotation', 'scale']:

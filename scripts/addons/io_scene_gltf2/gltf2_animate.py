@@ -121,7 +121,10 @@ def animate_gather_keys(fcurve_list, interpolation):
     return keys
 
 
-def animate_location(export_settings, location, interpolation, node_type, matrix_correction, matrix_basis):
+def animate_location(export_settings, location, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    if not export_settings['gltf_joint_cache'].get(node_name):
+        export_settings['gltf_joint_cache'][node_name] = {}
+    
     keys = animate_gather_keys(location, interpolation)
     
     times = animate_convert_keys(keys)
@@ -133,11 +136,16 @@ def animate_location(export_settings, location, interpolation, node_type, matrix
         translation = [0.0, 0.0, 0.0]
         
         if node_type == 'JOINT':
-            bpy.context.scene.frame_set(keys[keyframe_index])
-            
-            matrix = matrix_correction * matrix_basis 
-
-            translation, tmp_rotation, tmp_scale = matrix.decompose()
+            if export_settings['gltf_joint_cache'][node_name].get(keys[keyframe_index]):
+                translation, tmp_rotation, tmp_scale = export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] 
+            else:
+                bpy.context.scene.frame_set(keys[keyframe_index])
+                
+                matrix = matrix_correction * matrix_basis 
+    
+                translation, tmp_rotation, tmp_scale = matrix.decompose()
+                
+                export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] = [translation, tmp_rotation, tmp_scale]
         else:
             channel_index = 0
             for blender_fcurve in location:
@@ -158,7 +166,10 @@ def animate_location(export_settings, location, interpolation, node_type, matrix
     return result
 
 
-def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, matrix_correction, matrix_basis):
+def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    if not export_settings['gltf_joint_cache'].get(node_name):
+        export_settings['gltf_joint_cache'][node_name] = {}
+    
     keys = animate_gather_keys(rotation_axis_angle, interpolation)
     
     times = animate_convert_keys(keys)
@@ -172,11 +183,16 @@ def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolat
         rotation = [1.0, 0.0, 0.0, 0.0]
         
         if node_type == 'JOINT':
-            bpy.context.scene.frame_set(keys[keyframe_index])
-            
-            matrix = matrix_correction * matrix_basis 
-
-            tmp_location, rotation, tmp_scale = matrix.decompose()
+            if export_settings['gltf_joint_cache'][node_name].get(keys[keyframe_index]):
+                tmp_location, rotation, tmp_scale = export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] 
+            else:
+                bpy.context.scene.frame_set(keys[keyframe_index])
+                
+                matrix = matrix_correction * matrix_basis 
+    
+                tmp_location, rotation, tmp_scale = matrix.decompose()
+                
+                export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] = [tmp_location, rotation, tmp_scale]
         else:
             channel_index = 0
             for blender_fcurve in rotation_axis_angle:
@@ -202,7 +218,10 @@ def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolat
     return result
 
 
-def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, matrix_correction, matrix_basis):
+def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    if not export_settings['gltf_joint_cache'].get(node_name):
+        export_settings['gltf_joint_cache'][node_name] = {}
+    
     keys = animate_gather_keys(rotation_euler, interpolation)
 
     times = animate_convert_keys(keys)
@@ -216,11 +235,16 @@ def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, inter
         rotation = [1.0, 0.0, 0.0, 0.0]
         
         if node_type == 'JOINT':
-            bpy.context.scene.frame_set(keys[keyframe_index])
-            
-            matrix = matrix_correction * matrix_basis 
-
-            tmp_location, rotation, tmp_scale = matrix.decompose()
+            if export_settings['gltf_joint_cache'][node_name].get(keys[keyframe_index]):
+                tmp_location, rotation, tmp_scale = export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] 
+            else:
+                bpy.context.scene.frame_set(keys[keyframe_index])
+                
+                matrix = matrix_correction * matrix_basis 
+    
+                tmp_location, rotation, tmp_scale = matrix.decompose()
+                
+                export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] = [tmp_location, rotation, tmp_scale]
         else:
             channel_index = 0
             for blender_fcurve in rotation_euler:
@@ -246,7 +270,10 @@ def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, inter
     return result
 
 
-def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, matrix_correction, matrix_basis):
+def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    if not export_settings['gltf_joint_cache'].get(node_name):
+        export_settings['gltf_joint_cache'][node_name] = {}
+    
     keys = animate_gather_keys(rotation_quaternion, interpolation)
 
     times = animate_convert_keys(keys)
@@ -258,11 +285,16 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
         rotation = [1.0, 0.0, 0.0, 0.0]
         
         if node_type == 'JOINT':
-            bpy.context.scene.frame_set(keys[keyframe_index])
-            
-            matrix = matrix_correction * matrix_basis 
-
-            tmp_location, rotation, tmp_scale = matrix.decompose()
+            if export_settings['gltf_joint_cache'][node_name].get(keys[keyframe_index]):
+                tmp_location, rotation, tmp_scale = export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] 
+            else:
+                bpy.context.scene.frame_set(keys[keyframe_index])
+                
+                matrix = matrix_correction * matrix_basis 
+    
+                tmp_location, rotation, tmp_scale = matrix.decompose()
+                
+                export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] = [tmp_location, rotation, tmp_scale]
         else:
             channel_index = 0
             for blender_fcurve in rotation_quaternion:
@@ -286,7 +318,10 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
     return result
 
 
-def animate_scale(export_settings, scale, interpolation, node_type, matrix_correction, matrix_basis):
+def animate_scale(export_settings, scale, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    if not export_settings['gltf_joint_cache'].get(node_name):
+        export_settings['gltf_joint_cache'][node_name] = {}
+    
     keys = animate_gather_keys(scale, interpolation)
 
     times = animate_convert_keys(keys)
@@ -298,11 +333,16 @@ def animate_scale(export_settings, scale, interpolation, node_type, matrix_corre
         scale_data = [1.0, 1.0, 1.0]
         
         if node_type == 'JOINT':
-            bpy.context.scene.frame_set(keys[keyframe_index])
-            
-            matrix = matrix_correction * matrix_basis 
-
-            tmp_location, tmp_rotation, scale_data = matrix.decompose()
+            if export_settings['gltf_joint_cache'][node_name].get(keys[keyframe_index]):
+                tmp_location, tmp_rotation, scale_data = export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] 
+            else:
+                bpy.context.scene.frame_set(keys[keyframe_index])
+                
+                matrix = matrix_correction * matrix_basis 
+    
+                tmp_location, tmp_rotation, scale_data = matrix.decompose()
+                
+                export_settings['gltf_joint_cache'][node_name][keys[keyframe_index]] = [tmp_location, tmp_rotation, scale_data]
         else:
             channel_index = 0
             for blender_fcurve in scale:
