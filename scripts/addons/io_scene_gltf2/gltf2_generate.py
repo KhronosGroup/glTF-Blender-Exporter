@@ -1207,12 +1207,17 @@ def generate_nodes(operator,
         if export_settings['gltf_skins']:
             # Joint
             if blender_object.type == 'ARMATURE' and len(blender_object.pose.bones) > 0:
-                child_index = get_node_index(glTF, blender_object.name + "_" + blender_object.pose.bones[0].name)
+                for blender_bone in blender_object.pose.bones:
+                    
+                    if blender_bone.parent:
+                        continue
+                    
+                    child_index = get_node_index(glTF, blender_object.name + "_" + blender_bone.name)
             
-                if child_index < 0:
-                    continue
-            
-                children.append(child_index)
+                    if child_index < 0:
+                        continue
+                
+                    children.append(child_index)
                 
                 for blender_bone in blender_object.pose.bones:
                     joint_children = []
