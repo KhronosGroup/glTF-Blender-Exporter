@@ -164,6 +164,12 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_bake_skins = BoolProperty(
+            name='Bake skinning constraints',
+            description='',
+            default=False
+    )
+
     export_lights = BoolProperty(
             name='Export lights',
             description='',
@@ -210,8 +216,15 @@ class ExportGLTF2_Base():
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
-        export_settings['gltf_current_frame'] = self.export_current_frame
+        if self.export_animations:
+            export_settings['gltf_current_frame'] = False
+        else:
+            export_settings['gltf_current_frame'] = self.export_current_frame
         export_settings['gltf_skins'] = self.export_skins
+        if self.export_skins:
+            export_settings['gltf_bake_skins'] = self.export_bake_skins
+        else:
+            export_settings['gltf_bake_skins'] = False
         
         export_settings['gltf_lights'] = self.export_lights
         export_settings['gltf_common'] = self.export_common
@@ -263,6 +276,8 @@ class ExportGLTF2_Base():
         if not self.export_animations:
             col.prop(self, 'export_current_frame')
         col.prop(self, 'export_skins')
+        if self.export_skins:
+            col.prop(self, 'export_bake_skins')
 
         col = layout.box().column()
         col.label('Experimental:', icon='RADIO')
