@@ -304,17 +304,14 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     
     color_max = 0
     color_index = 0
-    for color_index in range (0, GLTF_MAX_COLORS):
-        found = False
-        for vertex_color in blender_mesh.vertex_colors:
-            if vertex_color.name == 'COLOR_' + str(color_index):
-                found = True
-                vertex_colors[vertex_color.name] = vertex_color
-                break
-        if found:
-            color_max += 1
-        else:
+    for vertex_color in blender_mesh.vertex_colors:
+        vertex_color_name = 'COLOR_' + str(color_index)
+        vertex_colors[vertex_color_name] = vertex_color
+        
+        color_index += 1
+        if color_index >= GLTF_MAX_COLORS:
             break
+    color_max = color_index
         
     #
     
