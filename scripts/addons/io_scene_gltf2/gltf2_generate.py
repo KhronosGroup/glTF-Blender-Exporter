@@ -1014,7 +1014,21 @@ def generate_nodes(operator,
         #
         #
         
-        generate_node_parameter(operator, context, export_settings, glTF, blender_object.matrix_local, node, 'NODE')
+        node_type = 'NODE'
+        matrix_local = blender_object.matrix_local
+        if blender_object.parent_type == 'BONE' :
+            axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0)))
+                
+            if export_settings['gltf_skins']:
+                node_type = 'JOINT'
+                
+                inverse_bind_matrix = axis_basis_change * blender_object.matrix_local
+                
+                matrix_local = inverse_bind_matrix.inverted()
+            else:
+                matrix_local = blender_object.parent.matrix_world.inverted() * blender_object.matrix_world
+        
+        generate_node_parameter(operator, context, export_settings, glTF, matrix_local, node, node_type)
         
         #
         #
@@ -1199,6 +1213,9 @@ def generate_nodes(operator,
         for blender_child_node in blender_object.children:
             child_index = get_node_index(glTF, blender_child_node.name)
             
+            if blender_child_node.parent_type == 'BONE' and export_settings['gltf_skins']:
+                continue
+            
             if child_index < 0:
                 continue
             
@@ -1207,6 +1224,18 @@ def generate_nodes(operator,
         if export_settings['gltf_skins']:
             # Joint
             if blender_object.type == 'ARMATURE' and len(blender_object.pose.bones) > 0:
+                
+                #
+
+                blender_object_to_bone = {}
+
+                if export_settings['gltf_skins']:
+                    for blender_child_node in blender_object.children:
+                        if blender_child_node.parent_type == 'BONE':
+                            blender_object_to_bone[blender_child_node.name] = blender_child_node.parent_bone
+                
+                # 
+                
                 for blender_bone in blender_object.pose.bones:
                     
                     if blender_bone.parent:
@@ -1228,6 +1257,16 @@ def generate_nodes(operator,
                             continue
                     
                         joint_children.append(child_index)
+                        
+                    for blender_object_name in blender_object_to_bone:
+                        blender_bone_name = blender_object_to_bone[blender_object_name]
+                        if blender_bone_name == blender_bone.name:
+                            child_index = get_node_index(glTF, blender_object_name) 
+                        
+                            if child_index < 0:
+                                continue
+                        
+                            joint_children.append(child_index)
                 
                     if len(joint_children) > 0:
                         node_index = get_node_index(glTF, blender_object.name + "_" + blender_bone.name)
