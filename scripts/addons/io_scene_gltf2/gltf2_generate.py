@@ -391,6 +391,9 @@ def generate_animations(operator,
             continue
         
         action = blender_object.animation_data.action
+
+        if action is None:
+            continue
         
         #
         #
