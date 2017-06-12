@@ -10,7 +10,7 @@ This is the offical Khronos Blender glTF 2.0 exporter. This repository mainly co
 
 Installation
 ------------
-At point of writing, the Khronos glTF 2.0 exporter is not part of any offical, community or testing add-on, which can be selected in the Blender Add-ons section.  
+At point of writing, the Khronos glTF 2.0 exporter is not part of any offical, community or testing Blender add-on, which can be activated in the "User Preferences ..." Add-ons tab.  
 Because of this, the exporter has to be added manually, which is described in the [scripts](scripts/) section.
 
 Feature matrix
