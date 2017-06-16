@@ -55,14 +55,10 @@ def calculate_tangent(internal_primitive, texcoord_id = 'TEXCOORD_0'):
         t0 = indices[i + 0] 
         t1 = indices[i + 1]
         t2 = indices[i + 2]
-        
-        vi0 = t0 * 3
-        vi1 = t1 * 3
-        vi2 = t2 * 3
 
-        p0 = mathutils.Vector((position[vi0 + 0], position[vi0 + 1], position[vi0 + 2])) 
-        p1 = mathutils.Vector((position[vi1 + 0], position[vi1 + 1], position[vi1 + 2]))
-        p2 = mathutils.Vector((position[vi2 + 0], position[vi2 + 1], position[vi2 + 2]))
+        p0 = mathutils.Vector((position[t0 * 3 + 0], position[t0 * 3 + 1], position[t0 * 3 + 2])) 
+        p1 = mathutils.Vector((position[t1 * 3 + 0], position[t1 * 3 + 1], position[t1 * 3 + 2]))
+        p2 = mathutils.Vector((position[t2 * 3 + 0], position[t2 * 3 + 1], position[t2 * 3 + 2]))
         
         uv0 = mathutils.Vector((texcoord[t0 * 2 + 0], texcoord[t0 * 2 + 1])) 
         uv1 = mathutils.Vector((texcoord[t1 * 2 + 0], texcoord[t1 * 2 + 1]))
@@ -86,43 +82,42 @@ def calculate_tangent(internal_primitive, texcoord_id = 'TEXCOORD_0'):
         tangent = ((deltaP0 * deltaUV1.y - deltaP1 * deltaUV0.y) / divisor)
         tangent.normalize()
         
-        if index_to_tangent.get(vi0) is None:
-            index_to_tangent[vi0] = tangent
+        if index_to_tangent.get(t0) is None:
+            index_to_tangent[t0] = tangent
         else: 
-            index_to_tangent[vi0] += tangent
+            index_to_tangent[t0] += tangent
         
-        if index_to_tangent.get(vi1) is None:
-            index_to_tangent[vi1] = tangent
+        if index_to_tangent.get(t1) is None:
+            index_to_tangent[t1] = tangent
         else: 
-            index_to_tangent[vi1] += tangent
+            index_to_tangent[t1] += tangent
 
-        if index_to_tangent.get(vi2) is None:
-            index_to_tangent[vi2] = tangent
+        if index_to_tangent.get(t2) is None:
+            index_to_tangent[t2] = tangent
         else: 
-            index_to_tangent[vi2] += tangent
+            index_to_tangent[t2] += tangent
     
     #
     
     if len(index_to_tangent) * 3 != len(normal):
+        print_console('WARNING', 'Could not calculate tangents.')
         return None
     
     #
     
     result = [0.0] * len(index_to_tangent) * 4
     
-    for vi, tangent in index_to_tangent.items():
-        n = mathutils.Vector((normal[vi + 0], normal[vi + 1], normal[vi + 2]))
+    for index, tangent in index_to_tangent.items():
+        n = mathutils.Vector((normal[index * 3 + 0], normal[index * 3 + 1], normal[index * 3 + 2]))
         t = mathutils.Vector((n.z, n.x, n.y))
         
         if tangent.length != 0.0:
             tangent.normalize()
             t = tangent
         
-        ti = (vi // 3) * 4
-        
-        result[ti + 0] = t.x
-        result[ti + 1] = t.y
-        result[ti + 2] = t.z
-        result[ti + 3] = 1.0
+        result[index * 4 + 0] = t.x
+        result[index * 4 + 1] = t.y
+        result[index * 4 + 2] = t.z
+        result[index * 4 + 3] = 1.0
      
     return result
