@@ -325,6 +325,14 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     bones_count -= 1
                 bone_max = max(bone_max, bones_count // 4 + 1)            
     
+    #
+    
+    morph_max = 0
+    if blender_mesh.shape_keys is not None:
+        morph_max = len(blender_mesh.shape_keys.key_blocks)
+
+    #
+    
     vertex_index_to_new_indices = {}
         
     #
