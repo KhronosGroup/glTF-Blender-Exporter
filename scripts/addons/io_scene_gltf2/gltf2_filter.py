@@ -103,8 +103,19 @@ def filter_apply(export_settings):
         if currentMaterial.node_tree and currentMaterial.use_nodes:
             for currentNode in currentMaterial.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeTexImage) and currentNode.image is not None and currentNode not in filtered_textures:
-                    filtered_textures.append(currentNode)
-                    # TODO: Displacement.
+                    add_node = False
+                    for blender_socket in currentNode.outputs:
+                        if blender_socket.is_linked:
+                            for blender_link in blender_socket.links:
+                                if isinstance(blender_link.to_node, bpy.types.ShaderNodeGroup):
+                                    if blender_link.to_node.node_tree.name == 'glTF Metallic Roughness' or blender_link.to_node.node_tree.name == 'glTF Specular Glossiness':
+                                        add_node = True
+                                        break
+                        if add_node:
+                            break
+                    if add_node:
+                        filtered_textures.append(currentNode)
+                        # TODO: Displacement.
         else:
             if export_settings['gltf_common'] != '-':
                 for currentTextureSlot in currentMaterial.texture_slots:
