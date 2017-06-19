@@ -111,7 +111,7 @@ def create_bufferView(operator,
                   context,
                   export_settings,
                   glTF,
-                  data_buffer, target):
+                  data_buffer, target, alignment):
 
     if data_buffer is None:
         return -1
@@ -140,6 +140,19 @@ def create_bufferView(operator,
     bufferView['byteLength'] = len(data_buffer)
     
     binary = export_settings['gltf_binary']
+    
+    #
+    
+    binary_length = len(binary)
+    remainder = binary_length % alignment
+    
+    if remainder > 0:
+        padding_byte = struct.pack('<1b', 0) 
+        for i in range(0, alignment - remainder):
+            binary.extend(padding_byte)
+    
+    #
+    
     bufferView['byteOffset'] = len(binary)
     binary.extend(data_buffer)
     
@@ -165,6 +178,7 @@ def create_accessor(operator,
     
     gltf_convert_type = [ "b", "B", "h", "H", "I", "f" ]
     gltf_enumNames = [ "BYTE", "UNSIGNED_BYTE", "SHORT", "UNSIGNED_SHORT", "UNSIGNED_INT", "FLOAT" ]
+    gltf_convert_type_size = [ 1, 1, 2, 2, 4, 4 ]
     
     if componentType not in gltf_enumNames:
         print_console('ERROR', 'Invalid componentType ' + componentType)
@@ -173,6 +187,7 @@ def create_accessor(operator,
     componentTypeInteger = [ 5120, 5121, 5122, 5123, 5125, 5126 ][gltf_enumNames.index(componentType)]
     
     convert_type = gltf_convert_type[gltf_enumNames.index(componentType)]
+    convert_type_size = gltf_convert_type_size[gltf_enumNames.index(componentType)]
     
     if count < 1:
         print_console('ERROR', 'Invalid count ' + str(count))
@@ -227,7 +242,7 @@ def create_accessor(operator,
     
     data_buffer = struct.pack(convert_type, *data) 
     
-    bufferView = create_bufferView(operator, context, export_settings, glTF, data_buffer, target)
+    bufferView = create_bufferView(operator, context, export_settings, glTF, data_buffer, target, convert_type_size)
 
     if bufferView < 0:
         print_console('ERROR', 'Invalid buffer view')
