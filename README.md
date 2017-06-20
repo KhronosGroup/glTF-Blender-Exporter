@@ -35,7 +35,7 @@ As soon as a feature is implemented, documented and tested, the exported feature
 |Materials PBR MR   |  X  |         |             | |     X     |          |      |
 |Animations         |  X  |         |             | |     X     |          |      |
 |Skinning           |  X  |         |             | |     X     |          |      |
-|Morph targets      |  X  |         |             | |           |          |      |
+|Morph targets      |  X  |         |             | |   Partly  |          |      |
 |GLB                |  X  |         |             | |     X     |          |      |
 |Materials PBR SG   |     |    X    |             | |     X     |          |      |
 |Lights             |     |         |      X      | |     X     |          |      |
