@@ -707,8 +707,6 @@ def generate_meshes(operator,
         # Property: mesh
         #
         
-        # TODO: Morph target 'weights'.
-        
         mesh = {}
         
         #
@@ -716,8 +714,6 @@ def generate_meshes(operator,
         primitives = []
         
         for internal_primitive in internal_primitives:
-            
-            # TODO: Morph target 'targets'.
             
             primitive = {}
             
@@ -955,7 +951,60 @@ def generate_meshes(operator,
                     else:
                         process_bone = False
             
-                # TODO: Export morph targets data.
+                #
+            
+                if export_settings['gltf_morph']:
+                    if blender_mesh.shape_keys is not None:
+                        targets = []
+                        morph_max = len(blender_mesh.shape_keys.key_blocks)
+                        for morph_index in range(0, morph_max):
+                            target_position_id = 'MORPH_POSITION_' + str(morph_index)
+                            target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+                            
+                            if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None:
+                                internal_target_position = internal_attributes[target_position_id]
+                    
+                                componentType = "FLOAT"
+                    
+                                count = len(internal_target_position) // 3
+                                
+                                type = "VEC3"
+                                
+                                target_position = create_accessor(operator, context, export_settings, glTF, internal_target_position, componentType, count, type, "ARRAY_BUFFER")
+                                
+                                if target_position < 0:
+                                    print_console('ERROR', 'Could not create accessor for ' + target_position_id)
+                                    continue
+                                
+                                #
+
+                                internal_target_normal = internal_attributes[target_normal_id]
+                    
+                                componentType = "FLOAT"
+                    
+                                count = len(internal_target_normal) // 3
+                                
+                                type = "VEC3"
+                                
+                                target_normal = create_accessor(operator, context, export_settings, glTF, internal_target_normal, componentType, count, type, "ARRAY_BUFFER")
+                                
+                                if target_normal < 0:
+                                    print_console('ERROR', 'Could not create accessor for ' + target_normal_id)
+                                    continue
+                                
+                                #
+                                #
+                                
+                                target = {
+                                    'POSITION' : target_position,
+                                    'NORMAL' : target_normal
+                                }
+                                
+                                targets.append(target)
+            
+                        if len(targets) > 0:
+                            primitive['targets'] = targets
+
             #
             #
             
@@ -1114,8 +1163,6 @@ def generate_nodes(operator,
                     correction_node['extensions'] = extensions
                     
                     nodes.append(correction_node)
-
-        # TODO: Morph target 'weights'.
 
         #
 
@@ -1619,7 +1666,7 @@ def generate_materials(operator,
                         if glossinessFactor != 1.0:
                             pbrSpecularGlossiness['glossinessFactor'] = glossinessFactor
                         
-                    # TODO: Displacement.
+                    # TODO: Export displacement data for PBR.
     
                     #
                     # Emissive texture

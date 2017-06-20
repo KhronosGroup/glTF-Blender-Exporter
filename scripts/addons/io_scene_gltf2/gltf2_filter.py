@@ -115,7 +115,7 @@ def filter_apply(export_settings):
                             break
                     if add_node:
                         filtered_textures.append(currentNode)
-                        # TODO: Displacement.
+                        # TODO: Add displacement texture, as not stored in node tree.
         else:
             if export_settings['gltf_common'] != '-':
                 for currentTextureSlot in currentMaterial.texture_slots:
