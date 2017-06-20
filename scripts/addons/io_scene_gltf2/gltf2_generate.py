@@ -493,7 +493,7 @@ def generate_animations(operator,
                 if export_settings['gltf_bake_skins']:
                     blender_object.animation_data.action = temp_action
 
-        
+        # TODO: Export morph targets animation data.
     #
     #
 
@@ -955,6 +955,7 @@ def generate_meshes(operator,
                     else:
                         process_bone = False
             
+                # TODO: Export morph targets data.
             #
             #
             
@@ -965,6 +966,21 @@ def generate_meshes(operator,
             
             primitives.append(primitive)
         
+        #
+            
+        if export_settings['gltf_morph']:
+            if blender_mesh.shape_keys is not None:
+                morph_max = len(blender_mesh.shape_keys.key_blocks)
+                if morph_max > 0:
+                    weights = []
+                    
+                    for morph_index in range(0, morph_max):
+                        blender_shape_key = blender_mesh.shape_keys.key_blocks[morph_index]
+                        weights.append(blender_shape_key.value)
+                    
+                    mesh['weights'] = weights
+
+        #
 
         mesh['primitives'] = primitives
 

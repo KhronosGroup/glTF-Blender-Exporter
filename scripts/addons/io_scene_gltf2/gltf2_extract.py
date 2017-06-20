@@ -117,6 +117,8 @@ def extract_primitive_floor(a, indices):
             process_bone = False
         
     bone_max = bone_index 
+    
+    # TODO: Add for morph targets data.
 
     #
 
@@ -147,6 +149,8 @@ def extract_primitive_floor(a, indices):
             for vi in range(0, 4):
                 attributes[joint_id].append(source_attributes[joint_id][old_index * 4 + vi])
                 attributes[weight_id].append(source_attributes[weight_id][old_index * 4 + vi])
+                
+        # TODO: Add for morph targets data.
 
     return result_primitive
 
@@ -212,6 +216,8 @@ def extract_primitive_pack(a, indices):
         
     bone_max = bone_index 
 
+    # TODO: Add for morph targets data.
+
     #
     
     old_to_new_indices = {}
@@ -251,6 +257,8 @@ def extract_primitive_pack(a, indices):
             for vi in range(0, 4):
                 attributes[joint_id].append(source_attributes[joint_id][old_index * 4 + vi])
                 attributes[weight_id].append(source_attributes[weight_id][old_index * 4 + vi])
+                
+        # TODO: Add for morph targets data.
     
     return result_primitive     
 
@@ -330,7 +338,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     morph_max = 0
     if blender_mesh.shape_keys is not None:
         morph_max = len(blender_mesh.shape_keys.key_blocks)
-
+        
     #
     
     vertex_index_to_new_indices = {}
@@ -398,6 +406,9 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             colors = []
             joints = []
             weights = []
+            
+            target_positions = []
+            target_normals = []
             
             vertex = blender_mesh.vertices[vertex_index]
             
@@ -468,6 +479,34 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for fill in range(0, bone_max - bone_count):
                     joints.append([0, 0, 0, 0])
                     weights.append([0.0, 0.0, 0.0, 0.0])
+                    
+            #
+            
+            if morph_max > 0 and export_settings['gltf_morph']:
+                for morph_index in range(0, morph_max):
+                    blender_shape_key = blender_mesh.shape_keys.key_blocks[morph_index]
+                    
+                    v_morph = convert_swizzle_location(blender_shape_key.data[vertex_index].co)
+                    
+                    target_positions.append(v_morph)
+                    
+                    # TODO: Check / store delta.
+                    
+                    #
+                    
+                    n_morph = None
+                    
+                    if blender_polygon.use_smooth:
+                        temp_normals = blender_shape_key.normals_vertex_get()
+                        n_morph = (temp_normals[vertex_index * 3 + 0], temp_normals[vertex_index * 3 + 1], temp_normals[vertex_index * 3 + 2])
+                    else:
+                        temp_normals = blender_shape_key.normals_polygon_get()
+                        n_morph = (temp_normals[0], temp_normals[1], temp_normals[2])
+                        
+                    target_normals.append(convert_swizzle_location(n_morph))
+                    
+                    # TODO: Check / store delta.
+            
             #
             #
 
@@ -522,6 +561,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                             if attributes[weight_id][current_new_index * 4 + i] != weight[i]:
                                 found = False
                                 break
+                            
+                # TODO: Add for morph targets data.
                 
                 if found:
                     indices.append(current_new_index)
@@ -579,6 +620,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         attributes[weight_id] = []
                     
                     attributes[weight_id].extend(weights[bone_index])
+                    
+            # TODO: Add for morph targets data.
     
     #
     # Add primitive plus split them if needed.
@@ -613,6 +656,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             for bone_index in range(0, bone_max):
                 joints.append(primitive['attributes']['JOINTS_' + str(bone_index)])
                 weights.append(primitive['attributes']['WEIGHTS_' + str(bone_index)])
+         
+        # TODO: Add for morph targets data.
             
         #
         
@@ -673,6 +718,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for weight in weights:
                     pending_attributes['WEIGHTS_' + str(weight_index)] = weight
                     weight_index += 1 
+            
+            # TODO: Add for morph targets data.
             
             pending_indices = pending_primitive['indices']
             
