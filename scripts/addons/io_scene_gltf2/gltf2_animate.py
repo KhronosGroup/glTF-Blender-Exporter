@@ -362,3 +362,30 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
 
     return result
 
+
+def animate_value(export_settings, value_parameter, interpolation, node_type, node_name, matrix_correction, matrix_basis):
+    keys = animate_gather_keys(value_parameter, interpolation)
+
+    times = animate_convert_keys(keys)
+
+    result = {}
+
+    keyframe_index = 0
+    for time in times:
+        value_data = [0.0]
+        
+        channel_index = 0
+        for blender_fcurve in value_parameter:
+            
+            if blender_fcurve is not None:
+                value = blender_fcurve.evaluate(keys[keyframe_index]) 
+                
+                value_data[channel_index] = value
+            
+            channel_index += 1 
+        
+        result[time] = value_data
+        
+        keyframe_index += 1 
+
+    return result

@@ -302,25 +302,76 @@ def generate_animations_parameter(operator,
 
             sampler['name'] = sampler_name
             
-            samplers.append(sampler)  
+            samplers.append(sampler)
+            
+    #
+    #  
 
     if value.count(None) < 1 and is_morph_data:
         sampler_name = prefix + action.name + "_weights"
     
         if get_index(samplers, sampler_name) == -1:
-            # TODO: Store like other transforms.
-            print_console('Test', sampler_name)
+            
+            sampler = {}
+            
+            #
+            
+            interpolation = animate_get_interpolation(scale)
+
+            sampler['interpolation'] = interpolation
+            if interpolation == 'CONVERSION_NEEDED':
+                sampler['interpolation'] = 'LINEAR'
+            
+            value_data = animate_value(export_settings, value, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
+
+            #
+
+            keys = sorted(value_data.keys())
+            values = []
+    
+            for key in keys:
+                value = value_data[key]
+                for value_element in value:
+                    values.append(value_element)
+    
+            #
+            
+            componentType = "FLOAT"
+            count = len(keys)
+            type = "SCALAR"
+            
+            input = create_accessor(operator, context, export_settings, glTF, keys, componentType, count, type, "")
+            
+            sampler['input'] = input
+            
+            #
+
+            componentType = "FLOAT"
+            count = len(values)
+            type = "SCALAR"
+            
+            output = create_accessor(operator, context, export_settings, glTF, values, componentType, count, type, "")
+            
+            sampler['output'] = output
+            
+            #
+
+            sampler['name'] = sampler_name
+            
+            samplers.append(sampler)
 
     #
     #
+    #
+    #
     
-    write_transform = [False, False, False]
+    write_transform = [False, False, False, False]
     
     # Gather fcurves by transform
     for blender_fcurve in action.fcurves:
         node_name = get_node(blender_fcurve.data_path)
         
-        if node_name is not None:
+        if node_name is not None and not is_morph_data:
             if blender_bone_name is None:
                 continue
             elif blender_bone_name != node_name:
@@ -330,7 +381,7 @@ def generate_animations_parameter(operator,
                 postfix = "_"  + node_name
 
         data_path = get_data_path(blender_fcurve.data_path)
-        if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale']:
+        if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale', 'value']:
             continue
         
         if data_path == 'location':
@@ -339,11 +390,13 @@ def generate_animations_parameter(operator,
             write_transform[1] = True
         if data_path == 'scale':
             write_transform[2] = True
+        if data_path == 'value':
+            write_transform[3] = True
 
     #
 
     write_transform_index = 0
-    for path in ['translation', 'rotation', 'scale']:
+    for path in ['translation', 'rotation', 'scale', 'weights']:
 
         if write_transform[write_transform_index]:        
             channel = {}
