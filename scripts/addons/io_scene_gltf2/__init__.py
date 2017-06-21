@@ -182,14 +182,10 @@ class ExportGLTF2_Base():
             default=False
     )
 
-    export_common = EnumProperty(
-        name='Common material',
-        items=(('-', 'No export', ''),
-        ('commonConstant', 'Constant', ''),
-        ('commonLambert', 'Lambert', ''),
-        ('commonPhong', 'Phong', ''),
-        ('commonBlinn', 'Blinn', '')),
-        default='-'
+    export_common = BoolProperty(
+            name='Export material Blinn-Phong',
+            description='',
+            default=False
     )
 
     export_displacement = BoolProperty(

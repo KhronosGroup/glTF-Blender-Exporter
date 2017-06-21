@@ -149,8 +149,8 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                value = translation_data[key]
-                for value_element in value:
+                translation_value = translation_data[key]
+                for value_element in translation_value:
                     values.append(value_element)
     
             #
@@ -208,8 +208,8 @@ def generate_animations_parameter(operator,
         values = []
 
         for key in keys:
-            value = rotation_data[key]
-            for value_element in value:
+            rotation_value = rotation_data[key]
+            for value_element in rotation_value:
                 values.append(value_element)
 
         #
@@ -274,8 +274,8 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                value = scale_data[key]
-                for value_element in value:
+                scale_value = scale_data[key]
+                for value_element in scale_value:
                     values.append(value_element)
     
             #
@@ -330,8 +330,8 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                value = value_data[key]
-                for value_element in value:
+                value_value = value_data[key]
+                for value_element in value_value:
                     values.append(value_element)
     
             #
@@ -1590,7 +1590,7 @@ def generate_textures(operator,
             textures.append(texture)
             
         else:
-            if export_settings['gltf_common'] != '-':
+            if export_settings['gltf_common']:
                 magFilter = 9729
                 wrap = 10497
                 if blenderTexture.texture.extension == 'CLIP':
@@ -1865,18 +1865,16 @@ def generate_materials(operator,
                     materials.append(material)
 
         else:
-            if export_settings['gltf_common'] != '-':
+            if export_settings['gltf_common']:
                 KHR_materials_common_Used = True
                 
                 # 
                 # Property: Common Material
                 #
     
-                common = { 'type' : export_settings['gltf_common'] }
+                common = { }
                 
-                material['extensions'] = { 'KHR_materials_common' : common }
-                
-                common['ambientFactor'] = [blender_material.ambient, blender_material.ambient, blender_material.ambient]
+                material['extensions'] = { 'KHR_materials_cmnBlinnPhong' : common }
                 
                 alpha = 1.0
                 alphaMode = 'OPAQUE'
@@ -1887,18 +1885,16 @@ def generate_materials(operator,
                     else:
                         alphaMode = 'BLEND'
 
-                if export_settings['gltf_common'] != 'commonConstant':
-                    common['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
-        
-                    if alphaMode != 'OPAQUE': 
-                        material['alphaMode'] = alphaMode
+                common['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
     
-                    if export_settings['gltf_common'] != 'commonLambert':
-                        common['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
-            
-                        shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
-            
-                        common['shininessFactor'] = shininessFactor
+                if alphaMode != 'OPAQUE': 
+                    material['alphaMode'] = alphaMode
+
+                common['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity, blender_material.specular_color[1] * blender_material.specular_intensity, blender_material.specular_color[2] * blender_material.specular_intensity]
+    
+                shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
+    
+                common['shininessFactor'] = shininessFactor
     
                 #
                 
@@ -1908,37 +1904,36 @@ def generate_materials(operator,
                 
                 for texture_slot in blender_material.texture_slots:
                     if texture_slot and texture_slot.texture and texture_slot.texture.type == 'IMAGE' and texture_slot.texture.image is not None:
-                        if export_settings['gltf_common'] != 'commonConstant':
-                            #
-                            # Diffuse texture
-                            #
-                            if texture_slot.use_map_color_diffuse:
-                                index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                                if index >= 0:
-                                    diffuseTexture = {
-                                        'index' : index
-                                    }
-                                    common['diffuseTexture'] = diffuseTexture
-                            if export_settings['gltf_common'] != 'commonLambert':                                #
-                                # Specular texture
-                                #
-                                if texture_slot.use_map_color_spec:
-                                    index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                                    if index >= 0:
-                                        specularTexture = {
-                                            'index' : index
-                                        }
-                                        common['specularTexture'] = specularTexture
-                                #
-                                # Shininess texture
-                                #
-                                if texture_slot.use_map_hardness:
-                                    index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
-                                    if index >= 0:
-                                        shininessTexture = {
-                                            'index' : index
-                                        }
-                                        common['shininessTexture'] = shininessTexture
+                        #
+                        # Diffuse texture
+                        #
+                        if texture_slot.use_map_color_diffuse:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                diffuseTexture = {
+                                    'index' : index
+                                }
+                                common['diffuseTexture'] = diffuseTexture
+                        #
+                        # Specular texture
+                        #
+                        if texture_slot.use_map_color_spec:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                specularTexture = {
+                                    'index' : index
+                                }
+                                common['specularTexture'] = specularTexture
+                        #
+                        # Shininess texture
+                        #
+                        if texture_slot.use_map_hardness:
+                            index = get_texture_index_by_filepath(export_settings, glTF, texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                shininessTexture = {
+                                    'index' : index
+                                }
+                                common['shininessTexture'] = shininessTexture
                         #
                         # Ambient texture
                         #
@@ -2010,8 +2005,8 @@ def generate_materials(operator,
             create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
             
         if KHR_materials_common_Used:
-            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_common')
-            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_common')
+            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
+            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
             
         if KHR_materials_displacement_Used:
             create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_displacement')
