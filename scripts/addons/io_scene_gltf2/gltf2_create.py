@@ -144,7 +144,11 @@ def create_bufferView(operator,
     #
     
     binary_length = len(binary)
-    remainder = binary_length % alignment
+    
+    remainder = 0
+    
+    if alignment > 0:
+        remainder = binary_length % alignment
     
     if remainder > 0:
         padding_byte = struct.pack('<1b', 0) 

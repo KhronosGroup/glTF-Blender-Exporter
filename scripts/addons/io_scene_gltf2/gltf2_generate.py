@@ -1432,7 +1432,7 @@ def generate_images(operator,
             
             png_data = create_png_data(blender_image)
             
-            bufferView = create_bufferView(operator, context, export_settings, glTF, png_data, 0)
+            bufferView = create_bufferView(operator, context, export_settings, glTF, png_data, 0, 0)
 
             # Required
 
