@@ -71,7 +71,8 @@ def generate_animations_parameter(operator,
                   blender_bone_name,
                   rotation_mode,
                   matrix_correction,
-                  matrix_basis):
+                  matrix_basis,
+                  is_morph_data):
     name = blender_node_name
     
     prefix = ""
@@ -90,6 +91,7 @@ def generate_animations_parameter(operator,
     rotation_euler = [None, None, None]
     rotation_quaternion = [None, None, None, None]
     scale = [None, None, None]
+    value = [None]
     
     data = {
         'location' : location,
@@ -97,13 +99,14 @@ def generate_animations_parameter(operator,
         'rotation_euler' : rotation_euler,
         'rotation_quaternion' : rotation_quaternion,
         'scale' : scale,
+        'value' : value
     }
     
     # Gather fcurves by transform
     for blender_fcurve in action.fcurves:
         node_name = get_node(blender_fcurve.data_path)
-        
-        if node_name is not None:
+
+        if node_name is not None and not is_morph_data:
             if blender_bone_name is None:
                 continue
             elif blender_bone_name != node_name:
@@ -114,9 +117,10 @@ def generate_animations_parameter(operator,
         
         data_path = get_data_path(blender_fcurve.data_path)
         
-        if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale']:
+        if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale', 'value']:
+            print_console('Test', 'Skipping ' + data_path)
             continue
-        
+
         data[data_path][blender_fcurve.array_index] = blender_fcurve
         
     #
@@ -300,6 +304,13 @@ def generate_animations_parameter(operator,
             
             samplers.append(sampler)  
 
+    if value.count(None) < 1 and is_morph_data:
+        sampler_name = prefix + action.name + "_weights"
+    
+        if get_index(samplers, sampler_name) == -1:
+            # TODO: Store like other transforms.
+            print_console('Test', sampler_name)
+
     #
     #
     
@@ -401,7 +412,7 @@ def generate_animations(operator,
         correction_matrix_local = mathutils.Matrix.Identity(4)
         matrix_basis = mathutils.Matrix.Identity(4)
         
-        generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, correction_matrix_local, matrix_basis)
+        generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, correction_matrix_local, matrix_basis, False)
         
         if export_settings['gltf_skins']:
             if blender_object.type == 'ARMATURE' and len(blender_object.pose.bones) > 0:
@@ -486,14 +497,48 @@ def generate_animations(operator,
                     
                     #
                     
-                    generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, correction_matrix_local, matrix_basis)
+                    generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, correction_matrix_local, matrix_basis, False)
                     
                 #
                 
                 if export_settings['gltf_bake_skins']:
                     blender_object.animation_data.action = temp_action
 
-        # TODO: Export morph targets animation data.
+    #
+    #
+    
+    processed_meshes = []
+        
+    for blender_object in filtered_objects:
+        
+        # Export morph targets animation data.
+
+        if blender_object.type != 'MESH' or blender_object.data is None:
+            continue
+        
+        blender_mesh = blender_object.data
+        
+        if blender_mesh in processed_meshes:
+            continue
+
+        if blender_mesh.shape_keys is None or blender_mesh.shape_keys.animation_data is None:
+            continue
+        
+        action = blender_mesh.shape_keys.animation_data.action
+
+        if action is None:
+            continue
+        
+        #
+        #
+        
+        correction_matrix_local = mathutils.Matrix.Identity(4)
+        matrix_basis = mathutils.Matrix.Identity(4)
+        
+        generate_animations_parameter(operator, context, export_settings, glTF, action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, correction_matrix_local, matrix_basis, True)
+        
+        processed_meshes.append(blender_mesh)
+
     #
     #
 
