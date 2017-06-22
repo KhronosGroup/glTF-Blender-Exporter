@@ -23,7 +23,7 @@ As soon as a feature is implemented, documented and tested, the exported feature
 |-------------------|:---:|:-------:|:-----------:|-|:---------:|:--------:|:----:|
 |Embed images       |  X  |         |             | |     X     |          |      |
 |Embed buffers      |  X  |         |             | |     X     |          |      |
-|Filtered objects   |  X  |         |             | |   Partly  |          |      |
+|Filtered objects   |  X  |         |             | |     X     |          |      |
 |Apply modifiers    |  X  |         |             | |     X     |          |      |
 |Indices type       |  X  |         |             | |     X     |          |      |
 |Vertices           |  X  |         |             | |     X     |          |      |
@@ -37,6 +37,7 @@ As soon as a feature is implemented, documented and tested, the exported feature
 |Skinning           |  X  |         |             | |     X     |          |      |
 |Morph targets      |  X  |         |             | |     X     |          |      |
 |GLB                |  X  |         |             | |     X     |          |      |
+|Extras             |  X  |         |             | |     X     |          |      |
 |Materials PBR SG   |     |    X    |             | |     X     |          |      |
 |Lights             |     |         |      X      | |     X     |          |      |
 |Materials Common   |     |         |      X      | |     X     |          |      |

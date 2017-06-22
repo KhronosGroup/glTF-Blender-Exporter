@@ -1127,6 +1127,15 @@ def generate_meshes(operator,
                     
                     mesh['weights'] = weights
 
+                    
+        #
+        
+        if export_settings['gltf_extras']:
+            extras = create_custom_property(blender_mesh)
+            
+            if extras is not None:
+                mesh['extras'] = extras 
+
         #
 
         mesh['primitives'] = primitives
@@ -1261,6 +1270,14 @@ def generate_nodes(operator,
                     correction_node['extensions'] = extensions
                     
                     nodes.append(correction_node)
+                    
+        #
+        
+        if export_settings['gltf_extras']:
+            extras = create_custom_property(blender_object)
+            
+            if extras is not None:
+                node['extras'] = extras 
 
         #
 
@@ -1993,6 +2010,14 @@ def generate_materials(operator,
                                     KHR_materials_displacement_Used = True
 
                 #
+                
+                if export_settings['gltf_extras']:
+                    extras = create_custom_property(blender_material)
+                    
+                    if extras is not None:
+                        material['extras'] = extras 
+        
+                #
         
                 material['name'] = blender_material.name
         
@@ -2059,6 +2084,14 @@ def generate_scenes(operator,
                 khr_lights = {'light' : light}
                 extensions = {'KHR_lights' : khr_lights}
                 scene['extensions'] = extensions
+
+        #
+        
+        if export_settings['gltf_extras']:
+            extras = create_custom_property(blender_scene.world)
+            
+            if extras is not None:
+                scene['extras'] = extras 
 
         #
 

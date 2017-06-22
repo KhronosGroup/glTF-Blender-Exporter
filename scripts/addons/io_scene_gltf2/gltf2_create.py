@@ -287,3 +287,42 @@ def create_png_data(blender_image):
         png_pack(b'IHDR', struct.pack("!2I5B", width, height, 8, 6, 0, 0, 0)),
         png_pack(b'IDAT', zlib.compress(raw_data, 9)),
         png_pack(b'IEND', b'')])
+
+
+def create_custom_property(blender_element):
+    if not blender_element:
+        return None
+    
+    extras = {}
+    
+    black_list = ['cycles', 'cycles_visibility', 'cycles_curves', '_RNA_UI'] 
+    
+    count = 0
+    for custom_property in blender_element.keys():
+        print_console('Test', custom_property)
+        
+        if custom_property in black_list:
+            continue
+        
+        value = blender_element[custom_property]
+        
+        add_value = False
+        
+        if isinstance(value, str):
+            add_value = True
+
+        if isinstance(value, (int, float)):
+            add_value = True
+
+        if hasattr(value, "to_list"):
+            value = value.to_list()
+            add_value = True
+        
+        if add_value:
+            extras[custom_property] = value
+            count += 1 
+    
+    if count == 0:
+        return None
+    
+    return extras
