@@ -471,11 +471,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     colors.append([color[0], color[1], color[2], 1.0])
             
             #
+            
+            bone_count = 0
 
             if vertex.groups is not None and len(vertex.groups) > 0 and export_settings['gltf_skins']:
                 joint = []
                 weight = []
-                bone_count = 0
                 for group_element in vertex.groups:
 
                     if len(joint) == 4:
@@ -515,9 +516,9 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     joints.append(joint)
                     weights.append(weight)
                     
-                for fill in range(0, bone_max - bone_count):
-                    joints.append([0, 0, 0, 0])
-                    weights.append([0.0, 0.0, 0.0, 0.0])
+            for fill in range(0, bone_max - bone_count):
+                joints.append([0, 0, 0, 0])
+                weights.append([0.0, 0.0, 0.0, 0.0])
                     
             #
             
