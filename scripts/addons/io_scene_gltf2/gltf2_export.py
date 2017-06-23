@@ -33,7 +33,7 @@ from .gltf2_generate import *
 #
 
 def prepare(export_settings):
-    if len(bpy.context.selected_objects) > 0:
+    if bpy.context.active_object is not None and bpy.context.active_object.mode != 'OBJECT':
         bpy.ops.object.mode_set(mode='OBJECT')
     
     filter_apply(export_settings)
