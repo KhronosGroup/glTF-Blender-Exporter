@@ -1182,58 +1182,53 @@ def generate_node_parameter(operator,
         node['scale'] = [scale[0], scale[1], scale[2]]
 
 
-def generate_nodes(operator,
+def generate_node_instance(operator,
                   context,
                   export_settings,
-                  glTF):
-    
+                  glTF,
+                  nodes, 
+                  blender_object,
+                  force_visible):
     correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(-90.0)))
     
     #
-    
-    nodes = []
-    
-    skins = []
+    # Property: node
+    #
 
+    node = {}
+    
     #
     #
     
-    filtered_objects = export_settings['filtered_objects']
-
-    for blender_object in filtered_objects:
-        #
-        # Property: node
-        #
-
-        node = {}
-        
-        #
-        #
-        
-        node_type = 'NODE'
-        matrix_local = blender_object.matrix_local
-        if blender_object.parent_type == 'BONE' :
-            axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0)))
-                
-            if export_settings['gltf_skins']:
-                node_type = 'JOINT'
-                
-                inverse_bind_matrix = axis_basis_change * blender_object.matrix_local
-                
-                matrix_local = inverse_bind_matrix.inverted()
-            else:
-                matrix_local = blender_object.parent.matrix_world.inverted() * blender_object.matrix_world
-        
-        generate_node_parameter(operator, context, export_settings, glTF, matrix_local, node, node_type)
+    node_type = 'NODE'
+    matrix_local = blender_object.matrix_local
+    if blender_object.parent_type == 'BONE' :
+        axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0)))
+            
+        if export_settings['gltf_skins']:
+            node_type = 'JOINT'
+            
+            inverse_bind_matrix = axis_basis_change * blender_object.matrix_local
+            
+            matrix_local = inverse_bind_matrix.inverted()
+        else:
+            matrix_local = blender_object.parent.matrix_world.inverted() * blender_object.matrix_world
+    
+    generate_node_parameter(operator, context, export_settings, glTF, matrix_local, node, node_type)
+    
+    #
+    #
+    
+    if export_settings['gltf_layers'] or blender_object.layers[0] or force_visible:
         
         #
         #
         
         if blender_object.type == 'MESH':
-            mesh = get_mesh_index(glTF, blender_object.data.name)
-            
-            if mesh >= 0:
-                node['mesh'] = mesh
+                mesh = get_mesh_index(glTF, blender_object.data.name)
+                
+                if mesh >= 0:
+                    node['mesh'] = mesh
         
         #
         #
@@ -1252,8 +1247,8 @@ def generate_nodes(operator,
                     correction_node['camera'] = camera
                     
                     nodes.append(correction_node)
-
-
+    
+    
         if export_settings['gltf_lights']:
             if blender_object.type == 'LAMP':
                 light = get_light_index(glTF, blender_object.data.name)
@@ -1270,23 +1265,79 @@ def generate_nodes(operator,
                     correction_node['extensions'] = extensions
                     
                     nodes.append(correction_node)
-                    
-        #
+                
+    #
+    
+    if export_settings['gltf_extras']:
+        extras = create_custom_property(blender_object)
         
-        if export_settings['gltf_extras']:
-            extras = create_custom_property(blender_object)
-            
-            if extras is not None:
-                node['extras'] = extras 
+        if extras is not None:
+            node['extras'] = extras 
 
-        #
+    #
 
-        node['name'] = blender_object.name
+    node['name'] = blender_object.name
+    
+    #
+    
+    return node
+
+
+def generate_nodes(operator,
+                  context,
+                  export_settings,
+                  glTF):
+    
+    nodes = []
+    
+    skins = []
+
+    #
+    #
+    
+    filtered_objects = export_settings['filtered_objects']
+
+    for blender_object in filtered_objects:
+
+        node = generate_node_instance(operator, context, export_settings, glTF, nodes, blender_object, False)
 
         #
         #
 
         nodes.append(node)
+
+    #
+    #
+    
+    for blender_object in filtered_objects:
+        if blender_object.dupli_type == 'GROUP' and blender_object.dupli_group != None:
+            
+            if export_settings['gltf_layers'] or (blender_object.layers[0] and blender_object.dupli_group.layers[0]):
+                
+                for blender_dupli_object in blender_object.dupli_group.objects:
+    
+                    node = generate_node_instance(operator, context, export_settings, glTF, nodes, blender_dupli_object, True)
+    
+                    node['name'] = 'Duplication_' + blender_object.name + '_' + blender_dupli_object.name 
+            
+                    #
+                    #
+            
+                    nodes.append(node)
+                
+                #
+                
+                node = {}
+                
+                node['name'] = 'Duplication_Offset_' + blender_object.name
+                
+                translation = convert_swizzle_location(blender_object.dupli_group.dupli_offset)
+                
+                node['translation'] = [-translation[0], -translation[1], -translation[2]]
+                
+                nodes.append(node)
+            
+            
 
     #
     #
@@ -1438,6 +1489,26 @@ def generate_nodes(operator,
                 continue
             
             children.append(child_index)
+            
+        # Duplications
+        if blender_object.dupli_type == 'GROUP' and blender_object.dupli_group != None:
+
+            child_index = get_node_index(glTF, 'Duplication_Offset_' + blender_object.name)
+            if child_index >= 0:
+                children.append(child_index)
+                
+                duplication_node = nodes[child_index]
+                
+                duplication_children = []
+                
+                for blender_dupli_object in blender_object.dupli_group.objects:
+                    child_index = get_node_index(glTF, 'Duplication_' + blender_object.name + '_' + blender_dupli_object.name)
+                    if child_index >= 0:
+                        duplication_children.append(child_index)
+                
+                duplication_node['children'] = duplication_children 
+        
+        #
         
         if export_settings['gltf_skins']:
             # Joint

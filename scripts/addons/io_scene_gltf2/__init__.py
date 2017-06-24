@@ -140,6 +140,12 @@ class ExportGLTF2_Base():
             default=False
     )
 
+    export_layers = BoolProperty(
+            name='Export for all layers',
+            description='',
+            default=False
+    )
+
     export_extras = BoolProperty(
             name='Export extras',
             description='',
@@ -222,6 +228,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
         export_settings['gltf_selected'] = self.export_selected
+        export_settings['gltf_layers'] = self.export_layers
         export_settings['gltf_extras'] = self.export_extras
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
@@ -261,6 +268,7 @@ class ExportGLTF2_Base():
         col = layout.box().column()
         col.label('Nodes:', icon='OOPS')
         col.prop(self, 'export_selected')
+        col.prop(self, 'export_layers')
         col.prop(self, 'export_extras')
 
         col = layout.box().column()
