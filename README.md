@@ -15,7 +15,7 @@ Because of this, the exporter has to be added manually, which is described in th
 
 Feature matrix
 --------------
-Following table shows the current status of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).  
+Following table shows the status of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).  
 The last three columns describe in combination the maturity of the exported feature:  
 As soon as a feature is implemented, documented and tested, the exported feature data can be considered as production quality.
 

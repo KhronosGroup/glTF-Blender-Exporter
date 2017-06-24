@@ -9,7 +9,7 @@ Two node groups are provided, one for the metallic roughness and one for the spe
 
 Even possible in the Cycles node editor, specific requirements have to be fulfilled, that all parameters
 are exported to the glTF 2.0 file format successfully.
-TODO: Further explain.
+TODO: Explain further.
 
 All PBR materials share the same input parameters, which are listed in the following table.
 
@@ -38,6 +38,13 @@ All PBR materials share the same input parameters, which are listed in the follo
 
 #### PBR Specular Glossiness
 
+The specular glossiness material is not part of core glTF 2.0. The material is defined by the extension `KHR_materials_pbrSpecularGlossiness`.
+
 ![glTF Specular Glossiness Node](glTF_Specular_Glossiness_Node.png)
 
-#### Common Constant, Lmabert, Blinn and Phong
+#### CMN Blinn-Phong
+
+The common Blinn-Phong material is not part of core glTF 2.0. The material is defined by the extension `KHR_materials_cmnBlinnPhong`.
+A valid glTF 2.0 file can contain no materials. To avoid an unwanted export of this material type, the option for this material has explicitly be enabled. This common material is not dependent on any node group, as the materials from `Blender Render` are used. As the Blender material has more settings and options than defined in the common Blinn-Phong material, only the following parameters are exported:
+
+TODO: List of exported textures and parameters.
