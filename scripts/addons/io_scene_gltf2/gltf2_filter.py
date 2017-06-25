@@ -149,10 +149,12 @@ def filter_apply(export_settings):
     filtered_images = []
 
     for blender_texture in filtered_textures:
-        if isinstance(blender_texture, bpy.types.ShaderNodeTexImage) and blender_texture.image not in filtered_images:
-            filtered_images.append(blender_texture.image)
+        if isinstance(blender_texture, bpy.types.ShaderNodeTexImage):
+            if blender_texture.image not in filtered_images:
+                filtered_images.append(blender_texture.image)
         else:
-            filtered_images.append(blender_texture.texture.image)
+            if blender_texture.texture.image not in filtered_images:
+                filtered_images.append(blender_texture.texture.image)
                     
     export_settings['filtered_images'] = filtered_images                
     
