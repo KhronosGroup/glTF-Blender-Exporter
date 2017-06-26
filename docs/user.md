@@ -7,11 +7,13 @@ User Documentation
 At point of writing, the PBR materials are simulated with Cycles using a specific node tree encapsulated in a node group.
 Two node groups are provided, one for the metallic roughness and one for the specular glossiness workflow.
 
-Even possible in the Cycles node editor, specific requirements have to be fulfilled, that all parameters
-are exported to the glTF 2.0 file format successfully.
-TODO: Explain further.
+Even possible in the Cycles node editor, specific requirements have to be fulfilled, that all parameters are exported to the glTF 2.0 file format successfully:  
 
-All PBR materials share the same input parameters, which are listed in the following table.
+- If a parameter is marked as 'Node group only', the parameter has to be changed in the node group. Any input by a node is ignored.  
+- If a parameter is marked as 'Texture only', the parameter in the node group contains the default value. Changing this value is ignored. Only an 'Image Texture' input link is accepted.
+- If a parameter is marked as 'Attribute only', the parameter in the node group contains the default value. Changing this value is ignored. Only an 'Attribute' input link is accepted.
+
+All PBR materials share the same input parameters, which are listed in the following table:
 
 |Material parameter export   |Node group only|Texture only|Attribute only|Comments                                        |
 |----------------------------|:-------------:|:----------:|:------------:|------------------------------------------------|
@@ -31,6 +33,19 @@ All PBR materials share the same input parameters, which are listed in the follo
 |COLOR_0                     |               |            |X             |'Name' from 'Attribute' to first 'Vertex Colors'|
 
 ![glTF Material Node](glTF_Material_Node_Part.png)
+
+##### Alpha
+
+By default, the alpha mode is 'OPAQUE' and set to 'BLEND', if 
+- the BaseColorFactor or DiffuseFactor alpha value is less than 1.0  
+- the Alpha channel from the BaseColor or Diffuse image texture is connected.  
+
+Please note, that separate alpha maps are currently not specified in glTF 2.0 and so not working.
+The alpha channel has to be linked from the above defined image textures. Following picture shows the correct and simple usage for the glTF Metallic Roughness node:
+
+![glTF Material Node Alpha Blend](glTF_Material_Node_Alpha_Blend.png)
+
+To use 'MASK' for blending, the AlphaMode has to be set from 0.0 to 1.0. In this case, as specified by glTF 2.0, the AlphaCutoff value is used and exported.
 
 #### PBR Metallic Roughness
 
