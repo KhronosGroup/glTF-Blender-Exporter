@@ -1728,6 +1728,8 @@ def generate_materials(operator,
         
             for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
+                    
+                    alpha = 1.0
     
                     if currentNode.node_tree.name == 'glTF Metallic Roughness':
                         # 
@@ -1759,6 +1761,7 @@ def generate_materials(operator,
                         baseColorFactor = get_vec4(currentNode.inputs['BaseColorFactor'].default_value, [1.0, 1.0, 1.0, 1.0])
                         if baseColorFactor[0] != 1.0 or baseColorFactor[1] != 1.0 or baseColorFactor[2] != 1.0 or baseColorFactor[3] != 1.0:
                             pbrMetallicRoughness['baseColorFactor'] = baseColorFactor
+                            alpha = baseColorFactor[3]
     
                         #
                         # Metallic factor
@@ -1821,6 +1824,7 @@ def generate_materials(operator,
                         diffuseFactor = get_vec4(currentNode.inputs['DiffuseFactor'].default_value, [1.0, 1.0, 1.0, 1.0])
                         if diffuseFactor[0] != 1.0 or diffuseFactor[1] != 1.0 or diffuseFactor[2] != 1.0 or diffuseFactor[3] != 1.0:
                             pbrSpecularGlossiness['diffuseFactor'] = diffuseFactor
+                            alpha = diffuseFactor[3]
 
                         #
                         # Specular texture
@@ -1921,7 +1925,7 @@ def generate_materials(operator,
                     # Alpha
                     #
                     index = get_texture_index(export_settings, glTF, 'Alpha', currentNode)
-                    if index >= 0:
+                    if index >= 0 or alpha < 1.0:
                         alphaMode = 'BLEND'
                         if get_scalar(currentNode.inputs['AlphaMode'].default_value, 0.0) >= 0.5:
                             alphaMode = 'MASK'
