@@ -98,6 +98,12 @@ class ExportGLTF2_Base():
         default='UNSIGNED_SHORT'
     )
 
+    export_force_indices = BoolProperty(
+            name='Force maximum indices',
+            description='',
+            default=False
+    )
+
     export_texcoords = BoolProperty(
             name='Export texture coordinates',
             description='',
@@ -221,6 +227,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_embed_images'] = self.export_embed_images
         export_settings['gltf_strip'] = self.export_strip
         export_settings['gltf_indices'] = self.export_indices
+        export_settings['gltf_force_indices'] = self.export_force_indices
         export_settings['gltf_texcoords'] = self.export_texcoords
         export_settings['gltf_normals'] = self.export_normals
         export_settings['gltf_tangents'] = self.export_tangents and self.export_normals
@@ -275,6 +282,7 @@ class ExportGLTF2_Base():
         col.label('Meshes:', icon='MESH_DATA')
         col.prop(self, 'export_apply')
         col.prop(self, 'export_indices')
+        col.prop(self, 'export_force_indices')
 
         col = layout.box().column()
         col.label('Attributes:', icon='SURFACE_DATA')

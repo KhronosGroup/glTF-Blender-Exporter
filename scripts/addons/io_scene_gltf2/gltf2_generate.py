@@ -851,6 +851,9 @@ def generate_meshes(operator,
             else:
                 print_console('ERROR', 'Invalid max_index: ' + str(max_index))
                 continue
+            
+            if export_settings['gltf_force_indices']:
+                componentType = export_settings['gltf_indices']
 
             count = len(indices)
             
