@@ -98,6 +98,14 @@ class ExportGLTF2_Base():
         default='UNSIGNED_SHORT'
     )
 
+    export_min_indices = EnumProperty(
+        name='Minimum indices',
+        items=(('UNSIGNED_BYTE', 'Unsigned Byte', ''),
+        ('UNSIGNED_SHORT', 'Unsigned Short', ''),
+        ('UNSIGNED_INT', 'Unsigned Integer', '')),
+        default='UNSIGNED_SHORT'
+    )
+
     export_texcoords = BoolProperty(
             name='Export texture coordinates',
             description='',
@@ -220,6 +228,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_embed_buffers'] = self.export_embed_buffers
         export_settings['gltf_embed_images'] = self.export_embed_images
         export_settings['gltf_strip'] = self.export_strip
+        export_settings['gltf_min_indices'] = self.export_min_indices
         export_settings['gltf_indices'] = self.export_indices
         export_settings['gltf_texcoords'] = self.export_texcoords
         export_settings['gltf_normals'] = self.export_normals
@@ -274,6 +283,7 @@ class ExportGLTF2_Base():
         col = layout.box().column()
         col.label('Meshes:', icon='MESH_DATA')
         col.prop(self, 'export_apply')
+        col.prop(self, 'export_min_indices')
         col.prop(self, 'export_indices')
 
         col = layout.box().column()

@@ -842,9 +842,9 @@ def generate_meshes(operator,
             
             max_index = max(indices)
             
-            if max_index < 256:
+            if max_index < 256 and export_settings['gltf_min_indices'] is not "UNSIGNED_SHORT" and export_settings['gltf_min_indices'] is not "UNSIGNED_INT":
                 componentType = "UNSIGNED_BYTE"
-            elif max_index < 65536:
+            elif max_index < 65536 and export_settings['gltf_min_indices'] is not "UNSIGNED_INT":
                 componentType = "UNSIGNED_SHORT"
             elif max_index < 4294967296:
                 componentType = "UNSIGNED_INT"
