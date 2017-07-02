@@ -409,7 +409,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         use_sharp = False
         
-        if blender_mesh.use_auto_smooth:
+        if blender_mesh.use_auto_smooth and export_settings['gltf_auto_smooth']:
             for edge_key in blender_polygon.edge_keys:
                 blender_edge = blender_mesh.edges[blender_mesh.edge_keys.index(edge_key)]
                 

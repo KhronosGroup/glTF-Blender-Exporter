@@ -472,7 +472,7 @@ def generate_animations(operator,
                 
                 #
                 
-                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) * blender_object.matrix_local
+                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0)))
                 
                 # Precalculate joint animation data.
                 
@@ -1203,21 +1203,7 @@ def generate_node_instance(operator,
     #
     #
     
-    node_type = 'NODE'
-    matrix_local = blender_object.matrix_local
-    if blender_object.parent_type == 'BONE' :
-        axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0)))
-            
-        if export_settings['gltf_skins']:
-            node_type = 'JOINT'
-            
-            inverse_bind_matrix = axis_basis_change * blender_object.matrix_local
-            
-            matrix_local = inverse_bind_matrix.inverted()
-        else:
-            matrix_local = blender_object.parent.matrix_world.inverted() * blender_object.matrix_world
-    
-    generate_node_parameter(operator, context, export_settings, glTF, matrix_local, node, node_type)
+    generate_node_parameter(operator, context, export_settings, glTF, blender_object.matrix_local, node, 'NODE')
     
     #
     #
@@ -1364,76 +1350,83 @@ def generate_nodes(operator,
                 bpy.context.scene.objects.active = blender_object
                 bpy.ops.object.mode_set(mode='POSE')
                 bpy.ops.nla.bake(frame_start=bpy.context.scene.frame_current, frame_end=bpy.context.scene.frame_current, only_selected=False, visual_keying=True, clear_constraints=False, use_current_action=False, bake_types={'POSE'})
-    
-            #
-            # Property: skin and node
-            #
-            
-            skin = {}
-            
+
             joints = []
             
-            inverse_matrices = []
-            
-            skin['skeleton'] = get_node_index(glTF, blender_object.name)
-            
-            for blender_bone in blender_object.pose.bones:
+            joints_written = False
     
-                node = {}
-                
+            for blender_object_child in blender_object.children:
                 #
+                # Property: skin and node
                 #
                 
-                axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) 
+                inverse_matrices = []
                 
-                correction_matrix_local = mathutils.Matrix.Identity(4)
-                
-                if blender_bone.parent is None:
-                    correction_matrix_local = axis_basis_change * blender_object.matrix_local * blender_bone.bone.matrix_local
-                else:
-                    correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
-                
-                generate_node_parameter(operator, context, export_settings, glTF, correction_matrix_local * blender_bone.matrix_basis, node, 'JOINT')
+                for blender_bone in blender_object.pose.bones:
         
-                #
-        
-                node['name'] = blender_object.name + "_" + blender_bone.name
-        
-                #
-                #
-    
-                joints.append(len(nodes))
+                    axis_basis_change = mathutils.Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0) , (0.0, 0.0, 0.0, 1.0))) 
+
+                    if not joints_written:                    
+                        node = {}
+                    
+                        correction_matrix_local = mathutils.Matrix.Identity(4)
+                        
+                        if blender_bone.parent is None:
+                            correction_matrix_local = axis_basis_change * blender_bone.bone.matrix_local
+                        else:
+                            correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
+                        
+                        generate_node_parameter(operator, context, export_settings, glTF, correction_matrix_local * blender_bone.matrix_basis, node, 'JOINT')
                 
-                #
-                #
+                        #
                 
-                inverse_bind_matrix = axis_basis_change * blender_object.matrix_local * blender_bone.bone.matrix_local
-                inverse_bind_matrix = inverse_bind_matrix.inverted()
+                        node['name'] = blender_object.name + "_" + blender_bone.name
                 
-                for column in range(0, 4):
-                    for row in range(0, 4):
-                        inverse_matrices.append(inverse_bind_matrix[row][column])
-                
-                #
-                #
-        
-                nodes.append(node)
-                
-            skin['joints'] = joints
+                        #
+                        #
             
-            #
-             
-            componentType = "FLOAT"
-            count = len(inverse_matrices) // 16
-            type = "MAT4"
+                        joints.append(len(nodes))
+                        
+                        nodes.append(node)
+                    
+                    #
+                    #
+                    
+                    inverse_bind_matrix = axis_basis_change * blender_object.matrix_world * axis_basis_change * blender_bone.bone.matrix_local
+
+                    bind_shape_matrix = axis_basis_change * blender_object_child.matrix_world
+                    
+                    inverse_bind_matrix = inverse_bind_matrix.inverted() * bind_shape_matrix
+                    
+                    for column in range(0, 4):
+                        for row in range(0, 4):
+                            inverse_matrices.append(inverse_bind_matrix[row][column])
+                    
+                #
             
-            inverseBindMatrices = create_accessor(operator, context, export_settings, glTF, inverse_matrices, componentType, count, type, "")
-             
-            skin['inverseBindMatrices'] = inverseBindMatrices
-            
-            #
-            
-            skins.append(skin)
+                joints_written = True                    
+
+                #
+                    
+                skin = {}
+                
+                skin['skeleton'] = get_node_index(glTF, blender_object.name)
+
+                skin['joints'] = joints
+                
+                #
+                 
+                componentType = "FLOAT"
+                count = len(inverse_matrices) // 16
+                type = "MAT4"
+                
+                inverseBindMatrices = create_accessor(operator, context, export_settings, glTF, inverse_matrices, componentType, count, type, "")
+                 
+                skin['inverseBindMatrices'] = inverseBindMatrices
+                
+                #
+                
+                skins.append(skin)
             
             #
             
@@ -1458,10 +1451,13 @@ def generate_nodes(operator,
         node = nodes[node_index]
         
         #
+        
         if export_settings['gltf_skins']:
             blender_armature = blender_object.find_armature()
             if blender_armature is not None:
-                node['skin'] = get_skin_index(glTF, blender_armature.name)
+                index_offset = blender_armature.children.index(blender_object)
+                
+                node['skin'] = get_skin_index(glTF, blender_armature.name, index_offset)
 
         #
 

@@ -164,6 +164,12 @@ class ExportGLTF2_Base():
             default=False
     )
 
+    export_auto_smooth = BoolProperty(
+            name='Use auto smooth',
+            description='',
+            default=False
+    )
+
     export_animations = BoolProperty(
             name='Export animations',
             description='',
@@ -238,6 +244,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_layers'] = self.export_layers
         export_settings['gltf_extras'] = self.export_extras
         export_settings['gltf_apply'] = self.export_apply
+        export_settings['gltf_auto_smooth'] = self.export_auto_smooth
         export_settings['gltf_animations'] = self.export_animations
         if self.export_animations:
             export_settings['gltf_current_frame'] = False
@@ -281,6 +288,7 @@ class ExportGLTF2_Base():
         col = layout.box().column()
         col.label('Meshes:', icon='MESH_DATA')
         col.prop(self, 'export_apply')
+        col.prop(self, 'export_auto_smooth')
         col.prop(self, 'export_indices')
         col.prop(self, 'export_force_indices')
 

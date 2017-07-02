@@ -288,7 +288,7 @@ def get_mesh_index(glTF, name):
     return -1
 
 
-def get_skin_index(glTF, name):
+def get_skin_index(glTF, name, index_offset):
     if glTF.get('skins') is None:
         return -1
     
@@ -297,7 +297,7 @@ def get_skin_index(glTF, name):
     index = 0
     for skin in glTF['skins']:
         if skin['skeleton'] == skeleton:
-            return index
+            return index + index_offset
         
         index += 1
 
