@@ -407,18 +407,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         #
         
-        use_sharp = False
-        
-        if blender_mesh.use_auto_smooth and export_settings['gltf_auto_smooth']:
-            for edge_key in blender_polygon.edge_keys:
-                blender_edge = blender_mesh.edges[blender_mesh.edge_keys.index(edge_key)]
-                
-                if blender_edge.use_edge_sharp:
-                    use_sharp = True
-                    break 
-        
-        #
-        
         indices = primitive['indices']
         
         loop_index_list = []
@@ -464,7 +452,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             vertex = blender_mesh.vertices[vertex_index]
             
             v = convert_swizzle_location(vertex.co)
-            if blender_polygon.use_smooth and not use_sharp:
+            if blender_polygon.use_smooth:
                 n = convert_swizzle_location(vertex.normal)
             else:
                 n = convert_swizzle_location(face_normal)
