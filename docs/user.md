@@ -63,3 +63,17 @@ The common Blinn-Phong material is not part of core glTF 2.0. The material is de
 A valid glTF 2.0 file can contain no materials. To avoid an unwanted export of this material type, the option for this material has explicitly be enabled. This common material is not dependent on any node group, as the materials from `Blender Render` are used. As the Blender material has more settings and options than defined in the common Blinn-Phong material, only the following parameters are exported:
 
 TODO: List of exported textures and parameters.
+
+### External Tools
+
+The following section describes several tools, how they can optimal be used with the Blender glTF 2.0 exporter. 
+
+#### Substance Painter
+[Substance Painter](https://www.allegorithmic.com/products/substance-painter) is a 3D painting software allowing you to texture, render and share your work.  
+At point of writing, the exporter of Substance Painter does not have a preset for glTF 2.0. However, this can be easily configured:  
+
+![glTF SubstancePainter](glTF_SubstancePainter.png)
+
+Important is the order of `occlusion`: red channel, `roughness`: green chanel, `metallic`: blue channel. Even the glTF 2.0 property is named `metallicRoughnessTexture`, the above channel order assignment is the only valid one.
+
+Furthermore, please make sure, that the `normal` is exported for `OpenGL`. Even your render is using a different graphics API, this is the only valid one.
