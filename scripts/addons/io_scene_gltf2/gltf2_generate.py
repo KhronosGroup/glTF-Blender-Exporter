@@ -1392,9 +1392,9 @@ def generate_nodes(operator,
                     #
                     #
                     
-                    inverse_bind_matrix = axis_basis_change * blender_object.matrix_world * axis_basis_change * blender_bone.bone.matrix_local
+                    inverse_bind_matrix = axis_basis_change * blender_bone.bone.matrix_local
 
-                    bind_shape_matrix = axis_basis_change * blender_object_child.matrix_world
+                    bind_shape_matrix = axis_basis_change * blender_object.matrix_world.inverted() * blender_object_child.matrix_world * axis_basis_change.inverted() 
                     
                     inverse_bind_matrix = inverse_bind_matrix.inverted() * bind_shape_matrix
                     
