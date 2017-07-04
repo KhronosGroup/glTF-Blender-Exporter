@@ -171,9 +171,16 @@ def filter_apply(export_settings):
     for blender_texture in filtered_textures:
         if isinstance(blender_texture, bpy.types.ShaderNodeTexImage):
             if blender_texture.image not in filtered_images:
+                
+                if blender_texture.image.filepath == '':
+                    blender_texture.image.filepath = 'glTF_Generated_' + blender_texture.image.name + '.png'
+                
                 filtered_images.append(blender_texture.image)
         else:
             if blender_texture.texture.image not in filtered_images:
+                if blender_texture.texture.image.filepath == '':
+                    blender_texture.texture.image.filepath = 'glTF_Generated_' + blender_texture.texture.image.name + '.png'
+
                 filtered_images.append(blender_texture.texture.image)
                     
     export_settings['filtered_images'] = filtered_images                
