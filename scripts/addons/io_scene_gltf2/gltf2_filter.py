@@ -58,17 +58,37 @@ def filter_apply(export_settings):
         
         current_blender_mesh = blender_mesh
         
+        current_blender_object = None
+        
         skip = True
         
         for blender_object in filtered_objects:
-            if blender_object.type != 'MESH':
+            
+            current_blender_object = blender_object
+            
+            if current_blender_object.type != 'MESH':
                 continue
             
-            if blender_object.data == current_blender_mesh:
+            if current_blender_object.data == current_blender_mesh:
+                
                 skip = False
                 
-                if export_settings['gltf_apply']:
-                    current_blender_mesh = blender_object.to_mesh(bpy.context.scene, True, 'PREVIEW')
+                use_auto_smooth = current_blender_mesh.use_auto_smooth
+                
+                if use_auto_smooth:
+                    current_blender_object = current_blender_object.copy() 
+                
+                if export_settings['gltf_apply'] or use_auto_smooth:
+                    
+                    if not export_settings['gltf_apply']:
+                        current_blender_object.modifiers.clear()
+                    
+                    if use_auto_smooth:
+                        blender_modifier = current_blender_object.modifiers.new('Temporary_Auto_Smooth', 'EDGE_SPLIT')
+                    
+                        blender_modifier.split_angle = current_blender_mesh.auto_smooth_angle
+
+                    current_blender_mesh = current_blender_object.to_mesh(bpy.context.scene, True, 'PREVIEW')
                     temporary_meshes.append(current_blender_mesh)
                 
                 break
@@ -77,7 +97,7 @@ def filter_apply(export_settings):
             continue
             
         filtered_meshes[blender_mesh.name] = current_blender_mesh
-        filtered_vertex_groups[blender_mesh.name] = blender_object.vertex_groups 
+        filtered_vertex_groups[blender_mesh.name] = current_blender_object.vertex_groups 
             
     export_settings['filtered_meshes'] = filtered_meshes
     export_settings['filtered_vertex_groups'] = filtered_vertex_groups
