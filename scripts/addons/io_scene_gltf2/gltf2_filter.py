@@ -33,6 +33,10 @@ def filter_apply(export_settings):
     implicit_filtered_objects = []
 
     for blender_object in bpy.data.objects:
+        
+        if blender_object.users == 0:
+            continue
+        
         if export_settings['gltf_selected'] and not blender_object.select:
             continue
         
@@ -55,6 +59,9 @@ def filter_apply(export_settings):
     temporary_meshes = []
     
     for blender_mesh in bpy.data.meshes:
+        
+        if blender_mesh.users == 0:
+            continue
         
         current_blender_mesh = blender_mesh
         
@@ -108,6 +115,10 @@ def filter_apply(export_settings):
     filtered_materials = []
 
     for blender_material in get_used_materials():
+        
+        if blender_material.users == 0:
+            continue
+        
         for mesh_name, blender_mesh in filtered_meshes.items():
             for compare_blender_material in blender_mesh.materials:
                 if compare_blender_material == blender_material and blender_material not in filtered_materials:
@@ -118,13 +129,16 @@ def filter_apply(export_settings):
     #
 
     filtered_textures = []
+    
+    temp_filtered_texture_names = []
 
-    for currentMaterial in filtered_materials:
-        if currentMaterial.node_tree and currentMaterial.use_nodes:
-            for currentNode in currentMaterial.node_tree.nodes:
-                if isinstance(currentNode, bpy.types.ShaderNodeTexImage) and currentNode.image is not None and currentNode not in filtered_textures:
+    for blender_material in filtered_materials:
+        if blender_material.node_tree and blender_material.use_nodes:
+            for blender_node in blender_material.node_tree.nodes:
+                
+                if isinstance(blender_node, bpy.types.ShaderNodeTexImage) and blender_node.image is not None and blender_node.image.users != 0 and blender_node not in filtered_textures:
                     add_node = False
-                    for blender_socket in currentNode.outputs:
+                    for blender_socket in blender_node.outputs:
                         if blender_socket.is_linked:
                             for blender_link in blender_socket.links:
                                 if isinstance(blender_link.to_node, bpy.types.ShaderNodeGroup):
@@ -133,34 +147,37 @@ def filter_apply(export_settings):
                                         break
                         if add_node:
                             break
+                        
                     if add_node:
-                        filtered_textures.append(currentNode)
+                        filtered_textures.append(blender_node)
                         # TODO: Add displacement texture, as not stored in node tree.
         else:
             if export_settings['gltf_common']:
-                for currentTextureSlot in currentMaterial.texture_slots:
-                    if currentTextureSlot and currentTextureSlot.texture and currentTextureSlot.texture.type == 'IMAGE' and currentTextureSlot.texture.image is not None:
-                        if currentTextureSlot not in filtered_textures:
+                for blender_texture_slot in blender_material.texture_slots:
+
+                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0:
+                        if blender_texture_slot not in filtered_textures and blender_texture_slot.name not in temp_filtered_texture_names:
                             accept = False
                             
-                            if currentTextureSlot.use_map_color_diffuse:
+                            if blender_texture_slot.use_map_color_diffuse:
                                 accept = True
-                            if currentTextureSlot.use_map_color_spec:
+                            if blender_texture_slot.use_map_color_spec:
                                 accept = True
-                            if currentTextureSlot.use_map_hardness:
+                            if blender_texture_slot.use_map_hardness:
                                 accept = True
     
-                            if currentTextureSlot.use_map_emit:
+                            if blender_texture_slot.use_map_emit:
                                 accept = True
-                            if currentTextureSlot.use_map_normal:
+                            if blender_texture_slot.use_map_normal:
                                 accept = True
 
                             if export_settings['gltf_displacement']:
-                                if currentTextureSlot.use_map_displacement:
+                                if blender_texture_slot.use_map_displacement:
                                     accept = True
                                 
                             if accept:
-                                filtered_textures.append(currentTextureSlot) 
+                                filtered_textures.append(blender_texture_slot)
+                                temp_filtered_texture_names.append(blender_texture_slot.name)
  
     export_settings['filtered_textures'] = filtered_textures                
 
@@ -169,21 +186,62 @@ def filter_apply(export_settings):
     filtered_images = []
 
     for blender_texture in filtered_textures:
+        
         if isinstance(blender_texture, bpy.types.ShaderNodeTexImage):
-            if blender_texture.image not in filtered_images:
+            if blender_texture.image is not None and blender_texture.image not in filtered_images and blender_texture.image.users != 0:
                 
                 if blender_texture.image.filepath == '':
                     blender_texture.image.filepath = 'glTF_Generated_' + blender_texture.image.name + '.png'
                 
                 filtered_images.append(blender_texture.image)
         else:
-            if blender_texture.texture.image not in filtered_images:
+            if blender_texture.texture.image is not None and blender_texture.texture.image not in filtered_images and blender_texture.texture.image.users != 0:
+                
                 if blender_texture.texture.image.filepath == '':
                     blender_texture.texture.image.filepath = 'glTF_Generated_' + blender_texture.texture.image.name + '.png'
 
                 filtered_images.append(blender_texture.texture.image)
                     
-    export_settings['filtered_images'] = filtered_images                
+    export_settings['filtered_images'] = filtered_images
+    
+    #
+    #
+    
+    filtered_cameras = []
+    
+    for blender_camera in bpy.data.cameras:
+        
+        if blender_camera.users == 0:
+            continue
+        
+        if export_settings['gltf_selected']:
+            if blender_camera not in filtered_objects:
+                continue 
+        
+        filtered_cameras.append(blender_camera)
+
+    export_settings['filtered_cameras'] = filtered_cameras
+
+    #
+    #
+    
+    filtered_lights = []
+    
+    for blender_light in bpy.data.lamps:
+        
+        if blender_light.users == 0:
+            continue
+
+        if export_settings['gltf_selected']:
+            if blender_light not in filtered_objects:
+                continue 
+
+        if blender_light.type == 'AREA' or blender_light.type == 'HEMI':
+            continue
+
+        filtered_lights.append(blender_light)
+                
+    export_settings['filtered_lights'] = filtered_lights
     
     #
     #

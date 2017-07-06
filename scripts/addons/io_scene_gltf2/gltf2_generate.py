@@ -619,7 +619,9 @@ def generate_cameras(operator,
     #
     #
     
-    for blender_camera in bpy.data.cameras:
+    filtered_cameras = export_settings['filtered_cameras']
+    
+    for blender_camera in filtered_cameras:
 
         #
         # Property: camera
@@ -691,7 +693,9 @@ def generate_lights(operator,
     #
     #
     
-    for blender_light in bpy.data.lamps:
+    filtered_lights = export_settings['filtered_lights']
+    
+    for blender_light in filtered_lights:
 
         #
         # Property: light
