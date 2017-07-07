@@ -644,7 +644,9 @@ def generate_cameras(operator,
             perspective['yfov'] = blender_camera.angle_y
 
             perspective['znear'] = blender_camera.clip_start
-            perspective['zfar'] = blender_camera.clip_end
+            
+            if not export_settings['gltf_camera_infinite']:
+                perspective['zfar'] = blender_camera.clip_end
             
             #
             

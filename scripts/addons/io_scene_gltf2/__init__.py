@@ -140,6 +140,12 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_camera_infinite = BoolProperty(
+            name='Infinite perspective Camera',
+            description='',
+            default=False
+    )
+
     export_selected = BoolProperty(
             name='Export selected only',
             description='',
@@ -234,6 +240,10 @@ class ExportGLTF2_Base():
         export_settings['gltf_materials'] = self.export_materials
         export_settings['gltf_colors'] = self.export_colors
         export_settings['gltf_cameras'] = self.export_cameras
+        if self.export_cameras:
+            export_settings['gltf_camera_infinite'] = self.export_camera_infinite
+        else:
+            export_settings['gltf_camera_infinite'] = False
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_layers'] = self.export_layers
         export_settings['gltf_extras'] = self.export_extras
@@ -296,6 +306,8 @@ class ExportGLTF2_Base():
         col.label('Objects:', icon='OBJECT_DATA')
         col.prop(self, 'export_materials')
         col.prop(self, 'export_cameras')
+        if self.export_cameras:
+            col.prop(self, 'export_camera_infinite')
 
         col = layout.box().column()
         col.label('Animation:', icon='OUTLINER_DATA_POSE')
