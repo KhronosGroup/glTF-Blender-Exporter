@@ -32,19 +32,32 @@ GLTF_MAX_COLORS = 2
 #
 
 def convert_swizzle_location(loc):
+    """
+    Converts a location from Blender coordinate system to glTF coordinate system.
+    """
     return mathutils.Vector((loc[0], loc[2], -loc[1]))
 
 
 def convert_swizzle_rotation(rot):
+    """
+    Converts a quaternion rotation from Blender coordinate system to glTF coordinate system.
+    'w' is still at first position.
+    """
     return mathutils.Quaternion((rot[0], rot[1], rot[3], -rot[2]))
 
 
 def convert_swizzle_scale(scale):
+    """
+    Converts a scale from Blender coordinate system to glTF coordinate system.
+    """
     return mathutils.Vector((scale[0], scale[2], scale[1]))
 
 
 def decompose_transition(matrix, context, export_settings):
     translation, rotation, scale = matrix.decompose()
+    """
+    Decompose a matrix depending if it is associated to a joint or node.
+    """
 
     if context == 'NODE':
         translation = convert_swizzle_location(translation)
@@ -58,6 +71,10 @@ def decompose_transition(matrix, context, export_settings):
 
 
 def extract_primitive_floor(a, indices):
+    """
+    Shift indices, that the first one starts with 0. It is assumed, that the indices are packed.
+    """
+
     attributes = {
         'POSITION' : [],
         'NORMAL' : []
@@ -176,6 +193,10 @@ def extract_primitive_floor(a, indices):
 
 
 def extract_primitive_pack(a, indices):
+    """
+    Packs indices, that the first one starts with 0. Current indices can have gaps.
+    """
+
     attributes = {
         'POSITION' : [],
         'NORMAL' : []
@@ -304,6 +325,12 @@ def extract_primitive_pack(a, indices):
 
     
 def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_settings):
+    """
+    Extracting primitives from a mesh. Polygons are triangulated and sorted by material.
+    Furthermore, primitives are splitted up, if the indices range is exceeded.
+    Finally, triangles are also splitted up/dublicatted, if face normals are used instead of vertex normals. 
+    """
+
     print_console('INFO', 'Extracting primitive')
     
     #
