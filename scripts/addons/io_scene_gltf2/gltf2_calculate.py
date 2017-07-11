@@ -29,6 +29,9 @@ from .gltf2_debug import *
 #
 
 def calculate_tangent(internal_primitive, texcoord_id = 'TEXCOORD_0'):
+    """
+    Calculates tangents for a given texture coordinate set.
+    """
     if internal_primitive is None:
         return None
     
