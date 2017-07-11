@@ -29,6 +29,10 @@ from .gltf2_get import *
 #
 
 def filter_apply(export_settings):
+    """
+    Gathers and filters the objects and assets to export.
+    Also filters out invalid, deleted and not exportable elements.
+    """
     filtered_objects = []
     implicit_filtered_objects = []
 
