@@ -78,6 +78,10 @@ def generate_animations_parameter(operator,
                   matrix_correction,
                   matrix_basis,
                   is_morph_data):
+    """
+    Helper function for storing animation parameters.
+    """
+    
     name = blender_node_name
     
     prefix = ""
@@ -444,6 +448,10 @@ def generate_animations(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level animations, channels and samplers entry.
+    """
+
     animations = []
 
     channels = []
@@ -619,6 +627,10 @@ def generate_cameras(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level cameras entry.
+    """
+
     cameras = []
 
     #
@@ -695,6 +707,11 @@ def generate_lights(operator,
                     context,
                     export_settings,
                     glTF):
+    """
+    Generates the top level lights entry.
+    Note: This is currently an experimental feature.
+    """
+
     lights = []
 
     #
@@ -796,6 +813,10 @@ def generate_meshes(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level meshes entry.
+    """
+
     meshes = []
 
     #
@@ -1177,6 +1198,9 @@ def generate_node_parameter(operator,
                   matrix,
                   node,
                   node_type):
+    """
+    Helper function for storing node parameters.
+    """
         
     translation, rotation, scale = decompose_transition(matrix, node_type, export_settings)
     
@@ -1203,6 +1227,10 @@ def generate_node_instance(operator,
                   nodes, 
                   blender_object,
                   force_visible):
+    """
+    Helper function for storing node instances.
+    """
+
     correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(-90.0)))
     
     #
@@ -1287,6 +1315,9 @@ def generate_nodes(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level nodes entry.
+    """
     
     nodes = []
     
@@ -1582,6 +1613,10 @@ def generate_images(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level images entry.
+    """
+
     filtered_images = export_settings['filtered_images']
                   
     images = []
@@ -1654,6 +1689,10 @@ def generate_textures(operator,
                        context,
                        export_settings,
                        glTF):
+    """
+    Generates the top level textures entry.
+    """
+
     filtered_textures = export_settings['filtered_textures']
                   
     textures = []
@@ -1714,6 +1753,10 @@ def generate_materials(operator,
                        context,
                        export_settings,
                        glTF):
+    """
+    Generates the top level materials entry.
+    """
+
     filtered_materials = export_settings['filtered_materials']
                   
     materials = []
@@ -2129,6 +2172,10 @@ def generate_scenes(operator,
                     context,
                     export_settings,
                     glTF):
+    """
+    Generates the top level scenes entry.
+    """
+
     scenes = []
 
     #
@@ -2193,6 +2240,10 @@ def generate_scene(operator,
                     context,
                     export_settings,
                     glTF):
+    """
+    Generates the top level scene entry.
+    """
+
     index = get_scene_index(glTF, bpy.context.screen.scene.name)
     
     #
@@ -2206,6 +2257,10 @@ def generate_glTF(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the main glTF structure.
+    """
+
     generate_asset(operator, context, export_settings, glTF)
     
     #
