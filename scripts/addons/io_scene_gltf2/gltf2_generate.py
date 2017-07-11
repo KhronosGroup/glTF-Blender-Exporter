@@ -653,11 +653,11 @@ def generate_cameras(operator,
             
             #
             
-            aspectRatio = 1.0
-            if blender_camera.angle_y != 0.0:
-                aspectRatio = blender_camera.angle_x / blender_camera.angle_y 
+            height = bpy.context.scene.render.pixel_aspect_y * bpy.context.scene.render.resolution_y
+            
+            if height != 0.0:
+                perspective['aspectRatio'] = bpy.context.scene.render.pixel_aspect_x * bpy.context.scene.render.resolution_x / height   
 
-            perspective['aspectRatio'] = aspectRatio 
             perspective['yfov'] = blender_camera.angle_y
 
             perspective['znear'] = blender_camera.clip_start
