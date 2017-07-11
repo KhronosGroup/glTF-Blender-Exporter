@@ -772,8 +772,8 @@ def generate_lights(operator,
     #
 
     if len (lights) > 0:
-        create_extensionUsed(operator, context, export_settings, glTF, 'KHR_lights')
-        create_extensionRequired(operator, context, export_settings, glTF, 'KHR_lights')
+        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights')
+        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights')
 
         if glTF.get('extensions') is None:
             glTF['extensions'] = {}
@@ -2106,16 +2106,16 @@ def generate_materials(operator,
 
     if len (materials) > 0:
         if KHR_materials_pbrSpecularGlossiness_Used:
-            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
-            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
+            create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
+            create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
             
         if KHR_materials_common_Used:
-            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
-            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
+            create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
+            create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
             
         if KHR_materials_displacement_Used:
-            create_extensionUsed(operator, context, export_settings, glTF, 'KHR_materials_displacement')
-            create_extensionRequired(operator, context, export_settings, glTF, 'KHR_materials_displacement')
+            create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_displacement')
+            create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_displacement')
 
         glTF['materials'] = materials
 

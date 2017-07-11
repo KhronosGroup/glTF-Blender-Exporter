@@ -29,10 +29,13 @@ from .gltf2_debug import *
 # Functions
 #
 
-def create_extensionUsed(operator,
+def create_extensionsUsed(operator,
                          context,
                          export_settings,
                          glTF, extension):
+    """
+    Creates and assigns the 'extensionsUsed' property.
+    """
 
     if glTF.get('extensionsUsed') is None:
         glTF['extensionsUsed'] = []
@@ -43,10 +46,13 @@ def create_extensionUsed(operator,
         extensionsUsed.append(extension)
 
 
-def create_extensionRequired(operator,
+def create_extensionsRequired(operator,
                              context,
                              export_settings,
                              glTF, extension):
+    """
+    Creates and assigns the 'extensionsRequired' property.
+    """
 
     if glTF.get('extensionsRequired') is None:
         glTF['extensionsRequired'] = []
@@ -61,6 +67,9 @@ def create_sampler(operator,
                   context,
                   export_settings,
                   glTF, magFilter, wrap):
+    """
+    Creates and appends a sampler with the given parameters.
+    """
 
     if glTF.get('samplers') is None:
         glTF['samplers'] = []
@@ -112,6 +121,9 @@ def create_bufferView(operator,
                   export_settings,
                   glTF,
                   data_buffer, target, alignment):
+    """
+    Creates and appends a bufferView with the given parameters.
+    """
 
     if data_buffer is None:
         return -1
@@ -175,6 +187,9 @@ def create_accessor(operator,
                   export_settings,
                   glTF,
                   data, componentType, count, type, target):
+    """
+    Creates and appends an accessor with the given parameters.
+    """
     
     if data is None:
         print_console('ERROR', 'No data')
@@ -262,6 +277,9 @@ def create_accessor(operator,
 
 
 def create_png_data(blender_image):
+    """
+    Creates a PNG byte array from a given Blender image.
+    """
     if blender_image is None:
         return None
     
@@ -290,6 +308,9 @@ def create_png_data(blender_image):
 
 
 def create_custom_property(blender_element):
+    """
+    Filters and creates a custom property, which is stored in the glTF extra field.
+    """
     if not blender_element:
         return None
     
@@ -299,8 +320,6 @@ def create_custom_property(blender_element):
     
     count = 0
     for custom_property in blender_element.keys():
-        print_console('Test', custom_property)
-        
         if custom_property in black_list:
             continue
         
