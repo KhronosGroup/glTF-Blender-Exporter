@@ -33,14 +33,23 @@ g_profile_delta = 0.0
 
 def print_console(level,
                   output):
+    """
+    Prints to Blender console with a given header and output.
+    """
     print(level + ': ' + output)
 
 
 def print_newline():
+    """
+    Prints a new line to Blender console.
+    """
     print()
 
 
 def print_timestamp(output = None):
+    """
+    Print a timestamp to Blender console.
+    """
     final_output = str(time.time())
     
     if output is not None:
@@ -50,6 +59,9 @@ def print_timestamp(output = None):
     
 
 def profile_start():
+    """
+    Start profiling by storing the current time.
+    """
     global g_profile_start
     global g_profile_started
     
@@ -63,6 +75,9 @@ def profile_start():
 
 
 def profile_end(label = None):
+    """
+    Stops profiling and printing out the delta time since profile start.
+    """
     global g_profile_end
     global g_profile_delta
     global g_profile_started
