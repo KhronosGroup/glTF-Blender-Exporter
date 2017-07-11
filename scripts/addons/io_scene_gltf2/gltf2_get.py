@@ -32,23 +32,31 @@ from bgl import GL_MAP1_COLOR_4
 
 
 def get_used_materials():
+    """
+    Gathers and returns all unfiltered, valid Blender materials.
+    """
+
     materials = []
 
-    for currentMaterial in bpy.data.materials:
-        if currentMaterial.node_tree and currentMaterial.use_nodes:
-            for currentNode in currentMaterial.node_tree.nodes:
+    for blender_material in bpy.data.materials:
+        if blender_material.node_tree and blender_material.use_nodes:
+            for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
                     if currentNode.node_tree.name == 'glTF Metallic Roughness':
-                        materials.append(currentMaterial)
+                        materials.append(blender_material)
                     elif currentNode.node_tree.name == 'glTF Specular Glossiness':
-                        materials.append(currentMaterial)
+                        materials.append(blender_material)
         else:
-            materials.append(currentMaterial)
+            materials.append(blender_material)
 
     return materials
 
 
 def get_material_requires_texcoords(glTF, index):
+    """
+    Query function, if a material "needs" texture cooridnates. This is the case, if a texture is present and used.
+    """
+
     if glTF.get('materials') is None:
         return False
     
@@ -104,55 +112,18 @@ def get_material_requires_texcoords(glTF, index):
 
 
 def get_material_requires_normals(glTF, index):
-    if glTF.get('materials') is None:
-        return False
-    
-    materials = glTF['materials']
-    
-    if index < 0 or index >= len(materials):
-        return False
-
-    material = materials[index]
-    
-    # General
-    
-    if material.get('normalTexture') is not None:
-        return True
-    
-    # Metal roughness
-    
-    if material.get('baseColorTexture') is not None:
-        return True
-    
-    if material.get('metallicRoughnessTexture') is not None:
-        return True
-    
-    # Specular glossiness
-    
-    if material.get('diffuseTexture') is not None:
-        return True
-
-    if material.get('specularGlossinessTexture') is not None:
-        return True
-    
-    # Common Material
-
-    if material.get('diffuseTexture') is not None:
-        return True
-
-    if material.get('specularTexture') is not None:
-        return True
-
-    if material.get('shininessTexture') is not None:
-        return True
-    
-    if material.get('ambientTexture') is not None:
-        return True
-
-    return False
+    """
+    Query function, if a material "needs" normals. This is the case, if a texture is present and used.
+    At point of writing, same function as for texture coordinates.
+    """
+    return get_material_requires_texcoords(glTF, index)
 
 
 def get_image_index(export_settings, uri):
+    """
+    Return the image index in the glTF array.
+    """
+
     if export_settings['gltf_uri'] is None:
         return -1
 
@@ -163,6 +134,10 @@ def get_image_index(export_settings, uri):
 
 
 def get_texture_index_by_filepath(export_settings, glTF, filepath):
+    """
+    Return the texture index in the glTF array by a given filepath.
+    """
+
     if filepath is None:
         return -1
     
@@ -188,6 +163,10 @@ def get_texture_index_by_filepath(export_settings, glTF, filepath):
 
 
 def get_texture_index(export_settings, glTF, name, shader_node_group):
+    """
+    Return the texture index in the glTF array.
+    """
+
     if shader_node_group is None:
         return -1
     
@@ -214,6 +193,10 @@ def get_texture_index(export_settings, glTF, name, shader_node_group):
 
 
 def get_texcoord_index(glTF, name, shader_node_group):
+    """
+    Return the texture coordinate index, if assigend and used.
+    """
+
     if shader_node_group is None:
         return 0
     
@@ -258,6 +241,10 @@ def get_texcoord_index(glTF, name, shader_node_group):
 
 
 def get_material_index(glTF, name):
+    """
+    Return the material index in the glTF array.
+    """
+
     if name is None:
         return -1
 
@@ -275,6 +262,10 @@ def get_material_index(glTF, name):
 
 
 def get_mesh_index(glTF, name):
+    """
+    Return the mesh index in the glTF array.
+    """
+
     if glTF.get('meshes') is None:
         return -1
 
@@ -289,6 +280,10 @@ def get_mesh_index(glTF, name):
 
 
 def get_skin_index(glTF, name, index_offset):
+    """
+    Return the skin index in the glTF array.
+    """
+
     if glTF.get('skins') is None:
         return -1
     
@@ -305,6 +300,10 @@ def get_skin_index(glTF, name, index_offset):
 
 
 def get_camera_index(glTF, name):
+    """
+    Return the camera index in the glTF array.
+    """
+
     if glTF.get('cameras') is None:
         return -1
 
@@ -319,6 +318,10 @@ def get_camera_index(glTF, name):
 
 
 def get_light_index(glTF, name):
+    """
+    Return the light index in the glTF array.
+    """
+
     if glTF.get('extensions') is None:
         return -1
     
@@ -345,6 +348,10 @@ def get_light_index(glTF, name):
 
 
 def get_node_index(glTF, name):
+    """
+    Return the node index in the glTF array.
+    """
+
     if glTF.get('nodes') is None:
         return -1
 
@@ -359,6 +366,10 @@ def get_node_index(glTF, name):
 
 
 def get_scene_index(glTF, name):
+    """
+    Return the scene index in the glTF array.
+    """
+
     if glTF.get('scenes') is None:
         return -1
 
@@ -373,10 +384,18 @@ def get_scene_index(glTF, name):
 
 
 def get_uri(filepath):
+    """
+    Return the final PNG uri depending on a filepath.
+    """
+
     return os.path.splitext(bpy.path.basename(filepath))[0] + '.png'
 
 
 def get_node(data_path):
+    """
+    Return Blender node on a given Blender data path.
+    """
+
     if data_path is None:
         return None
 
@@ -394,6 +413,10 @@ def get_node(data_path):
 
 
 def get_data_path(data_path):
+    """
+    Return Blender data path.
+    """
+
     index = data_path.rfind('.')
     
     if index == -1:
@@ -403,6 +426,10 @@ def get_data_path(data_path):
 
 
 def get_scalar(default_value, init_value = 0.0):
+    """
+    Return scalar with a given default/fallback value.
+    """
+
     return_value = init_value
 
     if default_value is None:
@@ -414,6 +441,10 @@ def get_scalar(default_value, init_value = 0.0):
 
 
 def get_vec2(default_value, init_value = [0.0, 0.0]):
+    """
+    Return vec2 with a given default/fallback value.
+    """
+
     return_value = init_value
 
     if default_value is None or len(default_value) < 2:
@@ -431,6 +462,10 @@ def get_vec2(default_value, init_value = [0.0, 0.0]):
 
 
 def get_vec3(default_value, init_value = [0.0, 0.0, 0.0]):
+    """
+    Return vec3 with a given default/fallback value.
+    """
+
     return_value = init_value
 
     if default_value is None or len(default_value) < 3:
@@ -448,6 +483,10 @@ def get_vec3(default_value, init_value = [0.0, 0.0, 0.0]):
 
 
 def get_vec4(default_value, init_value = [0.0, 0.0, 0.0, 1.0]):
+    """
+    Return vec4 with a given default/fallback value.
+    """
+
     return_value = init_value
 
     if default_value is None or len(default_value) < 4:
@@ -465,6 +504,10 @@ def get_vec4(default_value, init_value = [0.0, 0.0, 0.0, 1.0]):
 
 
 def get_index(list, name):
+    """
+    Return index of a glTF element by a given name.
+    """
+
     if list is None or name is None:
         return -1
     
