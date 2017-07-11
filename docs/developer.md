@@ -1,6 +1,11 @@
 Developer Documentation
 -----------------------
 
+### Preface
+
+In general, the main documentation for developers can be found inside the source files and its functions.
+The goal of this document is to provide an understanding for the concept of the exporter.  
+
 ### Implementation Details
 
 #### Coordinate system mapping
