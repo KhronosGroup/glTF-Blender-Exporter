@@ -70,7 +70,7 @@ The following section describes several tools, how they can optimal be used with
 
 #### Substance Painter
 [Substance Painter](https://www.allegorithmic.com/products/substance-painter) is a 3D painting software allowing you to texture, render and share your work.  
-At point of writing, the exporter of Substance Painter does not have a preset for glTF 2.0. However, this can be easily configured:  
+At point of writing, the exporter of Substance Painter does not have a preset for glTF 2.0 Metallic Roughness export. However, this can be easily configured:  
 
 ![glTF SubstancePainter](glTF_SubstancePainter.png)
 
