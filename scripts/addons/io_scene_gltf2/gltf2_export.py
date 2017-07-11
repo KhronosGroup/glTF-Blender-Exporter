@@ -33,6 +33,9 @@ from .gltf2_generate import *
 #
 
 def prepare(export_settings):
+    """
+    Stores current state of Blender and prepares for export, depending on the current export settings.
+    """
     if bpy.context.active_object is not None and bpy.context.active_object.mode != 'OBJECT':
         bpy.ops.object.mode_set(mode='OBJECT')
     
@@ -49,6 +52,9 @@ def prepare(export_settings):
 
     
 def finish(export_settings):
+    """
+    Brings back Blender into its original state before export and cleans up temporary objects.
+    """
     if export_settings['temporary_meshes'] is not None:
         for temporary_mesh in export_settings['temporary_meshes']:
             bpy.data.meshes.remove(temporary_mesh)
@@ -59,6 +65,9 @@ def finish(export_settings):
 def save(operator,
          context,
          export_settings):
+    """
+    Starts the glTF 2.0 export and saves to content either to a .gltf or .glb file.
+    """
 
     print_console('INFO', 'Starting glTF 2.0 export')
     
