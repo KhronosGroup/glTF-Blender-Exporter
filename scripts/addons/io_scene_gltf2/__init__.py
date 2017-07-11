@@ -72,6 +72,12 @@ bl_info = {
 #
 
 class ExportGLTF2_Base():
+    export_copyright = StringProperty(
+            name='Copyright',
+            description='',
+            default=''
+    )
+
     export_embed_buffers = BoolProperty(
             name='Embed buffers',
             description='',
@@ -229,6 +235,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_filedirectory'] = os.path.dirname(export_settings['gltf_filepath']) + '/'
 
         export_settings['gltf_format'] = self.export_format
+        export_settings['gltf_copyright'] = self.export_copyright
         export_settings['gltf_embed_buffers'] = self.export_embed_buffers
         export_settings['gltf_embed_images'] = self.export_embed_images
         export_settings['gltf_strip'] = self.export_strip
@@ -277,6 +284,7 @@ class ExportGLTF2_Base():
 
         col = layout.box().column()
         col.label('Embedding:', icon='PACKAGE')
+        col.prop(self, 'export_copyright')
         if self.export_format == 'ASCII':
             col.prop(self, 'export_embed_buffers')
             col.prop(self, 'export_embed_images')

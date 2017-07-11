@@ -39,6 +39,10 @@ def generate_asset(operator,
                   context,
                   export_settings,
                   glTF):
+    """
+    Generates the top level asset entry.
+    """
+
     asset = {}
     
     #
@@ -52,7 +56,8 @@ def generate_asset(operator,
     
     #
     
-    # 'copyright'
+    if export_settings['gltf_copyright'] != "":
+        asset['copyright'] = export_settings['gltf_copyright']
 
     #
     #
