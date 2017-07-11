@@ -658,7 +658,7 @@ def generate_cameras(operator,
             
             perspective['aspectRatio'] = aspectRatio   
 
-            perspective['yfov'] = blender_camera.angle / aspectRatio
+            perspective['yfov'] = 2.0 * math.atan(math.tan(blender_camera.angle * 0.5) / aspectRatio);
 
             perspective['znear'] = blender_camera.clip_start
             
