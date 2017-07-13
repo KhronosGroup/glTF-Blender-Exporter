@@ -492,20 +492,20 @@ def generate_animations(operator,
                 start = None
                 end = None
                 
-                for blender_action in bpy.data.actions:
-                    for blender_fcurve in blender_action.fcurves:
-                        if blender_fcurve is None:
+                for current_blender_action in bpy.data.actions:
+                    for current_blender_fcurve in current_blender_action.fcurves:
+                        if current_blender_fcurve is None:
                             continue
                         
                         if start == None:
-                            start = blender_fcurve.range()[0]
+                            start = current_blender_fcurve.range()[0]
                         else:
-                            start = min(start, blender_fcurve.range()[0])
+                            start = min(start, current_blender_fcurve.range()[0])
                             
                         if end == None:
-                            end = blender_fcurve.range()[1]
+                            end = current_blender_fcurve.range()[1]
                         else:
-                            end = max(end, blender_fcurve.range()[1])
+                            end = max(end, current_blender_fcurve.range()[1])
                             
                 #
                 
