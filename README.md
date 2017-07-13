@@ -15,33 +15,31 @@ Because of this, the exporter has to be added manually, which is described in th
 
 Feature matrix
 --------------
-Following table shows the status of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).  
-The last three columns describe in combination the maturity of the exported feature:  
-As soon as a feature is implemented, documented and tested, the exported feature data can be considered as production quality.
+Following table shows the belonging of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).
 
-|Feature export     |Core |Extension|Experimental | |Implemented|Documented|Tested|
-|-------------------|:---:|:-------:|:-----------:|-|:---------:|:--------:|:----:|
-|Embed images       |  X  |         |             | |     X     |          |      |
-|Embed buffers      |  X  |         |             | |     X     |          |      |
-|Filtered objects   |  X  |         |             | |     X     |          |      |
-|Apply modifiers    |  X  |         |             | |     X     |          |      |
-|Indices type       |  X  |         |             | |     X     |          |      |
-|Vertices           |  X  |         |             | |     X     |          |      |
-|Normals            |  X  |         |             | |     X     |          |      |
-|Tangents           |  X  |         |             | |     X     |          |      |
-|Texture Coordinates|  X  |         |             | |     X     |          |      |
-|Colors             |  X  |         |             | |     X     |          |      |
-|Cameras            |  X  |         |             | |     X     |          |      |
-|Materials PBR MR   |  X  |         |             | |     X     |          |      |
-|Animations         |  X  |         |             | |     X     |          |      |
-|Skinning           |  X  |         |             | |     X     |          |      |
-|Morph targets      |  X  |         |             | |     X     |          |      |
-|GLB                |  X  |         |             | |     X     |          |      |
-|Extras             |  X  |         |             | |     X     |          |      |
-|Materials PBR SG   |     |    X    |             | |     X     |          |      |
-|Lights             |     |         |      X      | |     X     |          |      |
-|Materials Common   |     |         |      X      | |     X     |          |      |
-|Materials Displace |     |         |      X      | |     X     |          |      |
+|Feature export     |Core |Extension|Experimental |
+|-------------------|:---:|:-------:|:-----------:|
+|Embed images       |  X  |         |             |
+|Embed buffers      |  X  |         |             |
+|Filtered objects   |  X  |         |             |
+|Apply modifiers    |  X  |         |             |
+|Indices type       |  X  |         |             |
+|Vertices           |  X  |         |             |
+|Normals            |  X  |         |             |
+|Tangents           |  X  |         |             |
+|Texture Coordinates|  X  |         |             |
+|Colors             |  X  |         |             |
+|Cameras            |  X  |         |             |
+|Materials PBR MR   |  X  |         |             |
+|Animations         |  X  |         |             |
+|Skinning           |  X  |         |             |
+|Morph targets      |  X  |         |             |
+|GLB                |  X  |         |             |
+|Extras             |  X  |         |             |
+|Materials PBR SG   |     |    X    |             |
+|Lights             |     |         |      X      |
+|Materials Common   |     |         |      X      |
+|Materials Displace |     |         |      X      |
 
 Folders
 -------

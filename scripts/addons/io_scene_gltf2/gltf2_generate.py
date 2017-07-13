@@ -654,11 +654,27 @@ def generate_cameras(operator,
             #
             
             # None of them can get 0, as Blender checks this.
-            aspectRatio = bpy.context.scene.render.pixel_aspect_x * bpy.context.scene.render.resolution_x / (bpy.context.scene.render.pixel_aspect_y * bpy.context.scene.render.resolution_y)
+            width = bpy.context.scene.render.pixel_aspect_x * bpy.context.scene.render.resolution_x
+            height = bpy.context.scene.render.pixel_aspect_y * bpy.context.scene.render.resolution_y
             
-            perspective['aspectRatio'] = aspectRatio   
+            aspectRatio = width / height
+            
+            perspective['aspectRatio'] = aspectRatio
 
-            perspective['yfov'] = 2.0 * math.atan(math.tan(blender_camera.angle * 0.5) / aspectRatio);
+            yfov = None
+            
+            if width >= height:
+                if blender_camera.sensor_fit != 'VERTICAL':                
+                    yfov = 2.0 * math.atan(math.tan(blender_camera.angle * 0.5) / aspectRatio);
+                else:
+                    yfov = blender_camera.angle                
+            else:
+                if blender_camera.sensor_fit != 'HORIZONTAL':                
+                    yfov = blender_camera.angle                
+                else:
+                    yfov = 2.0 * math.atan(math.tan(blender_camera.angle * 0.5) / aspectRatio);
+
+            perspective['yfov'] = yfov
 
             perspective['znear'] = blender_camera.clip_start
             
