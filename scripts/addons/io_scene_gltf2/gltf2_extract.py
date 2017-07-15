@@ -141,11 +141,9 @@ def extract_primitive_floor(a, indices):
     process_morph = True
     while process_morph:  
         morph_position_id = 'MORPH_POSITION_' + str(morph_index)
-        morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
         
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
-            attributes[morph_normal_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -184,10 +182,8 @@ def extract_primitive_floor(a, indices):
                 
         for morph_index in range(0, morph_max):
             morph_position_id = 'MORPH_POSITION_' + str(morph_index)
-            morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
-                attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
 
     return result_primitive
 
@@ -263,11 +259,9 @@ def extract_primitive_pack(a, indices):
     process_morph = True
     while process_morph:  
         morph_position_id = 'MORPH_POSITION_' + str(morph_index)
-        morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
         
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
-            attributes[morph_normal_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -316,10 +310,8 @@ def extract_primitive_pack(a, indices):
                 
         for morph_index in range(0, morph_max):
             morph_position_id = 'MORPH_POSITION_' + str(morph_index)
-            morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
-                attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
     
     return result_primitive     
 
@@ -403,8 +395,15 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     #
     
     morph_max = 0
+    
+    blender_shape_keys = []
+    
     if blender_mesh.shape_keys is not None:
-        morph_max = len(blender_mesh.shape_keys.key_blocks)
+        morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
+        
+        for blender_shape_key in blender_mesh.shape_keys.key_blocks:
+            if blender_shape_key != blender_shape_key.relative_key:
+                blender_shape_keys.append(blender_shape_key) 
         
     #
     
@@ -551,7 +550,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             if morph_max > 0 and export_settings['gltf_morph']:
                 for morph_index in range(0, morph_max):
-                    blender_shape_key = blender_mesh.shape_keys.key_blocks[morph_index]
+                    blender_shape_key = blender_shape_keys[morph_index]
                     
                     v_morph = convert_swizzle_location(blender_shape_key.data[vertex_index].co)
                     
@@ -559,24 +558,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     v_morph -= v
                     
                     target_positions.append(v_morph)
-                    
-                    #
-                    
-                    n_morph = None
-                    
-                    if blender_polygon.use_smooth:
-                        temp_normals = blender_shape_key.normals_vertex_get()
-                        n_morph = (temp_normals[vertex_index * 3 + 0], temp_normals[vertex_index * 3 + 1], temp_normals[vertex_index * 3 + 2])
-                    else:
-                        temp_normals = blender_shape_key.normals_polygon_get()
-                        n_morph = (temp_normals[0], temp_normals[1], temp_normals[2])
-                        
-                    n_morph = convert_swizzle_location(n_morph)                        
-
-                    # Store delta.
-                    n_morph -= n
-                        
-                    target_normals.append(n_morph)
             
             #
             #
@@ -636,15 +617,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 if export_settings['gltf_morph']:
                     for morph_index in range(0, morph_max):
                         target_position = target_positions[morph_index]
-                        target_normal = target_normals[morph_index]
                                             
                         target_position_id = 'MORPH_POSITION_' + str(morph_index)
-                        target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
                         for i in range(0, 3):
                             if attributes[target_position_id][current_new_index * 3 + i] != target_position[i]:
-                                found = False
-                                break
-                            if attributes[target_normal_id][current_new_index * 3 + i] != target_normal[i]:
                                 found = False
                                 break
                 
@@ -714,13 +690,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     
                     attributes[target_position_id].extend(target_positions[morph_index])
     
-                    target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
-                    
-                    if attributes.get(target_normal_id) is None:
-                        attributes[target_normal_id] = []
-                    
-                    attributes[target_normal_id].extend(target_normals[morph_index])
-    
     #
     # Add primitive plus split them if needed.
     # 
@@ -760,7 +729,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         if export_settings['gltf_morph']:
             for morph_index in range(0, morph_max):
                 target_positions.append(primitive['attributes']['MORPH_POSITION_' + str(morph_index)])
-                target_normals.append(primitive['attributes']['MORPH_NORMAL_' + str(morph_index)])
             
         #
         
@@ -825,10 +793,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 morph_index = 0
                 for target_position in target_positions:
                     pending_attributes['MORPH_POSITION_' + str(morph_index)] = target_position
-                    morph_index += 1 
-                morph_index = 0
-                for target_normal in target_normals:
-                    pending_attributes['MORPH_NORMAL_' + str(morph_index)] = target_normal
                     morph_index += 1 
             
             pending_indices = pending_primitive['indices']

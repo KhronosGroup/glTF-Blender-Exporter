@@ -408,17 +408,14 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
 
     keyframe_index = 0
     for time in times:
-        value_data = [0.0]
+        value_data = []
         
-        channel_index = 0
         for blender_fcurve in value_parameter:
             
             if blender_fcurve is not None:
                 value = blender_fcurve.evaluate(keys[keyframe_index]) 
                 
-                value_data[channel_index] = value
-            
-            channel_index += 1 
+                value_data.append(value)
         
         result[time] = value_data
         

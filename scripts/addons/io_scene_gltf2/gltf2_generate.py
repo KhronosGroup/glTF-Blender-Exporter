@@ -100,7 +100,7 @@ def generate_animations_parameter(operator,
     rotation_euler = [None, None, None]
     rotation_quaternion = [None, None, None, None]
     scale = [None, None, None]
-    value = [None]
+    value = []
     
     data = {
         'location' : location,
@@ -127,11 +127,13 @@ def generate_animations_parameter(operator,
         data_path = get_data_path(blender_fcurve.data_path)
         
         if data_path not in ['location', 'rotation_axis_angle', 'rotation_euler', 'rotation_quaternion', 'scale', 'value']:
-            print_console('Test', 'Skipping ' + data_path)
             continue
 
-        data[data_path][blender_fcurve.array_index] = blender_fcurve
-        
+        if data_path != 'value':
+            data[data_path][blender_fcurve.array_index] = blender_fcurve
+        else:
+            data[data_path].append(blender_fcurve)
+    
     #
 
     if location.count(None) < 3:
@@ -316,7 +318,7 @@ def generate_animations_parameter(operator,
     #
     #  
 
-    if value.count(None) < 1 and is_morph_data:
+    if len(value) > 0 and is_morph_data:
         sampler_name = prefix + action.name + "_weights"
     
         if get_index(samplers, sampler_name) == -1:
@@ -325,7 +327,7 @@ def generate_animations_parameter(operator,
             
             #
             
-            interpolation = animate_get_interpolation(scale)
+            interpolation = animate_get_interpolation(value)
 
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
@@ -1105,51 +1107,38 @@ def generate_meshes(operator,
                 if export_settings['gltf_morph']:
                     if blender_mesh.shape_keys is not None:
                         targets = []
-                        morph_max = len(blender_mesh.shape_keys.key_blocks)
-                        for morph_index in range(0, morph_max):
-                            target_position_id = 'MORPH_POSITION_' + str(morph_index)
-                            target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
-                            
-                            if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None:
-                                internal_target_position = internal_attributes[target_position_id]
-                    
-                                componentType = "FLOAT"
-                    
-                                count = len(internal_target_position) // 3
-                                
-                                type = "VEC3"
-                                
-                                target_position = create_accessor(operator, context, export_settings, glTF, internal_target_position, componentType, count, type, "ARRAY_BUFFER")
-                                
-                                if target_position < 0:
-                                    print_console('ERROR', 'Could not create accessor for ' + target_position_id)
-                                    continue
-                                
-                                #
 
-                                internal_target_normal = internal_attributes[target_normal_id]
-                    
-                                componentType = "FLOAT"
-                    
-                                count = len(internal_target_normal) // 3
+                        morph_index = 0
+                        for blender_shape_key in blender_mesh.shape_keys.key_blocks:
+                            if blender_shape_key != blender_shape_key.relative_key:
+                        
+                                target_position_id = 'MORPH_POSITION_' + str(morph_index)
                                 
-                                type = "VEC3"
-                                
-                                target_normal = create_accessor(operator, context, export_settings, glTF, internal_target_normal, componentType, count, type, "ARRAY_BUFFER")
-                                
-                                if target_normal < 0:
-                                    print_console('ERROR', 'Could not create accessor for ' + target_normal_id)
-                                    continue
-                                
-                                #
-                                #
-                                
-                                target = {
-                                    'POSITION' : target_position,
-                                    'NORMAL' : target_normal
-                                }
-                                
-                                targets.append(target)
+                                if internal_attributes.get(target_position_id) is not None:
+                                    internal_target_position = internal_attributes[target_position_id]
+                        
+                                    componentType = "FLOAT"
+                        
+                                    count = len(internal_target_position) // 3
+                                    
+                                    type = "VEC3"
+                                    
+                                    target_position = create_accessor(operator, context, export_settings, glTF, internal_target_position, componentType, count, type, "")
+                                    
+                                    if target_position < 0:
+                                        print_console('ERROR', 'Could not create accessor for ' + target_position_id)
+                                        continue
+                                    
+                                    #
+                                    #
+                                    
+                                    target = {
+                                        'POSITION' : target_position,
+                                    }
+                                    
+                                    targets.append(target)
+                                    
+                                    morph_index += 1
             
                         if len(targets) > 0:
                             primitive['targets'] = targets
@@ -1168,13 +1157,13 @@ def generate_meshes(operator,
             
         if export_settings['gltf_morph']:
             if blender_mesh.shape_keys is not None:
-                morph_max = len(blender_mesh.shape_keys.key_blocks)
+                morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
                 if morph_max > 0:
                     weights = []
                     
-                    for morph_index in range(0, morph_max):
-                        blender_shape_key = blender_mesh.shape_keys.key_blocks[morph_index]
-                        weights.append(blender_shape_key.value)
+                    for blender_shape_key in blender_mesh.shape_keys.key_blocks:
+                        if blender_shape_key != blender_shape_key.relative_key:
+                            weights.append(blender_shape_key.value)
                     
                     mesh['weights'] = weights
 
