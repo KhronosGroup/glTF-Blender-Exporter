@@ -1113,8 +1113,9 @@ def generate_meshes(operator,
                             if blender_shape_key != blender_shape_key.relative_key:
                         
                                 target_position_id = 'MORPH_POSITION_' + str(morph_index)
+                                target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
                                 
-                                if internal_attributes.get(target_position_id) is not None:
+                                if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None:
                                     internal_target_position = internal_attributes[target_position_id]
                         
                                     componentType = "FLOAT"
@@ -1130,10 +1131,27 @@ def generate_meshes(operator,
                                         continue
                                     
                                     #
+    
+                                    internal_target_normal = internal_attributes[target_normal_id]
+                        
+                                    componentType = "FLOAT"
+                        
+                                    count = len(internal_target_normal) // 3
+                                    
+                                    type = "VEC3"
+                                    
+                                    target_normal = create_accessor(operator, context, export_settings, glTF, internal_target_normal, componentType, count, type, "")
+                                    
+                                    if target_normal < 0:
+                                        print_console('ERROR', 'Could not create accessor for ' + target_normal_id)
+                                        continue
+                                    
+                                    #
                                     #
                                     
                                     target = {
                                         'POSITION' : target_position,
+                                        'NORMAL' : target_normal
                                     }
                                     
                                     targets.append(target)
