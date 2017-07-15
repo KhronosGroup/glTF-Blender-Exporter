@@ -24,8 +24,6 @@ if 'bpy' in locals():
     import imp
     if 'gltf2_animate' in locals():
         imp.reload(gltf2_animate)
-    if 'gltf2_calculate' in locals():
-        imp.reload(gltf2_calculate)
     if 'gltf2_create' in locals():
         imp.reload(gltf2_create)
     if 'gltf2_debug' in locals():

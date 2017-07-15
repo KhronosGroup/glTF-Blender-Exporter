@@ -38,6 +38,13 @@ def convert_swizzle_location(loc):
     return mathutils.Vector((loc[0], loc[2], -loc[1]))
 
 
+def convert_swizzle_tangent(tan):
+    """
+    Converts a tangent from Blender coordinate system to glTF coordinate system.
+    """
+    return mathutils.Vector((tan[0], tan[2], -tan[1], 1.0))
+
+
 def convert_swizzle_rotation(rot):
     """
     Converts a quaternion rotation from Blender coordinate system to glTF coordinate system.
@@ -77,7 +84,8 @@ def extract_primitive_floor(a, indices):
 
     attributes = {
         'POSITION' : [],
-        'NORMAL' : []
+        'NORMAL' : [],
+        'TANGENT' : []
     }
     
     result_primitive = {
@@ -142,10 +150,12 @@ def extract_primitive_floor(a, indices):
     while process_morph:  
         morph_position_id = 'MORPH_POSITION_' + str(morph_index)
         morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+        morph_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
         
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
             attributes[morph_normal_id] = []
+            attributes[morph_tangent_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -164,6 +174,9 @@ def extract_primitive_floor(a, indices):
         for vi in range(0, 3):
             attributes['POSITION'].append(source_attributes['POSITION'][old_index * 3 + vi])     
             attributes['NORMAL'].append(source_attributes['NORMAL'][old_index * 3 + vi])
+
+        for vi in range(0, 4):
+            attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
             
         for texcoord_index in range(0, texcoord_max):
             texcoord_id = 'TEXCOORD_' + str(texcoord_index)
@@ -185,9 +198,12 @@ def extract_primitive_floor(a, indices):
         for morph_index in range(0, morph_max):
             morph_position_id = 'MORPH_POSITION_' + str(morph_index)
             morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+            morph_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
                 attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
+            for vi in range(0, 4):
+                attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
 
     return result_primitive
 
@@ -199,7 +215,8 @@ def extract_primitive_pack(a, indices):
 
     attributes = {
         'POSITION' : [],
-        'NORMAL' : []
+        'NORMAL' : [],
+        'TANGENT' : []
     }
     
     result_primitive = {
@@ -264,10 +281,12 @@ def extract_primitive_pack(a, indices):
     while process_morph:  
         morph_position_id = 'MORPH_POSITION_' + str(morph_index)
         morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+        morph_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
         
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
             attributes[morph_normal_id] = []
+            attributes[morph_tangent_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -296,6 +315,9 @@ def extract_primitive_pack(a, indices):
         for vi in range(0, 3):
             attributes['POSITION'].append(source_attributes['POSITION'][old_index * 3 + vi])     
             attributes['NORMAL'].append(source_attributes['NORMAL'][old_index * 3 + vi])
+
+        for vi in range(0, 4):
+            attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
             
         for texcoord_index in range(0, texcoord_max):
             texcoord_id = 'TEXCOORD_' + str(texcoord_index)
@@ -317,9 +339,12 @@ def extract_primitive_pack(a, indices):
         for morph_index in range(0, morph_max):
             morph_position_id = 'MORPH_POSITION_' + str(morph_index)
             morph_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+            morph_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
                 attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
+            for vi in range(0, 4):
+                attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
     
     return result_primitive     
 
@@ -333,12 +358,15 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
 
     print_console('INFO', 'Extracting primitive')
     
+    blender_mesh.calc_tangents()
+    
     #
     # Gathering position, normal and texcoords.
     #
     attributes = {
         'POSITION' : [],
-        'NORMAL' : []
+        'NORMAL' : [],
+        'TANGENT' : []
     }
         
     #
@@ -438,6 +466,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         #
         
         face_normal = blender_polygon.normal
+        face_tangent = mathutils.Vector((0.0, 0.0, 0.0))
+        for loop_index in blender_polygon.loop_indices:
+            temp_vertex_index = blender_mesh.loops[loop_index].vertex_index
+            temp_vertex = blender_mesh.loops[temp_vertex_index]
+            face_tangent += temp_vertex.tangent
+            
+        face_tangent.normalize() 
         
         #
         
@@ -475,6 +510,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             v = None
             n = None
+            t = None
             uvs = []
             colors = []
             joints = []
@@ -482,14 +518,17 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             target_positions = []
             target_normals = []
+            target_tangents = []
             
             vertex = blender_mesh.vertices[vertex_index]
             
             v = convert_swizzle_location(vertex.co)
             if blender_polygon.use_smooth:
                 n = convert_swizzle_location(vertex.normal)
+                t = convert_swizzle_tangent(blender_mesh.loops[vertex_index].tangent)
             else:
                 n = convert_swizzle_location(face_normal)
+                t = convert_swizzle_tangent(face_tangent)
                 
             if blender_mesh.uv_layers.active:
                 for textcoord_index in range(0, texcoord_max):
@@ -584,6 +623,16 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     n_morph -= n
                         
                     target_normals.append(n_morph)
+                    
+                    #
+                    
+                    rotation = n_morph.rotation_difference(n)
+
+                    t_morph = mathutils.Vector((t[0], t[1], t[2]))
+                    
+                    t_morph.rotate(rotation)
+                    
+                    target_tangents.append(t_morph)
             
             #
             #
@@ -599,6 +648,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         break
 
                     if attributes['NORMAL'][current_new_index * 3 + i] != n[i]:
+                        found = False
+                        break
+
+                for i in range(0, 4):
+                    if attributes['TANGENT'][current_new_index * 4 + i] != t[i]:
                         found = False
                         break
                 
@@ -644,14 +698,19 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     for morph_index in range(0, morph_max):
                         target_position = target_positions[morph_index]
                         target_normal = target_normals[morph_index]
+                        target_tangent = target_tangents[morph_index]
                                             
                         target_position_id = 'MORPH_POSITION_' + str(morph_index)
                         target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+                        target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
                         for i in range(0, 3):
                             if attributes[target_position_id][current_new_index * 3 + i] != target_position[i]:
                                 found = False
                                 break
                             if attributes[target_normal_id][current_new_index * 3 + i] != target_normal[i]:
+                                found = False
+                                break
+                            if attributes[target_tangent_id][current_new_index * 3 + i] != target_tangent[i]:
                                 found = False
                                 break
                 
@@ -677,6 +736,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             attributes['POSITION'].extend(v)
             attributes['NORMAL'].extend(n)
+            attributes['TANGENT'].extend(t)
                 
             if blender_mesh.uv_layers.active:
                 for textcoord_index in range(0, texcoord_max):
@@ -727,6 +787,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         attributes[target_normal_id] = []
                     
                     attributes[target_normal_id].extend(target_normals[morph_index])
+
+                    target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
+                    
+                    if attributes.get(target_tangent_id) is None:
+                        attributes[target_tangent_id] = []
+                    
+                    attributes[target_tangent_id].extend(target_tangents[morph_index])
     
     #
     # Add primitive plus split them if needed.
@@ -748,6 +815,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         position = primitive['attributes']['POSITION']
         normal = primitive['attributes']['NORMAL']
+        tangent = primitive['attributes']['TANGENT']
         texcoords = []
         for texcoord_index in range(0, texcoord_max):
             texcoords.append(primitive['attributes']['TEXCOORD_' + str(texcoord_index)])
@@ -764,10 +832,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
          
         target_positions = []
         target_normals = []
+        target_tangents = []
         if export_settings['gltf_morph']:
             for morph_index in range(0, morph_max):
                 target_positions.append(primitive['attributes']['MORPH_POSITION_' + str(morph_index)])
                 target_normals.append(primitive['attributes']['MORPH_NORMAL_' + str(morph_index)])
+                target_tangents.append(primitive['attributes']['MORPH_TANGENT_' + str(morph_index)])
             
         #
         
@@ -796,7 +866,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             # At start, all indicees are pending.
             pending_attributes = {
                 'POSITION' : [],
-                'NORMAL' : []
+                'NORMAL' : [],
+                'TANGENT' : []
             }
             
             pending_primitive = {
@@ -810,6 +881,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                             
             pending_attributes['POSITION'].extend(position)
             pending_attributes['NORMAL'].extend(normal)
+            pending_attributes['TANGENT'].extend(tangent)
             textcoord_index = 0
             for textcoord in texcoords:
                 pending_attributes['TEXCOORD_' + str(texcoord_index)] = textcoord
@@ -836,6 +908,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 morph_index = 0
                 for target_normal in target_normals:
                     pending_attributes['MORPH_NORMAL_' + str(morph_index)] = target_normal
+                    morph_index += 1 
+                morph_index = 0
+                for target_tangent in target_tangents:
+                    pending_attributes['MORPH_TANGENT_' + str(morph_index)] = target_tangent
                     morph_index += 1 
             
             pending_indices = pending_primitive['indices']
