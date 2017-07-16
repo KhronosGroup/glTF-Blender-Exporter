@@ -374,7 +374,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             blender_mesh.calc_tangents()
             use_tangents = True
         except:
-            print_console('WARNING', 'Could not calculate tangents.')
+            print_console('WARNING', 'Could not calculate tangents. Please try to triangulate the mesh first.')
     
     #
     # Gathering position, normal and texcoords.

@@ -880,7 +880,7 @@ def generate_meshes(operator,
                 if material >= 0:
                     primitive['material'] = material
                 else:
-                    print_console('WARNING', 'Material ' + internal_primitive['material'] + ' not found.')
+                    print_console('WARNING', 'Material ' + internal_primitive['material'] + ' not found. Please assign glTF 2.0 material or enable Blinn-Phong material in export.')
                 
             #
             #
