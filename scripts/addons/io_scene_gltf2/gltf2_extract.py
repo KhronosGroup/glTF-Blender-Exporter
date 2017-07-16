@@ -77,16 +77,18 @@ def decompose_transition(matrix, context, export_settings):
     return translation, rotation, scale
 
 
-def extract_primitive_floor(a, indices):
+def extract_primitive_floor(a, indices, use_tangents):
     """
     Shift indices, that the first one starts with 0. It is assumed, that the indices are packed.
     """
 
     attributes = {
         'POSITION' : [],
-        'NORMAL' : [],
-        'TANGENT' : []
+        'NORMAL' : []
     }
+    
+    if use_tangents:
+        attributes['TANGENT'] = []
     
     result_primitive = {
         'material' : a['material'],
@@ -155,7 +157,8 @@ def extract_primitive_floor(a, indices):
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
             attributes[morph_normal_id] = []
-            attributes[morph_tangent_id] = []
+            if use_tangents:
+                attributes[morph_tangent_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -175,8 +178,9 @@ def extract_primitive_floor(a, indices):
             attributes['POSITION'].append(source_attributes['POSITION'][old_index * 3 + vi])     
             attributes['NORMAL'].append(source_attributes['NORMAL'][old_index * 3 + vi])
 
-        for vi in range(0, 4):
-            attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
+        if use_tangents:
+            for vi in range(0, 4):
+                attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
             
         for texcoord_index in range(0, texcoord_max):
             texcoord_id = 'TEXCOORD_' + str(texcoord_index)
@@ -202,22 +206,25 @@ def extract_primitive_floor(a, indices):
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
                 attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
-            for vi in range(0, 4):
-                attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
+            if use_tangents:
+                for vi in range(0, 4):
+                    attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
 
     return result_primitive
 
 
-def extract_primitive_pack(a, indices):
+def extract_primitive_pack(a, indices, use_tangents):
     """
     Packs indices, that the first one starts with 0. Current indices can have gaps.
     """
 
     attributes = {
         'POSITION' : [],
-        'NORMAL' : [],
-        'TANGENT' : []
+        'NORMAL' : []
     }
+    
+    if use_tangents:
+        attributes['TANGENT'] = []
     
     result_primitive = {
         'material' : a['material'],
@@ -286,7 +293,8 @@ def extract_primitive_pack(a, indices):
         if source_attributes.get(morph_position_id) is not None:
             attributes[morph_position_id] = []
             attributes[morph_normal_id] = []
-            attributes[morph_tangent_id] = []
+            if use_tangents:
+                attributes[morph_tangent_id] = []
             morph_index += 1
         else:
             process_morph = False
@@ -316,8 +324,9 @@ def extract_primitive_pack(a, indices):
             attributes['POSITION'].append(source_attributes['POSITION'][old_index * 3 + vi])     
             attributes['NORMAL'].append(source_attributes['NORMAL'][old_index * 3 + vi])
 
-        for vi in range(0, 4):
-            attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
+        if use_tangents:
+            for vi in range(0, 4):
+                attributes['TANGENT'].append(source_attributes['TANGENT'][old_index * 4 + vi])
             
         for texcoord_index in range(0, texcoord_max):
             texcoord_id = 'TEXCOORD_' + str(texcoord_index)
@@ -343,8 +352,9 @@ def extract_primitive_pack(a, indices):
             for vi in range(0, 3):
                 attributes[morph_position_id].append(source_attributes[morph_position_id][old_index * 3 + vi])
                 attributes[morph_normal_id].append(source_attributes[morph_normal_id][old_index * 3 + vi])
-            for vi in range(0, 4):
-                attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
+            if use_tangents:
+                for vi in range(0, 4):
+                    attributes[morph_tangent_id].append(source_attributes[morph_tangent_id][old_index * 4 + vi])
     
     return result_primitive     
 
@@ -358,16 +368,23 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
 
     print_console('INFO', 'Extracting primitive')
     
-    blender_mesh.calc_tangents()
+    use_tangents = False
+    if blender_mesh.uv_layers.active and len(blender_mesh.uv_layers) > 0:
+        use_tangents = True
+
+        blender_mesh.calc_tangents()
     
     #
     # Gathering position, normal and texcoords.
     #
     attributes = {
         'POSITION' : [],
-        'NORMAL' : [],
-        'TANGENT' : []
+        'NORMAL' : []
     }
+    
+    if use_tangents:
+        attributes['TANGENT'] = []
+
         
     #
     # Directory of materials with its primitive.
@@ -467,12 +484,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         face_normal = blender_polygon.normal
         face_tangent = mathutils.Vector((0.0, 0.0, 0.0))
-        for loop_index in blender_polygon.loop_indices:
-            temp_vertex_index = blender_mesh.loops[loop_index].vertex_index
-            temp_vertex = blender_mesh.loops[temp_vertex_index]
-            face_tangent += temp_vertex.tangent
-            
-        face_tangent.normalize() 
+        if use_tangents:
+            for loop_index in blender_polygon.loop_indices:
+                temp_vertex_index = blender_mesh.loops[loop_index].vertex_index
+                temp_vertex = blender_mesh.loops[temp_vertex_index]
+                face_tangent += temp_vertex.tangent
+                
+            face_tangent.normalize() 
         
         #
         
@@ -525,10 +543,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             v = convert_swizzle_location(vertex.co)
             if blender_polygon.use_smooth:
                 n = convert_swizzle_location(vertex.normal)
-                t = convert_swizzle_tangent(blender_mesh.loops[vertex_index].tangent)
+                if use_tangents:
+                    t = convert_swizzle_tangent(blender_mesh.loops[vertex_index].tangent)
             else:
                 n = convert_swizzle_location(face_normal)
-                t = convert_swizzle_tangent(face_tangent)
+                if use_tangents:
+                    t = convert_swizzle_tangent(face_tangent)
                 
             if blender_mesh.uv_layers.active:
                 for textcoord_index in range(0, texcoord_max):
@@ -626,13 +646,14 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     
                     #
                     
-                    rotation = n_morph.rotation_difference(n)
-
-                    t_morph = mathutils.Vector((t[0], t[1], t[2]))
-                    
-                    t_morph.rotate(rotation)
-                    
-                    target_tangents.append(t_morph)
+                    if use_tangents:
+                        rotation = n_morph.rotation_difference(n)
+    
+                        t_morph = mathutils.Vector((t[0], t[1], t[2]))
+                        
+                        t_morph.rotate(rotation)
+                        
+                        target_tangents.append(t_morph)
             
             #
             #
@@ -651,10 +672,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         found = False
                         break
 
-                for i in range(0, 4):
-                    if attributes['TANGENT'][current_new_index * 4 + i] != t[i]:
-                        found = False
-                        break
+                if use_tangents:
+                    for i in range(0, 4):
+                        if attributes['TANGENT'][current_new_index * 4 + i] != t[i]:
+                            found = False
+                            break
                 
                 if not found:
                     continue
@@ -710,9 +732,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                             if attributes[target_normal_id][current_new_index * 3 + i] != target_normal[i]:
                                 found = False
                                 break
-                            if attributes[target_tangent_id][current_new_index * 3 + i] != target_tangent[i]:
-                                found = False
-                                break
+                            if use_tangents:
+                                if attributes[target_tangent_id][current_new_index * 3 + i] != target_tangent[i]:
+                                    found = False
+                                    break
                 
                 if found:
                     indices.append(current_new_index)
@@ -736,7 +759,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             attributes['POSITION'].extend(v)
             attributes['NORMAL'].extend(n)
-            attributes['TANGENT'].extend(t)
+            if use_tangents:
+                attributes['TANGENT'].extend(t)
                 
             if blender_mesh.uv_layers.active:
                 for textcoord_index in range(0, texcoord_max):
@@ -788,12 +812,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     
                     attributes[target_normal_id].extend(target_normals[morph_index])
 
-                    target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
+                    if use_tangents:
+                        target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
                     
-                    if attributes.get(target_tangent_id) is None:
-                        attributes[target_tangent_id] = []
-                    
-                    attributes[target_tangent_id].extend(target_tangents[morph_index])
+                        if attributes.get(target_tangent_id) is None:
+                            attributes[target_tangent_id] = []
+                        
+                        attributes[target_tangent_id].extend(target_tangents[morph_index])
     
     #
     # Add primitive plus split them if needed.
@@ -815,7 +840,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         position = primitive['attributes']['POSITION']
         normal = primitive['attributes']['NORMAL']
-        tangent = primitive['attributes']['TANGENT']
+        if use_tangents:
+            tangent = primitive['attributes']['TANGENT']
         texcoords = []
         for texcoord_index in range(0, texcoord_max):
             texcoords.append(primitive['attributes']['TEXCOORD_' + str(texcoord_index)])
@@ -837,7 +863,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             for morph_index in range(0, morph_max):
                 target_positions.append(primitive['attributes']['MORPH_POSITION_' + str(morph_index)])
                 target_normals.append(primitive['attributes']['MORPH_NORMAL_' + str(morph_index)])
-                target_tangents.append(primitive['attributes']['MORPH_TANGENT_' + str(morph_index)])
+                if use_tangents:
+                    target_tangents.append(primitive['attributes']['MORPH_TANGENT_' + str(morph_index)])
             
         #
         
@@ -866,9 +893,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             # At start, all indicees are pending.
             pending_attributes = {
                 'POSITION' : [],
-                'NORMAL' : [],
-                'TANGENT' : []
+                'NORMAL' : []
             }
+            
+            if use_tangents:
+                pending_attributes['TANGENT'] = []
             
             pending_primitive = {
                 'material' : material_name,
@@ -881,7 +910,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                             
             pending_attributes['POSITION'].extend(position)
             pending_attributes['NORMAL'].extend(normal)
-            pending_attributes['TANGENT'].extend(tangent)
+            if use_tangents:
+                pending_attributes['TANGENT'].extend(tangent)
             textcoord_index = 0
             for textcoord in texcoords:
                 pending_attributes['TEXCOORD_' + str(texcoord_index)] = textcoord
@@ -909,10 +939,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for target_normal in target_normals:
                     pending_attributes['MORPH_NORMAL_' + str(morph_index)] = target_normal
                     morph_index += 1 
-                morph_index = 0
-                for target_tangent in target_tangents:
-                    pending_attributes['MORPH_TANGENT_' + str(morph_index)] = target_tangent
-                    morph_index += 1 
+                if use_tangents:
+                    morph_index = 0
+                    for target_tangent in target_tangents:
+                        pending_attributes['MORPH_TANGENT_' + str(morph_index)] = target_tangent
+                        morph_index += 1 
             
             pending_indices = pending_primitive['indices']
             
@@ -960,7 +991,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 # Only add result_primitives, which do have indices in it.
                 for local_indices in all_local_indices:
                     if len(local_indices) > 0:
-                        current_primitive = extract_primitive_floor(pending_primitive, local_indices)
+                        current_primitive = extract_primitive_floor(pending_primitive, local_indices, use_tangents)
                         
                         result_primitives.append(current_primitive)
                         
@@ -968,7 +999,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
 
                 # Process primitive faces having indices in several ranges.            
                 if len(pending_indices) > 0:
-                    pending_primitive = extract_primitive_pack(pending_primitive, pending_indices)
+                    pending_primitive = extract_primitive_pack(pending_primitive, pending_indices, use_tangents)
                     
                     pending_attributes = pending_primitive['attributes'] 
 

@@ -966,21 +966,22 @@ def generate_meshes(operator,
             #
 
             if export_settings['gltf_tangents']:            
-                internal_tangent = internal_attributes['TANGENT']
-
-                componentType = "FLOAT"
+                if internal_attributes.get('TANGENT') is not None:
+                    internal_tangent = internal_attributes['TANGENT']
     
-                count = len(internal_tangent) // 4
-                
-                type = "VEC4"
-                
-                tangent = create_accessor(operator, context, export_settings, glTF, internal_tangent, componentType, count, type, "ARRAY_BUFFER")
-                
-                if tangent < 0:
-                    print_console('ERROR', 'Could not create accessor for tangent')
-                    continue
-                
-                attributes['TANGENT'] = tangent
+                    componentType = "FLOAT"
+        
+                    count = len(internal_tangent) // 4
+                    
+                    type = "VEC4"
+                    
+                    tangent = create_accessor(operator, context, export_settings, glTF, internal_tangent, componentType, count, type, "ARRAY_BUFFER")
+                    
+                    if tangent < 0:
+                        print_console('ERROR', 'Could not create accessor for tangent')
+                        continue
+                    
+                    attributes['TANGENT'] = tangent
             
             #
             
