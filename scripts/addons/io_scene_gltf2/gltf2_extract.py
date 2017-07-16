@@ -370,9 +370,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     
     use_tangents = False
     if blender_mesh.uv_layers.active and len(blender_mesh.uv_layers) > 0:
-        use_tangents = True
-
-        blender_mesh.calc_tangents()
+        try:
+            blender_mesh.calc_tangents()
+            use_tangents = True
+        except:
+            print_console('WARNING', 'Could not calculate tangents.')
     
     #
     # Gathering position, normal and texcoords.
