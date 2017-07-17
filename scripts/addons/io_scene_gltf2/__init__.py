@@ -159,7 +159,7 @@ class ExportGLTF2_Base():
     export_layers = BoolProperty(
             name='Export for all layers',
             description='',
-            default=False
+            default=True
     )
 
     export_extras = BoolProperty(
