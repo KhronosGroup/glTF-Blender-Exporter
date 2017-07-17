@@ -488,8 +488,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         face_tangent = mathutils.Vector((0.0, 0.0, 0.0))
         if use_tangents:
             for loop_index in blender_polygon.loop_indices:
-                temp_vertex_index = blender_mesh.loops[loop_index].vertex_index
-                temp_vertex = blender_mesh.loops[temp_vertex_index]
+                temp_vertex = blender_mesh.loops[loop_index]
                 face_tangent += temp_vertex.tangent
                 
             face_tangent.normalize() 
@@ -546,7 +545,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             if blender_polygon.use_smooth:
                 n = convert_swizzle_location(vertex.normal)
                 if use_tangents:
-                    t = convert_swizzle_tangent(blender_mesh.loops[vertex_index].tangent)
+                    t = convert_swizzle_tangent(blender_mesh.loops[loop_index].tangent)
             else:
                 n = convert_swizzle_location(face_normal)
                 if use_tangents:
