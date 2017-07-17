@@ -1,6 +1,117 @@
 User Documentation
 ------------------
 
+### Export settings
+
+The default exporter settings are configured in such a way, that the generated glTF 2.0 scene is almost identical to the Blender scene. However, in some cases, applying different settings do result in a better export result. Furthermore, the export settings allow an individual and adapted export depending on the users expectation.
+
+![glTF Export Settings](glTF_Export_Settings.png)
+
+The following sections explains the different export settings.
+
+### Embedding
+
+#### Copyright
+
+If this field is not empty, the given string is exported into the `copyright` property. This entry is not stored in the Blender scene file.
+
+#### Embed buffers
+
+By default, any binary data like vertices and animations are exported into a `.bin` file. Enabling this option, the given data is embedded inside the `.gltf` file. This option is only availabe in the `.gltf` export, as for `.glb`, the integration is done automatically.
+
+#### Embed images
+
+By default, any image is saved as a `.png` file. Enabling this option, the given images are embedded inside the `.gltf` file. This option is only availabe in the `.gltf` export, as for `.glb`, the integration is done automatically.
+
+#### Strip delimiters
+
+By default, the generated `.gltf` file contains line breaks and indentations for better human readability. If enabled, the exporter glTF 2.0 JSON file is tightly packed. This option is only availabe in the `.gltf` export, as for `.glb`, the stripping is applied automatically.
+
+### Nodes
+
+#### Export selected only
+
+By default, all objects and it assets are exported. If enabled, only the selected items are exported.
+
+#### Export for all layers
+
+In Blender, objects can be assigned to different layers. By default, all objects on all layers are exported. It is a common use case, that helper objects are placed on other layers and only the first layer contains the correct visual output. In such a case, objects could appear dublicated or in a wrong context. Enable this setting, if only the objects on the first layers should be exported.
+
+#### Export extras
+
+In Blender, for some objects, it is possible to set custom properties. If enabled, these custom properties are exported into the `extras` property of the glTF 2.0 file.
+
+### Meshes
+
+#### Apply modifiers
+
+Blender has the feature of modifiers, which most of them cannot be exported to glTF 2.0 by default. When exporting, apply these specific modifiers for a correct visual output of the scene.
+If this setting is enabled, all modifiers are applied automatically. Drawback is, that skinning and morphing is backed as well.
+
+#### Maximum indices
+
+By default, vertex indices are exported as `Unsigned short` data type and is feasible in most cases. However, for large primitives, the mesh has to be split into several primitives, which causes a longer export time. Changing this value to `Unsigned integer`, no splitting has to be performed. Tradeoff is larger size of of the binary file. If `Unsigned byte` is used, the size of the vertex indices is minimal, but the amount of splitted primitives increases.
+
+#### Force maximum indices
+
+By default, if vertex indices can be represented with a smaller type size without splitting the primitive, the minimal type size is used. If this setting is enabled, all primitives are forced to have the same type size, as defined in the maximum indices field.
+
+### Attributes
+
+#### Export texture coordinates
+
+By default, if present, texture coordinates are exported.
+
+#### Export normals
+
+By default normals are exported.
+
+#### Export tangents
+
+By default, if they can be calculated, tangents are exported.
+
+#### Export colors
+
+By default, if present, vertex colors are exported.
+
+### Objects
+
+#### Export materials
+
+By default, if glTF 2.0 materials are used, materials are exported.
+
+#### Export cameras
+
+By default cameras are exported.
+
+#### Infinite perspective camera
+
+By default, all perspective cameras are exported as finite perspective cameras. By enabling this option, all perspective cameras are exported as infinite ones.
+
+### Animation
+
+#### Export animations
+
+By default, all animations are exported.
+
+#### Export current frame
+
+If the animations are not exported, this option gets visible. By default, the current frame is exported. If not, frame `0` is exported.
+
+#### Export skinning
+
+By default, all skinning data and animations are exported. If disabled, the armature position is exported.
+
+#### Bake skinning constraints
+
+If export skinning is enabled, this option is visible. If inverse kinematics are used, this option has to be enabled for a correct glTF 2.0 export. Tradoff is, because the animations are baked, that the animation data export is getting larger. 
+
+#### Export morphing
+
+By default, morphing animation data is exported.
+
+---
+
 ### Materials
 
 ### PBR Materials
@@ -63,6 +174,8 @@ The common Blinn-Phong material is not part of core glTF 2.0. The material is de
 A valid glTF 2.0 file can contain no materials. To avoid an unwanted export of this material type, the option for this material has explicitly be enabled. This common material is not dependent on any node group, as the materials from `Blender Render` are used. As the Blender material has more settings and options than defined in the common Blinn-Phong material, only the following parameters are exported:
 
 TODO: List of exported textures and parameters.
+
+---
 
 ### External Tools
 
