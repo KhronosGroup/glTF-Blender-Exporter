@@ -721,7 +721,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     for morph_index in range(0, morph_max):
                         target_position = target_positions[morph_index]
                         target_normal = target_normals[morph_index]
-                        target_tangent = target_tangents[morph_index]
+                        if use_tangents:
+                            target_tangent = target_tangents[morph_index]
                                             
                         target_position_id = 'MORPH_POSITION_' + str(morph_index)
                         target_normal_id = 'MORPH_NORMAL_' + str(morph_index)

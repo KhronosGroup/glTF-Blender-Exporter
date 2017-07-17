@@ -1114,7 +1114,7 @@ def generate_meshes(operator,
                                 target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
                                 target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
                                 
-                                if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None and internal_attributes.get(target_tangent_id) is not None:
+                                if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None:
                                     internal_target_position = internal_attributes[target_position_id]
                         
                                     componentType = "FLOAT"
@@ -1156,7 +1156,7 @@ def generate_meshes(operator,
                                         target['NORMAL'] = target_normal
                                     #
                                     
-                                    if export_settings['gltf_tangents']: 
+                                    if export_settings['gltf_tangents'] and internal_attributes.get(target_tangent_id) is not None: 
 
                                         internal_target_tangent = internal_attributes[target_tangent_id]
                             
