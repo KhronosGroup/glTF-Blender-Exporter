@@ -13,6 +13,11 @@ Installation
 At point of writing, the Khronos glTF 2.0 exporter is not part of any offical, community or testing Blender add-on, which can be activated in the "User Preferences ..." Add-ons tab.  
 Because of this, the exporter has to be added manually, which is described in the [scripts](scripts/) section.
 
+Exporter usage
+--------------
+The glTF 2.0 exporter provides several export settings. At the point of writing, to export PBR materials, specific node groups have to be used.
+Details about this can be found in the [docs](docs/) section.
+
 Feature matrix
 --------------
 Following table shows the belonging of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).
