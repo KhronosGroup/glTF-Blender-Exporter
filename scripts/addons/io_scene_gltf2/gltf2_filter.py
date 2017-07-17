@@ -56,7 +56,7 @@ def filter_apply(export_settings):
 
     export_settings['filtered_objects'] = filtered_objects
     
-    #
+    # Meshes
     
     filtered_meshes = {}
     filtered_vertex_groups = {}
@@ -108,7 +108,51 @@ def filter_apply(export_settings):
             continue
             
         filtered_meshes[blender_mesh.name] = current_blender_mesh
-        filtered_vertex_groups[blender_mesh.name] = current_blender_object.vertex_groups 
+        filtered_vertex_groups[blender_mesh.name] = current_blender_object.vertex_groups
+        
+    # Curves
+    
+    for blender_curve in bpy.data.curves:
+        
+        if blender_curve.users == 0:
+            continue
+        
+        current_blender_curve = blender_curve
+
+        current_blender_mesh = None
+    
+        current_blender_object = None
+        
+        skip = True
+        
+        for blender_object in filtered_objects:
+            
+            current_blender_object = blender_object
+            
+            if current_blender_object.type != 'CURVE':
+                continue
+            
+            if current_blender_object.data == current_blender_curve:
+
+                skip = False
+                
+                current_blender_object = current_blender_object.copy()
+                
+                if not export_settings['gltf_apply']:
+                    current_blender_object.modifiers.clear()
+                
+                current_blender_mesh = current_blender_object.to_mesh(bpy.context.scene, True, 'PREVIEW')
+                temporary_meshes.append(current_blender_mesh)
+                
+                break
+        
+        if skip:
+            continue
+            
+        filtered_meshes[blender_curve.name] = current_blender_mesh
+        filtered_vertex_groups[blender_curve.name] = current_blender_object.vertex_groups
+    
+    # 
             
     export_settings['filtered_meshes'] = filtered_meshes
     export_settings['filtered_vertex_groups'] = filtered_vertex_groups
