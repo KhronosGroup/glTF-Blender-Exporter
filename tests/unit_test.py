@@ -29,6 +29,6 @@ spec.loader.exec_module(gltf2_export)
 # Functions
 #
 
-gltf2_export.print_console('Test', 'Hello.')
+gltf2_export.print_console('DEBUG', 'Hello.')
 
 # TODO: Use unittest.

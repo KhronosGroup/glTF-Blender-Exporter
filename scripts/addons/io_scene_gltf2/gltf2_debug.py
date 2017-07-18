@@ -27,15 +27,38 @@ g_profile_start = 0.0
 g_profile_end = 0.0
 g_profile_delta = 0.0
 
+g_output_levels = ['ERROR', 'WARNING', 'INFO', 'PROFILE', 'DEBUG', 'VERBOSE']
+g_current_output_level = 'DEBUG'
+
 #
 # Functions
 #
+
+def set_output_level(level):
+    """
+    Allows to set an output debug level.
+    """
+    
+    global g_current_output_level
+    
+    if g_output_levels.index(level) < 0:
+        return
+    
+    g_current_output_level = level
+
 
 def print_console(level,
                   output):
     """
     Prints to Blender console with a given header and output.
     """
+    
+    global g_output_levels
+    global g_current_output_level
+    
+    if g_output_levels.index(level) > g_output_levels.index(g_current_output_level):
+        return 
+    
     print(level + ': ' + output)
 
 
@@ -46,16 +69,16 @@ def print_newline():
     print()
 
 
-def print_timestamp(output = None):
+def print_timestamp(label = None):
     """
     Print a timestamp to Blender console.
     """
-    final_output = str(time.time())
+    output = 'Timestamp: ' + str(time.time())
     
-    if output is not None:
-        final_output = output + ' ' + final_output
+    if label is not None:
+        output = output + ' (' + label + ')'    
     
-    print_console('TIMESTAMP', final_output)
+    print_console('PROFILE', output)
     
 
 def profile_start():
@@ -91,9 +114,9 @@ def profile_end(label = None):
     g_profile_end = time.time()
     g_profile_delta = g_profile_end - g_profile_start
     
-    output = str(g_profile_delta)
+    output = 'Delta time: ' + str(g_profile_delta)
     
     if label is not None:
-        output = output + '(' + label + ')'    
+        output = output + ' (' + label + ')'    
 
     print_console('PROFILE', output)
