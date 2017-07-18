@@ -1,6 +1,51 @@
 User Documentation
 ------------------
 
+### glTF 2.0 Materials
+
+glTF 2.0 introduced two PBR materials: The Metallic-Roughness and Specular-Glossiness workflow. As the Metallic-Roughness is integrated into core glTF 2.0, details are explained for this workflow. For Specular-Glossiness, it is similar or almost the same.
+
+At point of writing, Blender supports two material settings: One for `Blender Render` and one for `Cycles Render`. Fortunately, the glTF 2.0 Materials can be simulated using the `Cycles Render` by implementing a custom node tree. Advantage is, that the preview of the Cycles output is almost 1:1 to the expected rendering output when using the glTF 2.0 materials.
+
+However, this custom node tree needs to be imported and linked to a Blender file. For the future, it is planned to use the `Eevee` shader node, which will replace the current node group.
+
+#### Integrating glTF 2.0 Materials
+
+Following picture shows a basic Blender scene using the Cycles renderer.
+
+![glTF 01 Blender Scene](glTF_01_Blender_Scene.png)
+
+If this scene would be exported, the perspective camera and Suzanne are written to the glTF 2.0 file. However, this scene would not contain any materials. As this glTF 2.0 file is valid, any glTF 2.0 render would use a default material.  
+
+The reason for this is, that with Cycles much more complex PBR shaders can be created, which cannot be exported to glTF 2.0 in this case. In this concrete Blender scene, the exporter skips the material.
+
+In the following steps it is explained, how to integrate a glTF 2.0 material:
+
+![glTF 02 Blender Link](glTF_02_Blender_Link.png)
+
+At first, it is required to link or append the Blender file, which contains the glTF 2.0 materials.
+
+It is recommended for development to link the file, as any possible updates are automatically updated. As relative paths are used, this is not optimal for deployment, as the material information would get lost and finally the Blender file is broken.  
+For deployment, append is recommended, as even the final Blender file increases, any required information is kept in ths deployed file.
+
+![glTF 03 Blender Link Material](glTF_03_Blender_Link_Material.png)
+
+Navigate to the `glTF2.blend` file included in this repository, select `NodeTree` and finally the `glTF Metallic Roughness` entry. For a Specular-Glossiness material, choose `glTF Specular Glossiness`. After linking or appending the entry, the glTF 2.0 material is ready to be used in this Blender file.
+
+For using the glTF 2.0 material, the current Material of Suzanne has to be altered:
+
+![glTF 04 Blender Add Material](glTF_04_Blender_Add_Material.png)
+
+Add the node group `glTF Metallic Roughness` to the material, delete the `Diffuse BSDF` shader and connect the node group to the `Material Output` node.
+
+![glTF 05 Blender Final](glTF_05_Blender_Final.png)
+
+After changing the `baseColorFactor` property, Suzanne has again the red color.
+
+That's it!
+
+If this scene is exported, the glTF 2.0 file does contain the material.
+
 ### Export settings
 
 The default exporter settings are configured in such a way, that the generated glTF 2.0 scene is almost identical to the Blender scene. However, in some cases, applying different settings do result in a better export result. Furthermore, the export settings allow an individual and adapted export depending on the users expectation.
@@ -157,6 +202,10 @@ The alpha channel has to be linked from the above defined image textures. Follow
 ![glTF Material Node Alpha Blend](glTF_Material_Node_Alpha_Blend.png)
 
 To use 'MASK' for blending, the AlphaMode has to be set from 0.0 to 1.0. In this case, as specified by glTF 2.0, the AlphaCutoff value is used and exported.
+
+##### Double sided
+
+In glTF 2.0, the information if a mesh has to be rendered double sided or not, is stored in the material and not the mesh. By default, double sided is disabled and if a glTF 2.0 scene is exported, the back faces are culled. If a mesh should be renderered without back face culling, enable the double sided material by setting the slider to 1.0.
 
 #### PBR Metallic Roughness
 
