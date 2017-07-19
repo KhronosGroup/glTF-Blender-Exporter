@@ -1100,89 +1100,89 @@ def generate_meshes(operator,
                     else:
                         process_bone = False
             
-                #
+            #
             
-                if export_settings['gltf_morph']:
-                    if blender_mesh.shape_keys is not None:
-                        targets = []
+            if export_settings['gltf_morph']:
+                if blender_mesh.shape_keys is not None:
+                    targets = []
 
-                        morph_index = 0
-                        for blender_shape_key in blender_mesh.shape_keys.key_blocks:
-                            if blender_shape_key != blender_shape_key.relative_key:
-                        
-                                target_position_id = 'MORPH_POSITION_' + str(morph_index)
-                                target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
-                                target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
+                    morph_index = 0
+                    for blender_shape_key in blender_mesh.shape_keys.key_blocks:
+                        if blender_shape_key != blender_shape_key.relative_key:
+                    
+                            target_position_id = 'MORPH_POSITION_' + str(morph_index)
+                            target_normal_id = 'MORPH_NORMAL_' + str(morph_index)
+                            target_tangent_id = 'MORPH_TANGENT_' + str(morph_index)
+                            
+                            if internal_attributes.get(target_position_id) is not None:
+                                internal_target_position = internal_attributes[target_position_id]
+                    
+                                componentType = "FLOAT"
+                    
+                                count = len(internal_target_position) // 3
                                 
-                                if internal_attributes.get(target_position_id) is not None and internal_attributes.get(target_normal_id) is not None:
-                                    internal_target_position = internal_attributes[target_position_id]
+                                type = "VEC3"
+                                
+                                target_position = create_accessor(operator, context, export_settings, glTF, internal_target_position, componentType, count, type, "")
+                                
+                                if target_position < 0:
+                                    print_console('ERROR', 'Could not create accessor for ' + target_position_id)
+                                    continue
+                                
+                                #
+                                
+                                target = {
+                                    'POSITION' : target_position
+                                }
+                                
+                                #
+                                
+                                if export_settings['gltf_normals'] and export_settings['gltf_morph_normal'] and internal_attributes.get(target_normal_id) is not None: 
+    
+                                    internal_target_normal = internal_attributes[target_normal_id]
                         
                                     componentType = "FLOAT"
                         
-                                    count = len(internal_target_position) // 3
+                                    count = len(internal_target_normal) // 3
                                     
                                     type = "VEC3"
                                     
-                                    target_position = create_accessor(operator, context, export_settings, glTF, internal_target_position, componentType, count, type, "")
+                                    target_normal = create_accessor(operator, context, export_settings, glTF, internal_target_normal, componentType, count, type, "")
                                     
-                                    if target_position < 0:
-                                        print_console('ERROR', 'Could not create accessor for ' + target_position_id)
+                                    if target_normal < 0:
+                                        print_console('ERROR', 'Could not create accessor for ' + target_normal_id)
                                         continue
                                     
-                                    #
-                                    
-                                    target = {
-                                        'POSITION' : target_position
-                                    }
-                                    
-                                    #
-                                    
-                                    if export_settings['gltf_normals'] and export_settings['gltf_morph_normal']: 
-        
-                                        internal_target_normal = internal_attributes[target_normal_id]
-                            
-                                        componentType = "FLOAT"
-                            
-                                        count = len(internal_target_normal) // 3
-                                        
-                                        type = "VEC3"
-                                        
-                                        target_normal = create_accessor(operator, context, export_settings, glTF, internal_target_normal, componentType, count, type, "")
-                                        
-                                        if target_normal < 0:
-                                            print_console('ERROR', 'Could not create accessor for ' + target_normal_id)
-                                            continue
-                                        
-                                        target['NORMAL'] = target_normal
-                                    #
-                                    
-                                    if export_settings['gltf_tangents'] and export_settings['gltf_morph_tangent'] and internal_attributes.get(target_tangent_id) is not None: 
+                                    target['NORMAL'] = target_normal
+                                #
+                                
+                                if export_settings['gltf_tangents'] and export_settings['gltf_morph_tangent'] and internal_attributes.get(target_tangent_id) is not None: 
 
-                                        internal_target_tangent = internal_attributes[target_tangent_id]
-                            
-                                        componentType = "FLOAT"
-                            
-                                        count = len(internal_target_tangent) // 3
-                                        
-                                        type = "VEC3"
-                                        
-                                        target_tangent = create_accessor(operator, context, export_settings, glTF, internal_target_tangent, componentType, count, type, "")
-                                        
-                                        if target_tangent < 0:
-                                            print_console('ERROR', 'Could not create accessor for ' + target_tangent_id)
-                                            continue
-                                        
-                                        target['TANGENT'] = target_tangent
+                                    internal_target_tangent = internal_attributes[target_tangent_id]
+                        
+                                    componentType = "FLOAT"
+                        
+                                    count = len(internal_target_tangent) // 3
                                     
-                                    #
-                                    #
+                                    type = "VEC3"
                                     
-                                    targets.append(target)
+                                    target_tangent = create_accessor(operator, context, export_settings, glTF, internal_target_tangent, componentType, count, type, "")
                                     
-                                    morph_index += 1
-            
-                        if len(targets) > 0:
-                            primitive['targets'] = targets
+                                    if target_tangent < 0:
+                                        print_console('ERROR', 'Could not create accessor for ' + target_tangent_id)
+                                        continue
+                                    
+                                    target['TANGENT'] = target_tangent
+                                
+                                #
+                                #
+                                
+                                targets.append(target)
+                                
+                                morph_index += 1
+        
+                    if len(targets) > 0:
+                        primitive['targets'] = targets
 
             #
             #
