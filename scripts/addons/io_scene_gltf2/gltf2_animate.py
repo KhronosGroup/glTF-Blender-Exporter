@@ -37,7 +37,7 @@ def animate_get_interpolation(blender_fcurve_list):
     Blender allows mixing and more variations of interpolations.  
     In such a case, a conversion is needed.
     """
-    interpolation = 'CONVERSION_NEEDED'
+    interpolation = None
     
     for blender_fcurve in blender_fcurve_list:
         if blender_fcurve is None:
@@ -62,6 +62,9 @@ def animate_get_interpolation(blender_fcurve_list):
                 elif blender_keyframe.interpolation != 'LINEAR' and blender_keyframe.interpolation != 'CONSTANT':
                     interpolation = 'CONVERSION_NEEDED'
                     return interpolation
+
+    if interpolation is None:
+        interpolation = 'CONVERSION_NEEDED'
     
     return interpolation
     
