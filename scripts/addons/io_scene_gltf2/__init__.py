@@ -204,6 +204,18 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_morph_normal = BoolProperty(
+            name='Export morphing normals',
+            description='',
+            default=True
+    )
+
+    export_morph_tangent = BoolProperty(
+            name='Export morphing tangents',
+            description='',
+            default=True
+    )
+
     export_lights = BoolProperty(
             name='Export lights',
             description='',
@@ -264,6 +276,14 @@ class ExportGLTF2_Base():
         else:
             export_settings['gltf_bake_skins'] = False
         export_settings['gltf_morph'] = self.export_morph
+        if self.export_morph:
+            export_settings['gltf_morph_normal'] = self.export_morph_normal
+        else:
+            export_settings['gltf_morph_normal'] = False
+        if self.export_morph and self.export_morph_normal:
+            export_settings['gltf_morph_tangent'] = self.export_morph_tangent
+        else:
+            export_settings['gltf_morph_tangent'] = False
         
         export_settings['gltf_lights'] = self.export_lights
         export_settings['gltf_common'] = self.export_common
@@ -324,6 +344,10 @@ class ExportGLTF2_Base():
         if self.export_skins:
             col.prop(self, 'export_bake_skins')
         col.prop(self, 'export_morph')            
+        if self.export_morph:
+            col.prop(self, 'export_morph_normal')
+            if self.export_morph_normal:
+                col.prop(self, 'export_morph_tangent')
 
         col = layout.box().column()
         col.label('Experimental:', icon='RADIO')

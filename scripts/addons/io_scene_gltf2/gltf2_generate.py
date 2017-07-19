@@ -1137,7 +1137,7 @@ def generate_meshes(operator,
                                     
                                     #
                                     
-                                    if export_settings['gltf_normals']: 
+                                    if export_settings['gltf_normals'] and export_settings['gltf_morph_normal']: 
         
                                         internal_target_normal = internal_attributes[target_normal_id]
                             
@@ -1156,7 +1156,7 @@ def generate_meshes(operator,
                                         target['NORMAL'] = target_normal
                                     #
                                     
-                                    if export_settings['gltf_tangents'] and internal_attributes.get(target_tangent_id) is not None: 
+                                    if export_settings['gltf_tangents'] and export_settings['gltf_morph_tangent'] and internal_attributes.get(target_tangent_id) is not None: 
 
                                         internal_target_tangent = internal_attributes[target_tangent_id]
                             
