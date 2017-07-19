@@ -87,7 +87,13 @@ def filter_apply(export_settings):
                 use_auto_smooth = current_blender_mesh.use_auto_smooth
                 
                 if use_auto_smooth:
-                    current_blender_object = current_blender_object.copy() 
+                    
+                    if current_blender_mesh.shape_keys is None: 
+                        current_blender_object = current_blender_object.copy()
+                    else:
+                        use_auto_smooth = False
+                        
+                        print_console('WARNING', 'Auto smooth and shape keys cannot be exported in paralle. Falling back to non auto smooth.')
                 
                 if export_settings['gltf_apply'] or use_auto_smooth:
                     
@@ -98,6 +104,7 @@ def filter_apply(export_settings):
                         blender_modifier = current_blender_object.modifiers.new('Temporary_Auto_Smooth', 'EDGE_SPLIT')
                     
                         blender_modifier.split_angle = current_blender_mesh.auto_smooth_angle
+                        blender_modifier.use_edge_angle = current_blender_mesh.has_custom_normals == False
 
                     current_blender_mesh = current_blender_object.to_mesh(bpy.context.scene, True, 'PREVIEW')
                     temporary_meshes.append(current_blender_mesh)
