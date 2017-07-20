@@ -171,6 +171,22 @@ By default, morphing tangent targets are exported. If disabled, tangents are not
 
 ### Materials
 
+#### Using Blender Cycles for preview
+
+As soon as the PBR materials and the glTF 2.0 node groups are used, Cycles can be used for previewing the scene. The following images are taken from `01_alpha_mask.blend`, as the differences can be shown best by this example. The mesh of this example is a quad, where a texture - multiplied with a color factor - is used and aplha masking is applied. For each of the following images, just the `Viewport Shading` mode has been changed:
+
+![glTF 01 Blender Preview](glTF_01_Blender_Preview.png)
+`Solid` - The whole quad is seen. No texture, color or alpha masking is visible.  
+  
+![glTF 02 Blender Preview](glTF_02_Blender_Preview.png)
+`Texture` - Still, the whole quad is seen but influence of the texture is visible.  
+  
+![glTF 03 Blender Preview](glTF_03_Blender_Preview.png)
+`Material` - Now, the whole quad is seen with influence of the texture and the color factor.  
+  
+![glTF 04 Blender Preview](glTF_04_Blender_Preview.png)
+`Rendered` - This preview is a close WYSIWYG output. All parameters are applied and visible.  
+  
 ### PBR Materials
 At point of writing, the PBR materials are simulated with Cycles using a specific node tree encapsulated in a node group.
 Two node groups are provided, one for the metallic roughness and one for the specular glossiness workflow.
