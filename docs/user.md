@@ -219,6 +219,16 @@ To use 'MASK' for blending, the AlphaMode has to be set from 0.0 to 1.0. In this
 
 In glTF 2.0, the information if a mesh has to be rendered double sided or not, is stored in the material and not the mesh. By default, double sided is disabled and if a glTF 2.0 scene is exported, the back faces are culled. If a mesh should be renderered without back face culling, enable the double sided material by setting the slider to 1.0.
 
+##### Vertex color usage
+
+By default, `Use COLOR_0` is disabled and the slider has to be set to 1.0 for enabling it.
+
+Furthermore, an `Attribute` input has to be linked to `COLOR_0` for a correct export.
+
+In the `Name` property field of the `Attribute` node, the string of the `Vertex Colors` has to be entered. In following picture, the name is `COLOR_0` but any name can be used.
+
+![glTF Material Node Alpha Blend](glTF_Material_Node_Color.png)
+
 #### PBR Metallic Roughness
 
 ![glTF Metallic Roughness Node](glTF_Metallic_Roughness_Node.png)
@@ -228,13 +238,6 @@ In glTF 2.0, the information if a mesh has to be rendered double sided or not, i
 The specular glossiness material is not part of core glTF 2.0. The material is defined by the extension `KHR_materials_pbrSpecularGlossiness`.
 
 ![glTF Specular Glossiness Node](glTF_Specular_Glossiness_Node.png)
-
-#### CMN Blinn-Phong
-
-The common Blinn-Phong material is not part of core glTF 2.0. The material is defined by the extension `KHR_materials_cmnBlinnPhong`.
-A valid glTF 2.0 file can contain no materials. To avoid an unwanted export of this material type, the option for this material has explicitly be enabled. This common material is not dependent on any node group, as the materials from `Blender Render` are used. As the Blender material has more settings and options than defined in the common Blinn-Phong material, only the following parameters are exported:
-
-TODO: List of exported textures and parameters.
 
 ---
 

@@ -18,34 +18,6 @@ Exporter usage
 The glTF 2.0 exporter provides several export settings. At the point of writing, to export PBR materials, specific node groups have to be used.
 Details about this can be found in the [docs](docs/) section.
 
-Feature matrix
---------------
-Following table shows the belonging of the exported features. The first three columns describe, if a feature belongs to glTF 2.0 (Core), if it is an approved glTF 2.0 extension (Extension) or if the extension is still under development (Experimental).
-
-|Feature export     |Core |Extension|Experimental |
-|-------------------|:---:|:-------:|:-----------:|
-|Embed images       |  X  |         |             |
-|Embed buffers      |  X  |         |             |
-|Filtered objects   |  X  |         |             |
-|Apply modifiers    |  X  |         |             |
-|Indices type       |  X  |         |             |
-|Vertices           |  X  |         |             |
-|Normals            |  X  |         |             |
-|Tangents           |  X  |         |             |
-|Texture Coordinates|  X  |         |             |
-|Colors             |  X  |         |             |
-|Cameras            |  X  |         |             |
-|Materials PBR MR   |  X  |         |             |
-|Animations         |  X  |         |             |
-|Skinning           |  X  |         |             |
-|Morph targets      |  X  |         |             |
-|GLB                |  X  |         |             |
-|Extras             |  X  |         |             |
-|Materials PBR SG   |     |    X    |             |
-|Lights             |     |         |      X      |
-|Materials Common   |     |         |      X      |
-|Materials Displace |     |         |      X      |
-
 Folders
 -------
 
