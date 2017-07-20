@@ -99,7 +99,7 @@ def animate_convert_keys(key_list):
     return times
 
 
-def animate_gather_keys(fcurve_list, interpolation):
+def animate_gather_keys(export_settings, fcurve_list, interpolation):
     """
     Merges and sorts several key frames to one set. 
     If an interpolation conversion is needed, the sample key frames are created as well.
@@ -126,7 +126,8 @@ def animate_gather_keys(fcurve_list, interpolation):
 
         key = start
         while key <= end:
-            keys.append(key)
+            if not export_settings['gltf_frame_range'] or (export_settings['gltf_frame_range'] and key >= bpy.context.scene.frame_start and key <= bpy.context.scene.frame_end): 
+                keys.append(key)
             key += 1.0
     else: 
         for blender_fcurve in fcurve_list:
@@ -134,8 +135,10 @@ def animate_gather_keys(fcurve_list, interpolation):
                 continue
             
             for blender_keyframe in blender_fcurve.keyframe_points:
-                if blender_keyframe.co[0] not in keys:
-                    keys.append(blender_keyframe.co[0])
+                key = blender_keyframe.co[0]
+                if not export_settings['gltf_frame_range'] or (export_settings['gltf_frame_range'] and key >= bpy.context.scene.frame_start and key <= bpy.context.scene.frame_end): 
+                    if key not in keys:
+                        keys.append(key)
 
         keys.sort()
     
@@ -149,7 +152,7 @@ def animate_location(export_settings, location, interpolation, node_type, node_n
     if not export_settings['gltf_joint_cache'].get(node_name):
         export_settings['gltf_joint_cache'][node_name] = {}
     
-    keys = animate_gather_keys(location, interpolation)
+    keys = animate_gather_keys(export_settings, location, interpolation)
     
     times = animate_convert_keys(keys)
     
@@ -197,7 +200,7 @@ def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolat
     if not export_settings['gltf_joint_cache'].get(node_name):
         export_settings['gltf_joint_cache'][node_name] = {}
     
-    keys = animate_gather_keys(rotation_axis_angle, interpolation)
+    keys = animate_gather_keys(export_settings, rotation_axis_angle, interpolation)
     
     times = animate_convert_keys(keys)
     
@@ -252,7 +255,7 @@ def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, inter
     if not export_settings['gltf_joint_cache'].get(node_name):
         export_settings['gltf_joint_cache'][node_name] = {}
     
-    keys = animate_gather_keys(rotation_euler, interpolation)
+    keys = animate_gather_keys(export_settings, rotation_euler, interpolation)
 
     times = animate_convert_keys(keys)
 
@@ -307,7 +310,7 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
     if not export_settings['gltf_joint_cache'].get(node_name):
         export_settings['gltf_joint_cache'][node_name] = {}
     
-    keys = animate_gather_keys(rotation_quaternion, interpolation)
+    keys = animate_gather_keys(export_settings, rotation_quaternion, interpolation)
 
     times = animate_convert_keys(keys)
     
@@ -358,7 +361,7 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
     if not export_settings['gltf_joint_cache'].get(node_name):
         export_settings['gltf_joint_cache'][node_name] = {}
     
-    keys = animate_gather_keys(scale, interpolation)
+    keys = animate_gather_keys(export_settings, scale, interpolation)
 
     times = animate_convert_keys(keys)
 
@@ -403,7 +406,7 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
     """
     Calculates/gathers the key value pairs for scalar anaimations.
     """
-    keys = animate_gather_keys(value_parameter, interpolation)
+    keys = animate_gather_keys(export_settings, value_parameter, interpolation)
 
     times = animate_convert_keys(keys)
 
