@@ -139,6 +139,10 @@ By default, all perspective cameras are exported as finite perspective cameras. 
 
 By default, all animations are exported.
 
+#### Export within playback range
+
+By default, all animations are exported within the playback range. If disabled, all animation data is exported. This property is only visible, if export animations is enabled.
+
 #### Export current frame
 
 If the animations are not exported, this option gets visible. By default, the current frame is exported. If not, frame `0` is exported.
@@ -154,6 +158,14 @@ If export skinning is enabled, this option is visible. If inverse kinematics are
 #### Export morphing
 
 By default, morphing animation data is exported.
+
+#### Export morphing normals
+
+By default, morphing normal targets are exported. If disabled, tangents are not exported as well. Property is only visible, if export morphing is enabled.
+
+#### Export morphing tangents
+
+By default, morphing tangent targets are exported. If disabled, tangents are not exported. Property is only visible, if export morphing and morphing normals is enabled.
 
 ---
 
