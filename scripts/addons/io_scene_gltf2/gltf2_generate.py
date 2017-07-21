@@ -458,11 +458,6 @@ def generate_animations_parameter(operator,
             
             channel['target'] = target
             
-            #
-            # 
-            
-            channel['name'] = name + "_" + sampler_name
-            
             # 
             
             channels.append(channel)
@@ -638,6 +633,13 @@ def generate_animations(operator,
     #
 
     if len(channels) > 0 or len(samplers) > 0:
+        
+        # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
+        for sampler in samplers:
+           del sampler['name']
+        
+        #
+        
         animation = {
             'channels' : channels,
             'samplers' : samplers 
