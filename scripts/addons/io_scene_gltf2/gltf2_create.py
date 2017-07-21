@@ -316,6 +316,7 @@ def create_custom_property(blender_element):
     
     extras = {}
     
+    # Custom properties, which are in most cases present and should not be exported.
     black_list = ['cycles', 'cycles_visibility', 'cycles_curves', '_RNA_UI'] 
     
     count = 0

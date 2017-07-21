@@ -21,9 +21,9 @@ The reason for this is, that with Cycles much more complex PBR shaders can be cr
 
 In the following steps it is explained, how to integrate a glTF 2.0 material:
 
-![glTF 02 Blender Link](glTF_02_Blender_Link.png)
-
 At first, it is required to link or append the Blender file, which contains the glTF 2.0 materials.
+
+![glTF 02 Blender Link](glTF_02_Blender_Link.png)
 
 It is recommended for development to link the file, as any possible updates are automatically updated. As relative paths are used, this is not optimal for deployment, as the material information would get lost and finally the Blender file is broken.  
 For deployment, append is recommended, as even the final Blender file increases, any required information is kept in ths deployed file.
@@ -44,7 +44,7 @@ After changing the `baseColorFactor` property, Suzanne has again the red color.
 
 That's it!
 
-If this scene is exported, the glTF 2.0 file does contain the material.
+If this scene is exported, the glTF 2.0 file does contain a material.
 
 ### Export settings
 
@@ -145,7 +145,7 @@ By default, all animations are exported within the playback range. If disabled, 
 
 #### Keyframes start with 0
 
-By default, before export all keyframes are modified, that the first keyframe starts with 0. If disabled, the keyframes keep their original value.
+By default, all keyframes are modified that the first keyframe starts with 0. If disabled, the keyframes keep their original value. This property is only visible, if export animations is enabled.
 
 #### Export current frame
 
@@ -222,6 +222,8 @@ All PBR materials share the same input parameters, which are listed in the follo
 
 ![glTF Material Node](glTF_Material_Node_Part.png)
 
+Most of the input links are named by their depending glTF 2.0 property. In the following sections, the properties are explained, which are not straightforward to setup. 
+
 ##### Alpha
 
 By default, the alpha mode is 'OPAQUE' and set to 'BLEND', if 
@@ -245,11 +247,13 @@ By default, `Use COLOR_0` is disabled and the slider has to be set to 1.0 for en
 
 Furthermore, an `Attribute` input has to be linked to `COLOR_0` for a correct export.
 
-In the `Name` property field of the `Attribute` node, the string of the `Vertex Colors` has to be entered. In following picture, the name is `COLOR_0` but any name can be used.
+In the `Name` property field of the `Attribute` node, the string of the `Vertex Colors` has to be entered. In the following picture, the name is `COLOR_0` but any name can be used.
 
 ![glTF Material Node Alpha Blend](glTF_Material_Node_Color.png)
 
 #### PBR Metallic Roughness
+
+This is the complete Metallic Roughness material node.
 
 ![glTF Metallic Roughness Node](glTF_Metallic_Roughness_Node.png)
 

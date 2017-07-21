@@ -251,6 +251,7 @@ class ExportGLTF2_Base():
     def execute(self, context):
         from . import gltf2_export
         
+        # All custom export settings are stored in this container.
         export_settings = {}
 
         export_settings['gltf_filepath'] = bpy.path.ensure_ext(self.filepath, self.filename_ext)

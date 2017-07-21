@@ -8,7 +8,7 @@ The goal of this document is to provide an understanding for the concept of the 
 
 ### File organisation and description
 
-The Blender glTF 2.0 exporter consists out of nine Python scripts in total. In general, the functions are separated into theses files by their tasks they have to process. The following sections give a rough overview, what these files and function do.
+The Blender glTF 2.0 exporter consists out of nine Python scripts in total. In general, the functions are separated into theses files by their tasks they have to process. The following sections give an overview, what these files and function do.
 
 #### __init__.py
 
@@ -26,7 +26,7 @@ Any binary data - eiter embedded ot stored to the file system - is created in th
 
 #### gltf2_debug.py
 
-The functions provided here are for debugging and profiling the exporter. The debug output is printed to the Blender console and allows level filtering in this order:  
+The functions provided here are for debugging and profiling the exporter. The debug output is printed to the Blender console and allows output level filtering in the follwing order:  
 `ERROR`, `WARNING`, `INFO`, `PROFILE`, `DEBUG`, `VERBOSE`  
 The profiler allows to print out a time stamp and to measure the delta time between two given points in the code.
 
@@ -41,11 +41,11 @@ Here, mainly data of the meshes and and its primitives are extracted. Furthermor
 
 #### gltf2_filter.py
 
-The purpose of this module is to filter and gather all Blender objects, which need to be exported depending on the settings. Furthermore, in some cases, meshes need to be converted depending on its setting and this also happend suring the filter process. 
+The purpose of this module is to filter and gather all Blender objects, which need to be exported depending on the settings. Furthermore, in some cases, meshes need to be converted depending on its setting and this also happens during the filtering process. 
 
 #### gltf2_generate.py
 
-In this module, the main glTF 2.0 scene is generated. All top level elements of a glTF 2.0 are gathered and stored in th JSON structure.
+In this module, the main glTF 2.0 scene is generated. All top level elements of a glTF 2.0 file are gathered and stored in the JSON structure.
 
 #### gltf2_get.py
 
