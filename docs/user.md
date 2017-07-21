@@ -143,6 +143,10 @@ By default, all animations are exported.
 
 By default, all animations are exported within the playback range. If disabled, all animation data is exported. This property is only visible, if export animations is enabled.
 
+#### Keyframes start with 0
+
+By default, before export all keyframes are modified, that the first keyframe starts with 0. If disabled, the keyframes keep their original value.
+
 #### Export current frame
 
 If the animations are not exported, this option gets visible. By default, the current frame is exported. If not, frame `0` is exported.
