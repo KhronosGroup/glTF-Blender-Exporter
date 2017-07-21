@@ -162,6 +162,13 @@ def generate_animations_parameter(operator,
                 translation_value = translation_data[key]
                 for value_element in translation_value:
                     values.append(value_element)
+
+            #
+            
+            if len(keys) > 0:
+                key_offset = keys[0]
+                
+                keys[:] = [key - key_offset for key in keys] 
     
             #
             
@@ -221,6 +228,13 @@ def generate_animations_parameter(operator,
             rotation_value = rotation_data[key]
             for value_element in rotation_value:
                 values.append(value_element)
+
+        #
+        
+        if len(keys) > 0:
+            key_offset = keys[0]
+            
+            keys[:] = [key - key_offset for key in keys] 
 
         #
 
@@ -290,6 +304,13 @@ def generate_animations_parameter(operator,
     
             #
             
+            if len(keys) > 0:
+                key_offset = keys[0]
+                
+                keys[:] = [key - key_offset for key in keys] 
+    
+            #
+            
             componentType = "FLOAT"
             count = len(keys)
             type = "SCALAR"
@@ -343,6 +364,13 @@ def generate_animations_parameter(operator,
                 value_value = value_data[key]
                 for value_element in value_value:
                     values.append(value_element)
+    
+            #
+            
+            if len(keys) > 0:
+                key_offset = keys[0]
+                
+                keys[:] = [key - key_offset for key in keys] 
     
             #
             
