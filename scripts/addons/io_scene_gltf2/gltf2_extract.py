@@ -379,14 +379,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     #
     # Gathering position, normal and texcoords.
     #
-    attributes = {
+    no_material_attributes = {
         'POSITION' : [],
         'NORMAL' : []
     }
     
     if use_tangents:
-        attributes['TANGENT'] = []
-
+        no_material_attributes['TANGENT'] = []
         
     #
     # Directory of materials with its primitive.
@@ -394,7 +393,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     no_material_primitives = {
         'material' : '',
         'indices' : [],
-        'attributes' : attributes
+        'attributes' : no_material_attributes
     }
     
     material_name_to_primitives = {'' : no_material_primitives}
@@ -405,6 +404,14 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     for blender_material in blender_mesh.materials:
         if blender_material is None:
             continue
+
+        attributes = {
+            'POSITION' : [],
+            'NORMAL' : []
+        }
+        
+        if use_tangents:
+            attributes['TANGENT'] = []
         
         primitive = {
             'material' : blender_material.name,
@@ -414,8 +421,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         material_name_to_primitives[blender_material.name] = primitive
 
-    new_index = 0
-    
     texcoord_max = 0
     if blender_mesh.uv_layers.active:
         texcoord_max = len(blender_mesh.uv_layers)
@@ -483,6 +488,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             if blender_mesh.materials[blender_polygon.material_index].name in export_settings['gltf_use_no_color']: 
                 export_color = False
         #
+        
+        attributes = primitive['attributes']
         
         face_normal = blender_polygon.normal
         face_tangent = mathutils.Vector((0.0, 0.0, 0.0))
@@ -661,7 +668,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
 
             create = True
                 
-            for current_new_index in vertex_index_to_new_indices[vertex_index]:
+            for current_new_index in indices:
                 found = True
                 
                 for i in range(0, 3):
@@ -746,7 +753,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     break
                 
             if not create:
-                continue    
+                continue
+            
+            new_index = 0
+            
+            if len(indices) > 0:
+                new_index = max(indices) + 1
 
             vertex_index_to_new_indices[vertex_index].append(new_index)
             
@@ -754,8 +766,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             #
             
             indices.append(new_index)
-
-            new_index += 1
 
             #
             
