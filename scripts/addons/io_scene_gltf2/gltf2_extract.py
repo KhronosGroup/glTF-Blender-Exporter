@@ -377,6 +377,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             print_console('WARNING', 'Could not calculate tangents. Please try to triangulate the mesh first.')
     
     #
+    
+    material_map = {}
+    
+    #
     # Gathering position, normal and texcoords.
     #
     no_material_attributes = {
@@ -397,6 +401,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
     }
     
     material_name_to_primitives = {'' : no_material_primitives}
+
+    #
+    
+    vertex_index_to_new_indices = {}
+    
+    material_map[''] = vertex_index_to_new_indices 
     
     #
     # Create primitive for each material.
@@ -420,6 +430,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         }
         
         material_name_to_primitives[blender_material.name] = primitive
+        
+        #
+        
+        vertex_index_to_new_indices = {}
+        
+        material_map[blender_material.name] = vertex_index_to_new_indices 
 
     texcoord_max = 0
     if blender_mesh.uv_layers.active:
@@ -466,10 +482,6 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 blender_shape_keys.append(blender_shape_key) 
         
     #
-    
-    vertex_index_to_new_indices = {}
-        
-    #
     # Convert polygon to primitive indices and eliminate invalid ones. Assign to material.
     #
     for blender_polygon in blender_mesh.polygons:
@@ -478,10 +490,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         #
         
         primitive = None
+        vertex_index_to_new_indices = None
         if blender_polygon.material_index < 0 or blender_polygon.material_index >= len(blender_mesh.materials) or blender_mesh.materials[blender_polygon.material_index] is None:
             primitive = material_name_to_primitives['']
+            vertex_index_to_new_indices = material_map['']
         else:
             primitive = material_name_to_primitives[blender_mesh.materials[blender_polygon.material_index].name]
+            vertex_index_to_new_indices = material_map[blender_mesh.materials[blender_polygon.material_index].name]
             
             # 
             
@@ -668,7 +683,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
 
             create = True
                 
-            for current_new_index in indices:
+            for current_new_index in vertex_index_to_new_indices[vertex_index]:
                 found = True
                 
                 for i in range(0, 3):
