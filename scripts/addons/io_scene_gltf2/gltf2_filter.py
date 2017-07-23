@@ -191,7 +191,7 @@ def filter_apply(export_settings):
         if blender_material.node_tree and blender_material.use_nodes:
             for blender_node in blender_material.node_tree.nodes:
                 
-                if isinstance(blender_node, bpy.types.ShaderNodeTexImage) and blender_node.image is not None and blender_node.image.users != 0 and blender_node not in filtered_textures:
+                if isinstance(blender_node, bpy.types.ShaderNodeTexImage) and blender_node.image is not None and blender_node.image.users != 0 and blender_node.image.size[0] > 0 and blender_node.image.size[1] > 0 and blender_node not in filtered_textures:
                     add_node = False
                     for blender_socket in blender_node.outputs:
                         if blender_socket.is_linked:
@@ -210,7 +210,7 @@ def filter_apply(export_settings):
             if export_settings['gltf_common']:
                 for blender_texture_slot in blender_material.texture_slots:
 
-                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0:
+                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0 and blender_texture_slot.texture.image.size[0] > 0 and  blender_texture_slot.texture.image.size[1] > 0:
                         if blender_texture_slot not in filtered_textures and blender_texture_slot.name not in temp_filtered_texture_names:
                             accept = False
                             
@@ -238,7 +238,7 @@ def filter_apply(export_settings):
             else:
                 for blender_texture_slot in blender_material.texture_slots:
 
-                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0:
+                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0 and blender_texture_slot.texture.image.size[0] > 0 and  blender_texture_slot.texture.image.size[1] > 0:
                         if blender_texture_slot not in filtered_textures and blender_texture_slot.name not in temp_filtered_texture_names:
                             accept = False
                             
@@ -269,14 +269,14 @@ def filter_apply(export_settings):
     for blender_texture in filtered_textures:
         
         if isinstance(blender_texture, bpy.types.ShaderNodeTexImage):
-            if blender_texture.image is not None and blender_texture.image not in filtered_images and blender_texture.image.users != 0:
+            if blender_texture.image is not None and blender_texture.image not in filtered_images and blender_texture.image.users != 0 and blender_texture.image.size[0] > 0 and blender_texture.image.size[1] > 0:
                 
                 if blender_texture.image.filepath == '':
                     blender_texture.image.filepath = 'glTF_Generated_' + blender_texture.image.name + '.png'
                 
                 filtered_images.append(blender_texture.image)
         else:
-            if blender_texture.texture.image is not None and blender_texture.texture.image not in filtered_images and blender_texture.texture.image.users != 0:
+            if blender_texture.texture.image is not None and blender_texture.texture.image not in filtered_images and blender_texture.texture.image.users != 0 and blender_texture.texture.image.size[0] > 0 and blender_texture.texture.image.size[1] > 0:
                 
                 if blender_texture.texture.image.filepath == '':
                     blender_texture.texture.image.filepath = 'glTF_Generated_' + blender_texture.texture.image.name + '.png'
