@@ -147,6 +147,10 @@ By default, all animations are exported within the playback range. If disabled, 
 
 By default, all keyframes are modified that the first keyframe starts with 0. If disabled, the keyframes keep their original value. This property is only visible, if export animations is enabled.
 
+#### Force sample animations
+
+By default and if possible, only the keyframes of an animation are exported. However, mainly because of the non-quaternion to quaternion conversion, animations need to be sampled for proper animating the scene. This property is only visible, if export animations is enabled.
+
 #### Export current frame
 
 If the animations are not exported, this option gets visible. By default, the current frame is exported. If not, frame `0` is exported.
