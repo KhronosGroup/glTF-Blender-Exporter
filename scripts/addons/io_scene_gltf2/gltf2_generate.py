@@ -1803,20 +1803,19 @@ def generate_textures(operator,
             textures.append(texture)
             
         else:
-            if export_settings['gltf_common']:
-                magFilter = 9729
-                wrap = 10497
-                if blender_texture.texture.extension == 'CLIP':
-                    wrap = 33071
-    
-                texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
-    
-                texture['source'] = get_image_index(export_settings, get_uri(blender_texture.texture.image.filepath))
+            magFilter = 9729
+            wrap = 10497
+            if blender_texture.texture.extension == 'CLIP':
+                wrap = 33071
 
-                #
-                #
-        
-                textures.append(texture)
+            texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
+
+            texture['source'] = get_image_index(export_settings, get_uri(blender_texture.texture.image.filepath))
+
+            #
+            #
+    
+            textures.append(texture)
 
     #
     #
@@ -1854,6 +1853,10 @@ def generate_materials(operator,
         #
         
         if blender_material.node_tree is not None and blender_material.use_nodes:
+            
+            #
+            # Cycles Render.
+            #
         
             for blender_node in blender_material.node_tree.nodes:
                 if isinstance(blender_node, bpy.types.ShaderNodeGroup):
@@ -2086,6 +2089,11 @@ def generate_materials(operator,
                     materials.append(material)
 
         else:
+            
+            #
+            # Blender Render.
+            #
+            
             if export_settings['gltf_common']:
                 KHR_materials_common_Used = True
                 
@@ -2239,7 +2247,7 @@ def generate_materials(operator,
                 for blender_texture_slot in blender_material.texture_slots:
                     if blender_texture_slot and blender_texture_slot.texture and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None:
                         #
-                        # Diffuse texture
+                        # Diffuse texture becmomes baseColorTexture
                         #
                         if blender_texture_slot.use_map_color_diffuse:
                             index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
@@ -2248,8 +2256,9 @@ def generate_materials(operator,
                                     'index' : index
                                 }
                                 pbrMetallicRoughness['baseColorTexture'] = baseColorTexture
+                        
                         #
-                        # Ambient texture
+                        # Ambient texture becomes occlusionTexture
                         #
                         if blender_texture_slot.use_map_ambient:
                             index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
@@ -2258,6 +2267,7 @@ def generate_materials(operator,
                                     'index' : index
                                 }
                                 material['occlusionTexture'] = ambientTexture
+                        
                         #
                         # Emissive texture
                         #
@@ -2268,6 +2278,7 @@ def generate_materials(operator,
                                     'index' : index
                                 }
                                 material['emissiveTexture'] = emissiveTexture
+
                         #
                         # Normal texture
                         #
@@ -2278,6 +2289,28 @@ def generate_materials(operator,
                                     'index' : index
                                 }
                                 material['normalTexture'] = normalTexture
+                                
+                        #
+                        # Displacement textue
+                        #
+                        if export_settings['gltf_displacement']:
+                            if blender_texture_slot.use_map_displacement:
+                                index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
+                                if index >= 0:
+                                    extensions = material['extensions']
+
+                                    # 
+                                    
+                                    displacementTexture = {
+                                        'index' : index,
+                                        'strength' : blender_texture_slot.displacement_factor 
+                                    }
+                                     
+                                    extensions['KHR_materials_displacement'] = {'displacementTexture' : displacementTexture}
+                                    
+                                    #
+                                    
+                                    KHR_materials_displacement_Used = True
 
                 #
                 # Base color factor
@@ -2288,13 +2321,31 @@ def generate_materials(operator,
                     alpha = baseColorFactor[3]
 
                 #
+                # Metallic factor has to be 0.0 for not breaking the Metallic-Roughness workflow.
+                #
+                pbrMetallicRoughness['metallicFactor'] = 0.0
+
+                #
                 # Emissive factor
                 #
                 emissiveFactor = [blender_material.emit * blender_material.diffuse_color[0], blender_material.emit * blender_material.diffuse_color[1], blender_material.emit * blender_material.diffuse_color[2]]
                 if emissiveFactor[0] != 0.0 or emissiveFactor[1] != 0.0 or emissiveFactor[2] != 0.0:
                     material['emissiveFactor'] = emissiveFactor
 
+                #
+                
+                if export_settings['gltf_extras']:
+                    extras = create_custom_property(blender_material)
+                    
+                    if extras is not None:
+                        material['extras'] = extras 
+        
+                #
+
                 material['name'] = blender_material.name
+                
+                #
+                #
 
                 materials.append(material)
 
