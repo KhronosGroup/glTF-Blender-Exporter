@@ -145,7 +145,7 @@ def generate_animations_parameter(operator,
             
             #
             
-            interpolation = animate_get_interpolation(location)
+            interpolation = animate_get_interpolation(export_settings, location)
             
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
@@ -206,15 +206,15 @@ def generate_animations_parameter(operator,
 
     if get_index(samplers, sampler_name) == -1:
         if rotation_axis_angle.count(None) < 4:
-            interpolation = animate_get_interpolation(rotation_axis_angle)
+            interpolation = animate_get_interpolation(export_settings, rotation_axis_angle)
             rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
         if rotation_euler.count(None) < 3:
-            interpolation = animate_get_interpolation(rotation_euler)
+            interpolation = animate_get_interpolation(export_settings, rotation_euler)
             rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
 
         if rotation_quaternion.count(None) < 4:
-            interpolation = animate_get_interpolation(rotation_quaternion)
+            interpolation = animate_get_interpolation(export_settings, rotation_quaternion)
             rotation_data = animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
     if rotation_data is not None:
@@ -284,7 +284,7 @@ def generate_animations_parameter(operator,
             
             #
             
-            interpolation = animate_get_interpolation(scale)
+            interpolation = animate_get_interpolation(export_settings, scale)
 
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
@@ -347,7 +347,7 @@ def generate_animations_parameter(operator,
             
             #
             
-            interpolation = animate_get_interpolation(value)
+            interpolation = animate_get_interpolation(export_settings, value)
 
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':

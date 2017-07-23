@@ -192,6 +192,12 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_force_sampling = BoolProperty(
+            name='Force sample animations',
+            description='',
+            default=False
+    )
+
     export_current_frame = BoolProperty(
             name='Export current frame',
             description='',
@@ -283,10 +289,12 @@ class ExportGLTF2_Base():
             export_settings['gltf_current_frame'] = False
             export_settings['gltf_frame_range'] = self.export_frame_range
             export_settings['gltf_move_keyframes'] = self.export_move_keyframes
+            export_settings['gltf_force_sampling'] = self.export_force_sampling
         else:
             export_settings['gltf_current_frame'] = self.export_current_frame
             export_settings['gltf_frame_range'] = False
             export_settings['gltf_move_keyframes'] = False
+            export_settings['gltf_force_sampling'] = False
         export_settings['gltf_skins'] = self.export_skins
         if self.export_skins:
             export_settings['gltf_bake_skins'] = self.export_bake_skins
@@ -358,6 +366,7 @@ class ExportGLTF2_Base():
         if self.export_animations:
             col.prop(self, 'export_frame_range')
             col.prop(self, 'export_move_keyframes')
+            col.prop(self, 'export_force_sampling')
         else:
             col.prop(self, 'export_current_frame')
         col.prop(self, 'export_skins')

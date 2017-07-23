@@ -31,12 +31,18 @@ from .gltf2_extract import *
 # Functions
 #
 
-def animate_get_interpolation(blender_fcurve_list):
+def animate_get_interpolation(export_settings, blender_fcurve_list):
     """
     Retrieves the glTF interpolation, depending on a fcurve list.
     Blender allows mixing and more variations of interpolations.  
     In such a case, a conversion is needed.
     """
+    
+    if export_settings['gltf_force_sampling']:
+        return 'CONVERSION_NEEDED'
+    
+    #
+    
     interpolation = None
     
     for blender_fcurve in blender_fcurve_list:
