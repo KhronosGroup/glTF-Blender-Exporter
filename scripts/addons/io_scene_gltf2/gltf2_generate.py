@@ -2225,6 +2225,79 @@ def generate_materials(operator,
         
                 materials.append(material)
 
+            else:
+
+                #
+                # A minimal export of basic material properties that didn't get picked up any other way to a pbrMetallicRoughness glTF material
+                #
+                material['pbrMetallicRoughness'] = {}
+
+                pbrMetallicRoughness = material['pbrMetallicRoughness']
+
+                alpha = 1.0
+
+                for blender_texture_slot in blender_material.texture_slots:
+                    if blender_texture_slot and blender_texture_slot.texture and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None:
+                        #
+                        # Diffuse texture
+                        #
+                        if blender_texture_slot.use_map_color_diffuse:
+                            index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                baseColorTexture = {
+                                    'index' : index
+                                }
+                                pbrMetallicRoughness['baseColorTexture'] = baseColorTexture
+                        #
+                        # Ambient texture
+                        #
+                        if blender_texture_slot.use_map_ambient:
+                            index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                ambientTexture = {
+                                    'index' : index
+                                }
+                                material['occlusionTexture'] = ambientTexture
+                        #
+                        # Emissive texture
+                        #
+                        if blender_texture_slot.use_map_emit:
+                            index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                emissiveTexture = {
+                                    'index' : index
+                                }
+                                material['emissiveTexture'] = emissiveTexture
+                        #
+                        # Normal texture
+                        #
+                        if blender_texture_slot.use_map_normal:
+                            index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
+                            if index >= 0:
+                                normalTexture = {
+                                    'index' : index
+                                }
+                                material['normalTexture'] = normalTexture
+
+                #
+                # Base color factor
+                #
+                baseColorFactor = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity, blender_material.diffuse_color[1] * blender_material.diffuse_intensity, blender_material.diffuse_color[2] * blender_material.diffuse_intensity, alpha]
+                if baseColorFactor[0] != 1.0 or baseColorFactor[1] != 1.0 or baseColorFactor[2] != 1.0 or baseColorFactor[3] != 1.0:
+                    pbrMetallicRoughness['baseColorFactor'] = baseColorFactor
+                    alpha = baseColorFactor[3]
+
+                #
+                # Emissive factor
+                #
+                emissiveFactor = [blender_material.emit * blender_material.diffuse_color[0], blender_material.emit * blender_material.diffuse_color[1], blender_material.emit * blender_material.diffuse_color[2]]
+                if emissiveFactor[0] != 0.0 or emissiveFactor[1] != 0.0 or emissiveFactor[2] != 0.0:
+                    material['emissiveFactor'] = emissiveFactor
+
+                material['name'] = blender_material.name
+
+                materials.append(material)
+
     #
     #
 
