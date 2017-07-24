@@ -1462,7 +1462,7 @@ def generate_nodes(operator,
     
             temp_action = None
 
-            if export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
+            if blender_object.animation_data is not None and export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
                 temp_action = blender_object.animation_data.action
                 
                 bpy.context.scene.objects.active = blender_object
@@ -1548,7 +1548,7 @@ def generate_nodes(operator,
             
             #
             
-            if export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
+            if temp_action is not None and export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
                 blender_object.animation_data.action = temp_action
 
 
