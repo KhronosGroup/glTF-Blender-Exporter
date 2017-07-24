@@ -1572,7 +1572,7 @@ def generate_nodes(operator,
         
         if export_settings['gltf_skins']:
             blender_armature = blender_object.find_armature()
-            if blender_armature is not None:
+            if blender_armature is not None and blender_object.parent is not None:
                 index_offset = blender_armature.children.index(blender_object)
                 
                 node['skin'] = get_skin_index(glTF, blender_armature.name, index_offset)
