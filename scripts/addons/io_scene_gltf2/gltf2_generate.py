@@ -481,11 +481,49 @@ def generate_animations(operator,
     channels = []
     
     samplers = []
-
+    
     #
     #
     
     filtered_objects = export_settings['filtered_objects']
+
+    #
+    #
+    
+    blender_backup_action = {}
+    
+    if export_settings['gltf_bake_skins']:
+        
+        start = None
+        end = None
+        
+        for current_blender_action in bpy.data.actions:
+            for current_blender_fcurve in current_blender_action.fcurves:
+                if current_blender_fcurve is None:
+                    continue
+                
+                if start == None:
+                    start = current_blender_fcurve.range()[0]
+                else:
+                    start = min(start, current_blender_fcurve.range()[0])
+                    
+                if end == None:
+                    end = current_blender_fcurve.range()[1]
+                else:
+                    end = max(end, current_blender_fcurve.range()[1])
+        
+        #
+        
+        for blender_object in filtered_objects:
+            if blender_object.animation_data is not None: 
+                blender_backup_action[blender_object.name] = blender_object.animation_data.action
+        
+        #
+        
+        bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True, clear_constraints=False, use_current_action=False, bake_types={'POSE'})
+    
+    #
+    #
     
     for blender_object in filtered_objects:
         if blender_object.animation_data is None:
@@ -530,17 +568,6 @@ def generate_animations(operator,
                             end = current_blender_fcurve.range()[1]
                         else:
                             end = max(end, current_blender_fcurve.range()[1])
-                            
-                #
-                
-                blender_temp_action = None
-
-                if export_settings['gltf_bake_skins']:
-                    blender_temp_action = blender_object.animation_data.action
-                    
-                    bpy.context.scene.objects.active = blender_object
-                    bpy.ops.object.mode_set(mode='POSE')
-                    bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True, clear_constraints=False, use_current_action=False, bake_types={'POSE'})
                 
                 #
 
@@ -563,6 +590,9 @@ def generate_animations(operator,
                         #
                         if not export_settings['gltf_joint_cache'].get(blender_bone.name):
                             export_settings['gltf_joint_cache'][blender_bone.name] = {}
+                        
+                        if export_settings['gltf_bake_skins']:
+                            matrix_basis = blender_object.convert_space(blender_bone, blender_bone.matrix, from_space='POSE', to_space='LOCAL')
                         
                         matrix = correction_matrix_local * matrix_basis 
             
@@ -587,12 +617,10 @@ def generate_animations(operator,
                     
                     #
                     
-                    generate_animations_parameter(operator, context, export_settings, glTF, blender_action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, correction_matrix_local, matrix_basis, False)
+                    if export_settings['gltf_bake_skins']:
+                        matrix_basis = blender_object.convert_space(blender_bone, blender_bone.matrix, from_space='POSE', to_space='LOCAL')
                     
-                #
-                
-                if export_settings['gltf_bake_skins']:
-                    blender_object.animation_data.action = blender_temp_action
+                    generate_animations_parameter(operator, context, export_settings, glTF, blender_action, channels, samplers, blender_object.name, blender_bone.name, blender_bone.rotation_mode, correction_matrix_local, matrix_basis, False)
 
     #
     #
@@ -628,7 +656,15 @@ def generate_animations(operator,
         generate_animations_parameter(operator, context, export_settings, glTF, blender_action, channels, samplers, blender_object.name, None, blender_object.rotation_mode, correction_matrix_local, matrix_basis, True)
         
         processed_meshes.append(blender_mesh)
-
+    
+    #
+    #
+    
+    if export_settings['gltf_bake_skins']:
+        for blender_object in filtered_objects:
+            if blender_backup_action.get(blender_object.name) is not None:
+                blender_object.animation_data.action = blender_backup_action[blender_object.name]
+    
     #
     #
 
@@ -1462,8 +1498,9 @@ def generate_nodes(operator,
     
             temp_action = None
 
-            if blender_object.animation_data is not None and export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
-                temp_action = blender_object.animation_data.action
+            if export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
+                if blender_object.animation_data is not None: 
+                    temp_action = blender_object.animation_data.action
                 
                 bpy.context.scene.objects.active = blender_object
                 bpy.ops.object.mode_set(mode='POSE')
@@ -1494,7 +1531,12 @@ def generate_nodes(operator,
                         else:
                             correction_matrix_local = blender_bone.parent.bone.matrix_local.inverted() * blender_bone.bone.matrix_local
                         
-                        generate_node_parameter(operator, context, export_settings, glTF, correction_matrix_local * blender_bone.matrix_basis, node, 'JOINT')
+                        matrix_basis = blender_bone.matrix_basis
+                        
+                        if export_settings['gltf_bake_skins']:
+                            matrix_basis = blender_object.convert_space(blender_bone, blender_bone.matrix, from_space='POSE', to_space='LOCAL')
+                        
+                        generate_node_parameter(operator, context, export_settings, glTF, correction_matrix_local * matrix_basis, node, 'JOINT')
                 
                         #
                 
@@ -1548,7 +1590,7 @@ def generate_nodes(operator,
             
             #
             
-            if temp_action is not None and export_settings['gltf_bake_skins'] and not export_settings['gltf_animations']:
+            if temp_action is not None:
                 blender_object.animation_data.action = temp_action
 
 
