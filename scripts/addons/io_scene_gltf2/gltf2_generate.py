@@ -521,10 +521,12 @@ def generate_animations(operator,
         for blender_object in filtered_objects:
             if blender_object.animation_data is not None: 
                 blender_backup_action[blender_object.name] = blender_object.animation_data.action
-        
-        #
-        
-        bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True, clear_constraints=False, use_current_action=False, bake_types={'POSE'})
+                
+            bpy.context.scene.objects.active = blender_object
+            
+            #
+            
+            bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True, clear_constraints=False, use_current_action=False, bake_types={'POSE'})
     
     #
     #
