@@ -70,6 +70,8 @@ def save(operator,
     """
 
     print_console('INFO', 'Starting glTF 2.0 export')
+    bpy.context.window_manager.progress_begin(0, 100)
+    bpy.context.window_manager.progress_update(0)
     
     #
     
@@ -153,6 +155,7 @@ def save(operator,
     #
 
     print_console('INFO', 'Finished glTF 2.0 export')
+    bpy.context.window_manager.progress_end()
     print_newline()
 
     return {'FINISHED'}

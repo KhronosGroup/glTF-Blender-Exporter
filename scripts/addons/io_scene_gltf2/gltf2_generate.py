@@ -512,6 +512,10 @@ def generate_animations(operator,
                 else:
                     end = max(end, current_blender_fcurve.range()[1])
         
+        if start is None or end is None:
+            start = bpy.context.scene.frame_start
+            end = bpy.context.scene.frame_end
+        
         #
         
         for blender_object in filtered_objects:
@@ -568,6 +572,10 @@ def generate_animations(operator,
                             end = current_blender_fcurve.range()[1]
                         else:
                             end = max(end, current_blender_fcurve.range()[1])
+                
+                if start is None or end is None:
+                    start = bpy.context.scene.frame_start
+                    end = bpy.context.scene.frame_end
                 
                 #
 
@@ -2503,43 +2511,84 @@ def generate_glTF(operator,
     Generates the main glTF structure.
     """
 
+    profile_start()
     generate_asset(operator, context, export_settings, glTF)
+    profile_end('asset')
+    bpy.context.window_manager.progress_update(5)
     
     #
 
     if export_settings['gltf_materials']:
+        profile_start()
         generate_images(operator, context, export_settings, glTF)
+        profile_end('images')
+        bpy.context.window_manager.progress_update(10)
     
+        profile_start()
         generate_textures(operator, context, export_settings, glTF)
+        profile_end('textures')
+        bpy.context.window_manager.progress_update(20)
     
+        profile_start()
         generate_materials(operator, context, export_settings, glTF)
+        profile_end('materials')
+        bpy.context.window_manager.progress_update(30)
+
+    bpy.context.window_manager.progress_update(30)
     
     #
 
     if export_settings['gltf_cameras']:
+        profile_start()
         generate_cameras(operator, context, export_settings, glTF)
+        profile_end('cameras')
+        bpy.context.window_manager.progress_update(40)
         
     if export_settings['gltf_lights']:
+        profile_start()
         generate_lights(operator, context, export_settings, glTF)        
+        profile_end('lights')
+        bpy.context.window_manager.progress_update(50)
+    
+    bpy.context.window_manager.progress_update(50)
     
     #
     
+    profile_start()
     generate_meshes(operator, context, export_settings, glTF)
+    profile_end('meshes')
+    bpy.context.window_manager.progress_update(60)
     
     #
 
+    profile_start()
     generate_nodes(operator, context, export_settings, glTF)
+    profile_end('nodes')
+    bpy.context.window_manager.progress_update(70)
     
     #
     
     if export_settings['gltf_animations']:
+        profile_start()
         generate_animations(operator, context, export_settings, glTF)
+        profile_end('animations')
+        bpy.context.window_manager.progress_update(80)
+        
+    bpy.context.window_manager.progress_update(80)
     
     #
     
+    profile_start()
     generate_scenes(operator, context, export_settings, glTF)
+    profile_end('scenes')
     
+    bpy.context.window_manager.progress_update(95)
+    
+    profile_start()
     generate_scene(operator, context, export_settings, glTF)
+    profile_end('scene')
+    
+    bpy.context.window_manager.progress_update(100)
     
     #
     
