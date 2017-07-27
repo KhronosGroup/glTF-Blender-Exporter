@@ -512,7 +512,7 @@ def generate_animations(operator,
                 else:
                     end = max(end, current_blender_fcurve.range()[1])
         
-        if start is None or end is None:
+        if start is None or end is None or export_settings['gltf_frame_range']:
             start = bpy.context.scene.frame_start
             end = bpy.context.scene.frame_end
         
