@@ -129,12 +129,24 @@ def animate_gather_keys(export_settings, fcurve_list, interpolation):
                 end = blender_fcurve.range()[1]
             else:
                 end = max(end, blender_fcurve.range()[1])
+                
+            #
+            
+            for blender_keyframe in blender_fcurve.keyframe_points:
+                if blender_keyframe.interpolation == 'CONSTANT':
+                    key = blender_keyframe.co[0] + (1.0 - 0.001)
+                    
+                    if key not in keys:
+                        keys.append(key)
 
         key = start
         while key <= end:
             if not export_settings['gltf_frame_range'] or (export_settings['gltf_frame_range'] and key >= bpy.context.scene.frame_start and key <= bpy.context.scene.frame_end): 
                 keys.append(key)
             key += 1.0
+            
+        keys.sort()
+        
     else: 
         for blender_fcurve in fcurve_list:
             if blender_fcurve is None:
