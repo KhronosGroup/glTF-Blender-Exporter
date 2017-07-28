@@ -166,7 +166,7 @@ def generate_animations_parameter(operator,
             #
             
             if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = keys[0]
+                key_offset = bpy.context.scene.frame_start
                 
                 keys[:] = [key - key_offset for key in keys] 
     
@@ -232,7 +232,7 @@ def generate_animations_parameter(operator,
         #
         
         if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-            key_offset = keys[0]
+            key_offset = bpy.context.scene.frame_start
             
             keys[:] = [key - key_offset for key in keys] 
 
@@ -305,7 +305,7 @@ def generate_animations_parameter(operator,
             #
             
             if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = keys[0]
+                key_offset = bpy.context.scene.frame_start
                 
                 keys[:] = [key - key_offset for key in keys] 
     
@@ -368,7 +368,7 @@ def generate_animations_parameter(operator,
             #
             
             if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = keys[0]
+                key_offset = bpy.context.scene.frame_start
                 
                 keys[:] = [key - key_offset for key in keys] 
     
