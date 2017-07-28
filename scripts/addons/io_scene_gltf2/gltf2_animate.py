@@ -132,12 +132,24 @@ def animate_gather_keys(export_settings, fcurve_list, interpolation):
                 
             #
             
+            add_epsilon_keyframe = False
             for blender_keyframe in blender_fcurve.keyframe_points:
-                if blender_keyframe.interpolation == 'CONSTANT':
-                    key = blender_keyframe.co[0] + (1.0 - 0.001)
+                if add_epsilon_keyframe:
+                    key = blender_keyframe.co[0] - 0.001
                     
                     if key not in keys:
                         keys.append(key)
+                        
+                    add_epsilon_keyframe = False
+                
+                if blender_keyframe.interpolation == 'CONSTANT':
+                    add_epsilon_keyframe = True
+            
+            if add_epsilon_keyframe:
+                key = end - 0.001
+                
+                if key not in keys:
+                    keys.append(key)
 
         key = start
         while key <= end:
