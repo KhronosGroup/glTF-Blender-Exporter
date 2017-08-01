@@ -286,7 +286,7 @@ def create_png_data(blender_image):
     width = blender_image.size[0]
     height = blender_image.size[1]
     
-    buf = bytearray([int(channel * 255.0) for channel in blender_image.pixels])    
+    buf = bytearray([int(pow(channel,  0.45) * 255.0) for channel in blender_image.pixels])    
     
     #
     # Taken from 'blender-thumbnailer.py' in Blender.
