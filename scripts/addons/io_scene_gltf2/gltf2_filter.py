@@ -93,7 +93,7 @@ def filter_apply(export_settings):
                     else:
                         use_auto_smooth = False
                         
-                        print_console('WARNING', 'Auto smooth and shape keys cannot be exported in paralle. Falling back to non auto smooth.')
+                        print_console('WARNING', 'Auto smooth and shape keys cannot be exported in parallel. Falling back to non auto smooth.')
                 
                 if export_settings['gltf_apply'] or use_auto_smooth:
                     
