@@ -1519,8 +1519,20 @@ def generate_nodes(operator,
             joints = []
             
             joints_written = False
+            
+            #
+            
+            children_list = list(blender_object.children)
+            
+            for blender_check_object in filtered_objects:
+                blender_check_armature = blender_check_object.find_armature()
+                
+                if blender_check_armature is not None and blender_check_object not in children_list:
+                    children_list.append(blender_check_object)
+            
+            #
     
-            for blender_object_child in blender_object.children:
+            for blender_object_child in children_list:
                 #
                 # Property: skin and node
                 #
@@ -1624,8 +1636,24 @@ def generate_nodes(operator,
         
         if export_settings['gltf_skins']:
             blender_armature = blender_object.find_armature()
-            if blender_armature is not None and blender_object.parent is not None:
-                index_offset = blender_armature.children.index(blender_object)
+            if blender_armature is not None:
+                index_offset = 0
+                
+                if blender_object in blender_armature.children:
+                    index_offset = blender_armature.children.index(blender_object)
+                else:
+                    index_local_offset = 0
+                    
+                    for blender_check_object in filtered_objects:
+                        blender_check_armature = blender_check_object.find_armature()
+                        if blender_check_armature == blender_armature:
+                            index_local_offset += 1
+                            
+                        if blender_object == blender_check_object:
+                            index_local_offset -= 1
+                            break
+                    
+                    index_offset = len(blender_armature.children) + index_local_offset
                 
                 node['skin'] = get_skin_index(glTF, blender_armature.name, index_offset)
 
