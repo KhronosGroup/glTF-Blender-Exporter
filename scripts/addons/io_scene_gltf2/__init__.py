@@ -157,7 +157,7 @@ class ExportGLTF2_Base():
     )
 
     export_layers = BoolProperty(
-            name='Export for all layers',
+            name='Export all layers',
             description='',
             default=True
     )
@@ -181,7 +181,7 @@ class ExportGLTF2_Base():
     )
 
     export_frame_range = BoolProperty(
-            name='Export withing playback range',
+            name='Export within playback range',
             description='',
             default=True
     )
