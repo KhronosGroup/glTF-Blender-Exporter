@@ -7,7 +7,7 @@ Blender glTF 2.0 Exporter
 Version
 -------
 
-1.0 Beta
+1.0 Release Candidate
 
 Introduction
 ------------
@@ -34,6 +34,8 @@ Location of environment maps used in the [scenes](scenes/).
 Miscellaneous files like logos and so on.  
 [pbr_node](pbr_node/)  
 Blender node groups for simulating the glTF 2.0 material model.  
+[polly](polly/)  
+Project 'Polly' Blender and glTF 2.0 scenes.  
 [scenes](scenes/)  
 Basic and enhanced scenes for testing the exporter.  
 [scripts](scripts/)  
