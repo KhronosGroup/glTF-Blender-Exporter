@@ -7,7 +7,7 @@ Blender glTF 2.0 Exporter
 Version
 -------
 
-1.0 Release Candidate
+1.0
 
 Introduction
 ------------
