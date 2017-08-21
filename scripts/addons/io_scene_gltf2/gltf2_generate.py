@@ -2323,6 +2323,16 @@ def generate_materials(operator,
                 pbrMetallicRoughness = material['pbrMetallicRoughness']
 
                 alpha = 1.0
+                alphaMode = 'OPAQUE'
+                if blender_material.use_transparency:
+                    alpha = blender_material.alpha
+                    if blender_material.transparency_method == 'MASK':
+                        alphaMode = 'MASK'
+                    else:
+                        alphaMode = 'BLEND'
+
+                if alphaMode != 'OPAQUE': 
+                    material['alphaMode'] = alphaMode
 
                 for blender_texture_slot in blender_material.texture_slots:
                     if blender_texture_slot and blender_texture_slot.texture and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None:
