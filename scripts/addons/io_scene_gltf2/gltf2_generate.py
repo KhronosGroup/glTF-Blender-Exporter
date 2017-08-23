@@ -2159,6 +2159,15 @@ def generate_materials(operator,
                     if get_scalar(blender_node.inputs['Use COLOR_0'].default_value, 0.0) < 0.5:
                         export_settings['gltf_use_no_color'].append(blender_material.name)
 
+
+                    #
+                    
+                    if export_settings['gltf_extras']:
+                        extras = create_custom_property(blender_material)
+                        
+                        if extras is not None:
+                            material['extras'] = extras 
+            
                     #
             
                     material['name'] = blender_material.name
