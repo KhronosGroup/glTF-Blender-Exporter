@@ -2160,6 +2160,14 @@ def generate_materials(operator,
                         export_settings['gltf_use_no_color'].append(blender_material.name)
 
                     #
+                    
+                    if export_settings['gltf_extras']:
+                        extras = create_custom_property(blender_material)
+                        
+                        if extras is not None:
+                            material['extras'] = extras 
+            
+                    #
             
                     material['name'] = blender_material.name
             
