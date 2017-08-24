@@ -1943,7 +1943,7 @@ def generate_materials(operator,
                     
                     alpha = 1.0
     
-                    if blender_node.node_tree.name == 'glTF Metallic Roughness':
+                    if blender_node.node_tree.name.startswith('glTF Metallic Roughness'):
                         # 
                         # Property: pbrMetallicRoughness
                         #
@@ -2004,7 +2004,7 @@ def generate_materials(operator,
     
                             pbrMetallicRoughness['metallicRoughnessTexture'] = metallicRoughnessTexture
                             
-                    if blender_node.node_tree.name == 'glTF Specular Glossiness':
+                    if blender_node.node_tree.name.startswith('glTF Specular Glossiness'):
                         KHR_materials_pbrSpecularGlossiness_Used = True
                         
                         # 

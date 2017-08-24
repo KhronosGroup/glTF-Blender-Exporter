@@ -197,7 +197,7 @@ def filter_apply(export_settings):
                         if blender_socket.is_linked:
                             for blender_link in blender_socket.links:
                                 if isinstance(blender_link.to_node, bpy.types.ShaderNodeGroup):
-                                    if blender_link.to_node.node_tree.name == 'glTF Metallic Roughness' or blender_link.to_node.node_tree.name == 'glTF Specular Glossiness':
+                                    if blender_link.to_node.node_tree.name.startswith('glTF Metallic Roughness') or blender_link.to_node.node_tree.name.startswith('glTF Specular Glossiness'):
                                         add_node = True
                                         break
                         if add_node:

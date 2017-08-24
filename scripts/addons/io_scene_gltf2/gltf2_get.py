@@ -42,9 +42,9 @@ def get_used_materials():
         if blender_material.node_tree and blender_material.use_nodes:
             for currentNode in blender_material.node_tree.nodes:
                 if isinstance(currentNode, bpy.types.ShaderNodeGroup):
-                    if currentNode.node_tree.name == 'glTF Metallic Roughness':
+                    if currentNode.node_tree.name.startswith('glTF Metallic Roughness'):
                         materials.append(blender_material)
-                    elif currentNode.node_tree.name == 'glTF Specular Glossiness':
+                    elif currentNode.node_tree.name.startswith('glTF Specular Glossiness'):
                         materials.append(blender_material)
         else:
             materials.append(blender_material)
