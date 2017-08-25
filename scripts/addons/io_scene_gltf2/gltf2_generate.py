@@ -146,12 +146,14 @@ def generate_animations_parameter(operator,
             #
             
             interpolation = animate_get_interpolation(export_settings, location)
+            if interpolation == 'CUBICSPLINE' and node_type == 'JOINT':
+                interpolation = 'CONVERSION_NEEDED'
             
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
                 sampler['interpolation'] = 'LINEAR'
             
-            translation_data = animate_location(export_settings, location, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
+            translation_data, in_tangent_data, out_tangent_data = animate_location(export_settings, location, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
             
             #
             
@@ -160,9 +162,17 @@ def generate_animations_parameter(operator,
     
             for key in keys:
                 translation_value = translation_data[key]
-                for value_element in translation_value:
-                    values.append(value_element)
-
+                in_tangent_value = in_tangent_data[key]
+                out_tangent_value = out_tangent_data[key]
+                for i in range(0, 3):
+                    if interpolation == 'CUBICSPLINE':
+                        values.append(in_tangent_value[i])
+                for i in range(0, 3):
+                    values.append(translation_value[i])
+                for i in range(0, 3):
+                    if interpolation == 'CUBICSPLINE':
+                        values.append(out_tangent_value[i])
+            
             #
             
             if len(keys) > 0 and export_settings['gltf_move_keyframes']:
@@ -200,6 +210,8 @@ def generate_animations_parameter(operator,
     #
     
     rotation_data = None
+    rotation_in_tangent_data = [0.0, 0.0, 0.0, 0.0]
+    rotation_out_tangent_data = [0.0, 0.0, 0.0, 0.0]
     interpolation = None
     
     sampler_name = prefix + action.name + "_rotation"
@@ -207,15 +219,23 @@ def generate_animations_parameter(operator,
     if get_index(samplers, sampler_name) == -1:
         if rotation_axis_angle.count(None) < 4:
             interpolation = animate_get_interpolation(export_settings, rotation_axis_angle)
+            # Conversion required in any case.
+            if interpolation == 'CUBICSPLINE':
+                interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
         if rotation_euler.count(None) < 3:
             interpolation = animate_get_interpolation(export_settings, rotation_euler)
+            # Conversion required in any case.
+            if interpolation == 'CUBICSPLINE':
+                interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
 
         if rotation_quaternion.count(None) < 4:
             interpolation = animate_get_interpolation(export_settings, rotation_quaternion)
-            rotation_data = animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
+            if interpolation == 'CUBICSPLINE' and node_type == 'JOINT':
+                interpolation = 'CONVERSION_NEEDED'
+            rotation_data, rotation_in_tangent_data, rotation_out_tangent_data = animate_rotation_quaternion(export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
         
     if rotation_data is not None:
         
@@ -228,6 +248,19 @@ def generate_animations_parameter(operator,
             rotation_value = rotation_data[key]
             for value_element in rotation_value:
                 values.append(value_element)
+
+        for key in keys:
+            rotation_value = rotation_data[key]
+            in_tangent_value = rotation_in_tangent_data[key]
+            out_tangent_value = rotation_out_tangent_data[key]
+            for i in range(0, 4):
+                if interpolation == 'CUBICSPLINE':
+                    values.append(in_tangent_value[i])
+            for i in range(0, 4):
+                values.append(rotation_value[i])
+            for i in range(0, 4):
+                if interpolation == 'CUBICSPLINE':
+                    values.append(out_tangent_value[i])
 
         #
         
@@ -285,12 +318,14 @@ def generate_animations_parameter(operator,
             #
             
             interpolation = animate_get_interpolation(export_settings, scale)
+            if interpolation == 'CUBICSPLINE' and node_type == 'JOINT':
+                interpolation = 'CONVERSION_NEEDED'
 
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
                 sampler['interpolation'] = 'LINEAR'
             
-            scale_data = animate_scale(export_settings, scale, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
+            scale_data, in_tangent_data, out_tangent_data = animate_scale(export_settings, scale, interpolation, node_type, used_node_name, matrix_correction, matrix_basis)
 
             #
 
@@ -299,8 +334,16 @@ def generate_animations_parameter(operator,
     
             for key in keys:
                 scale_value = scale_data[key]
-                for value_element in scale_value:
-                    values.append(value_element)
+                in_tangent_value = in_tangent_data[key]
+                out_tangent_value = out_tangent_data[key]
+                for i in range(0, 3):
+                    if interpolation == 'CUBICSPLINE':
+                        values.append(in_tangent_value[i])
+                for i in range(0, 3):
+                    values.append(scale_value[i])
+                for i in range(0, 3):
+                    if interpolation == 'CUBICSPLINE':
+                        values.append(out_tangent_value[i])
     
             #
             
@@ -348,6 +391,9 @@ def generate_animations_parameter(operator,
             #
             
             interpolation = animate_get_interpolation(export_settings, value)
+            # TODO: Change
+            if interpolation == 'CUBICSPLINE':
+                interpolation = 'CONVERSION_NEEDED'
 
             sampler['interpolation'] = interpolation
             if interpolation == 'CONVERSION_NEEDED':
