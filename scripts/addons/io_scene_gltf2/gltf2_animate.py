@@ -497,20 +497,34 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
     times = animate_convert_keys(keys)
 
     result = {}
+    result_in_tangent = {}
+    result_out_tangent = {}
 
     keyframe_index = 0
     for time in times:
         value_data = []
+        in_tangent = []
+        out_tangent = []
         
         for blender_fcurve in value_parameter:
             
             if blender_fcurve is not None:
-                value = blender_fcurve.evaluate(keys[keyframe_index]) 
-                
-                value_data.append(value)
+                if interpolation == 'CUBICSPLINE':
+                    blender_key_frame = blender_fcurve.keyframe_points[keyframe_index]
+
+                    value_data.append(blender_key_frame.co[1])
+                    
+                    in_tangent.append(3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / (blender_key_frame.co[0] - blender_key_frame.handle_left[0])) 
+                    out_tangent.append(3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / (blender_key_frame.handle_right[0] - blender_key_frame.co[0])) 
+                else: 
+                    value = blender_fcurve.evaluate(keys[keyframe_index]) 
+                    
+                    value_data.append(value)
         
         result[time] = value_data
+        result_in_tangent[time] = in_tangent
+        result_out_tangent[time] = out_tangent
         
         keyframe_index += 1 
 
-    return result
+    return result, result_in_tangent, result_out_tangent
