@@ -158,6 +158,7 @@ def generate_animations_parameter(operator,
             #
             
             keys = sorted(translation_data.keys())
+            keys[:] = [key for key in keys if key >= 0]
             values = []
     
             for key in keys:
@@ -242,6 +243,7 @@ def generate_animations_parameter(operator,
         #
 
         keys = sorted(rotation_data.keys())
+        keys[:] = [key for key in keys if key >= 0]
         values = []
 
         for key in keys:
@@ -330,6 +332,7 @@ def generate_animations_parameter(operator,
             #
 
             keys = sorted(scale_data.keys())
+            keys[:] = [key for key in keys if key >= 0]
             values = []
     
             for key in keys:
@@ -403,6 +406,7 @@ def generate_animations_parameter(operator,
             #
 
             keys = sorted(value_data.keys())
+            keys[:] = [key for key in keys if key >= 0]
             values = []
     
             for key in keys:

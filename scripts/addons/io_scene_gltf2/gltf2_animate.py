@@ -49,6 +49,13 @@ def animate_get_interpolation(export_settings, blender_fcurve_list):
         if blender_fcurve is None:
             continue
         
+        #
+        
+        if len(blender_fcurve.keyframe_points) > 0 and blender_fcurve.keyframe_points[0].co[0] < 0:
+            return 'CONVERSION_NEEDED'
+        
+        #
+        
         for blender_keyframe in blender_fcurve.keyframe_points:
             if interpolation is None:
                 if blender_keyframe.interpolation == 'BEZIER': 
