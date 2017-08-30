@@ -252,17 +252,12 @@ def generate_animations_parameter(operator,
                 values.append(value_element)
 
         for key in keys:
-            rotation_value = rotation_data[key]
-            in_tangent_value = rotation_in_tangent_data[key]
-            out_tangent_value = rotation_out_tangent_data[key]
             for i in range(0, 4):
                 if interpolation == 'CUBICSPLINE':
-                    values.append(in_tangent_value[i])
-            for i in range(0, 4):
-                values.append(rotation_value[i])
-            for i in range(0, 4):
+                    values.append(rotation_in_tangent_data[key][i])
+                values.append(rotation_data[key][i])
                 if interpolation == 'CUBICSPLINE':
-                    values.append(out_tangent_value[i])
+                    values.append(rotation_out_tangent_data[key][i])
 
         #
         
