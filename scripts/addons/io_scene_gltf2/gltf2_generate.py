@@ -162,17 +162,14 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                translation_value = translation_data[key]
-                in_tangent_value = in_tangent_data[key]
-                out_tangent_value = out_tangent_data[key]
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(in_tangent_value[i])
+                        values.append(in_tangent_data[key][i])
                 for i in range(0, 3):
-                    values.append(translation_value[i])
+                    values.append(translation_data[key][i])
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(out_tangent_value[i])
+                        values.append(out_tangent_data[key][i])
             
             #
             
@@ -255,7 +252,9 @@ def generate_animations_parameter(operator,
             for i in range(0, 4):
                 if interpolation == 'CUBICSPLINE':
                     values.append(rotation_in_tangent_data[key][i])
+            for i in range(0, 4):
                 values.append(rotation_data[key][i])
+            for i in range(0, 4):
                 if interpolation == 'CUBICSPLINE':
                     values.append(rotation_out_tangent_data[key][i])
 
@@ -331,17 +330,14 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                scale_value = scale_data[key]
-                in_tangent_value = in_tangent_data[key]
-                out_tangent_value = out_tangent_data[key]
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(in_tangent_value[i])
+                        values.append(in_tangent_data[key][i])
                 for i in range(0, 3):
-                    values.append(scale_value[i])
+                    values.append(scale_data[key][i])
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(out_tangent_value[i])
+                        values.append(out_tangent_data[key][i])
     
             #
             
@@ -405,17 +401,14 @@ def generate_animations_parameter(operator,
             values = []
     
             for key in keys:
-                value_value = value_data[key]
-                in_tangent_value = in_tangent_data[key]
-                out_tangent_value = out_tangent_data[key]
                 for i in range(0, len(in_tangent_value)):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(in_tangent_value[i])
-                for i in range(0, len(value_value)):
-                    values.append(value_value[i])
+                        values.append(in_tangent_data[key][i])
+                for i in range(0, len(value_data[key])):
+                    values.append(value_data[key][i])
                 for i in range(0, len(out_tangent_value)):
                     if interpolation == 'CUBICSPLINE':
-                        values.append(out_tangent_value[i])
+                        values.append(out_tangent_data[key][i])
     
             #
             
