@@ -158,10 +158,19 @@ def generate_animations_parameter(operator,
             #
             
             keys = sorted(translation_data.keys())
-            keys[:] = [key for key in keys if key >= 0]
             values = []
-    
+            final_keys = []
+
+            key_offset = 0.0
+            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
+                key_offset = bpy.context.scene.frame_start / bpy.context.scene.render.fps
+
             for key in keys:
+                if key - key_offset < 0.0:
+                    continue 
+                
+                final_keys.append(key - key_offset)
+                
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
                         values.append(in_tangent_data[key][i])
@@ -173,18 +182,11 @@ def generate_animations_parameter(operator,
             
             #
             
-            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = bpy.context.scene.frame_start
-                
-                keys[:] = [key - key_offset for key in keys if key - key_offset >= 0] 
-    
-            #
-            
             componentType = "FLOAT"
-            count = len(keys)
+            count = len(final_keys)
             type = "SCALAR"
             
-            input = create_accessor(operator, context, export_settings, glTF, keys, componentType, count, type, "")
+            input = create_accessor(operator, context, export_settings, glTF, final_keys, componentType, count, type, "")
             
             sampler['input'] = input
             
@@ -240,15 +242,19 @@ def generate_animations_parameter(operator,
         #
 
         keys = sorted(rotation_data.keys())
-        keys[:] = [key for key in keys if key >= 0]
         values = []
+        final_keys = []
+
+        key_offset = 0.0
+        if len(keys) > 0 and export_settings['gltf_move_keyframes']:
+            key_offset = bpy.context.scene.frame_start / bpy.context.scene.render.fps
 
         for key in keys:
-            rotation_value = rotation_data[key]
-            for value_element in rotation_value:
-                values.append(value_element)
-
-        for key in keys:
+            if key - key_offset < 0.0:
+                continue 
+            
+            final_keys.append(key - key_offset)
+            
             for i in range(0, 4):
                 if interpolation == 'CUBICSPLINE':
                     values.append(rotation_in_tangent_data[key][i])
@@ -259,23 +265,16 @@ def generate_animations_parameter(operator,
                     values.append(rotation_out_tangent_data[key][i])
 
         #
-        
-        if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-            key_offset = bpy.context.scene.frame_start
-            
-            keys[:] = [key - key_offset for key in keys if key - key_offset >= 0] 
-
-        #
 
         sampler = {}
 
         #
         
         componentType = "FLOAT"
-        count = len(keys)
+        count = len(final_keys)
         type = "SCALAR"
         
-        input = create_accessor(operator, context, export_settings, glTF, keys, componentType, count, type, "")
+        input = create_accessor(operator, context, export_settings, glTF, final_keys, componentType, count, type, "")
         
         sampler['input'] = input
         
@@ -326,10 +325,19 @@ def generate_animations_parameter(operator,
             #
 
             keys = sorted(scale_data.keys())
-            keys[:] = [key for key in keys if key >= 0]
             values = []
+            final_keys = []
+    
+            key_offset = 0.0
+            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
+                key_offset = bpy.context.scene.frame_start / bpy.context.scene.render.fps
     
             for key in keys:
+                if key - key_offset < 0.0:
+                    continue 
+                
+                final_keys.append(key - key_offset)
+                
                 for i in range(0, 3):
                     if interpolation == 'CUBICSPLINE':
                         values.append(in_tangent_data[key][i])
@@ -341,18 +349,11 @@ def generate_animations_parameter(operator,
     
             #
             
-            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = bpy.context.scene.frame_start
-                
-                keys[:] = [key - key_offset for key in keys if key - key_offset >= 0] 
-    
-            #
-            
             componentType = "FLOAT"
-            count = len(keys)
+            count = len(final_keys)
             type = "SCALAR"
             
-            input = create_accessor(operator, context, export_settings, glTF, keys, componentType, count, type, "")
+            input = create_accessor(operator, context, export_settings, glTF, final_keys, componentType, count, type, "")
             
             sampler['input'] = input
             
@@ -397,10 +398,19 @@ def generate_animations_parameter(operator,
             #
 
             keys = sorted(value_data.keys())
-            keys[:] = [key for key in keys if key >= 0]
             values = []
+            final_keys = []
+    
+            key_offset = 0.0
+            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
+                key_offset = bpy.context.scene.frame_start / bpy.context.scene.render.fps
     
             for key in keys:
+                if key - key_offset < 0.0:
+                    continue 
+                
+                final_keys.append(key - key_offset)
+                
                 for i in range(0, len(in_tangent_value)):
                     if interpolation == 'CUBICSPLINE':
                         values.append(in_tangent_data[key][i])
@@ -412,18 +422,11 @@ def generate_animations_parameter(operator,
     
             #
             
-            if len(keys) > 0 and export_settings['gltf_move_keyframes']:
-                key_offset = bpy.context.scene.frame_start
-                
-                keys[:] = [key - key_offset for key in keys if key - key_offset >= 0] 
-    
-            #
-            
             componentType = "FLOAT"
-            count = len(keys)
+            count = len(final_keys)
             type = "SCALAR"
             
-            input = create_accessor(operator, context, export_settings, glTF, keys, componentType, count, type, "")
+            input = create_accessor(operator, context, export_settings, glTF, final_keys, componentType, count, type, "")
             
             sampler['input'] = input
             
