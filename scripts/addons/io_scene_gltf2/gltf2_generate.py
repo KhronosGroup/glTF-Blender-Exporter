@@ -853,7 +853,7 @@ def generate_cameras(operator,
         glTF['cameras'] = cameras
 
 
-def generate_lights(operator,
+def generate_lights_cmn(operator,
                     context,
                     export_settings,
                     glTF):
@@ -867,15 +867,15 @@ def generate_lights(operator,
     #
     #
     
-    filtered_lights = export_settings['filtered_lights']
+    filtered_lights_cmn = export_settings['filtered_lights_cmn']
     
-    for blender_light in filtered_lights:
+    for blender_light in filtered_lights_cmn:
 
         #
         # Property: light
         #
 
-        light = {}
+        light = {'profile' : 'CMN'}
         
         if blender_light.type == 'SUN':
             light['type'] = 'directional' 
@@ -887,22 +887,31 @@ def generate_lights(operator,
             continue
 
         if blender_light.type == 'POINT' or blender_light.type == 'SPOT':
+            
+            positional = {}
+            
             if blender_light.falloff_type == 'CONSTANT':
-                light['constantAttenuation'] = 1.0
+                positional['constantAttenuation'] = 1.0
             elif blender_light.falloff_type == 'INVERSE_LINEAR':
-                light['linearAttenuation'] = 1.0 / blender_light.distance
+                positional['linearAttenuation'] = 1.0 / blender_light.distance
             elif blender_light.falloff_type == 'INVERSE_SQUARE':
-                light['quadraticAttenuation'] = 1.0 / blender_light.distance
+                positional['quadraticAttenuation'] = 1.0 / blender_light.distance
             elif blender_light.falloff_type == 'INVERSE_COEFFICIENTS':
-                light['constantAttenuation'] = blender_light.constant_coefficient * 1.0
-                light['linearAttenuation'] = blender_light.linear_coefficient * 1.0 / blender_light.distance
-                light['quadraticAttenuation'] = blender_light.quadratic_coefficient *  1.0 / blender_light.distance
+                positional['constantAttenuation'] = blender_light.constant_coefficient * 1.0
+                positional['linearAttenuation'] = blender_light.linear_coefficient * 1.0 / blender_light.distance
+                positional['quadraticAttenuation'] = blender_light.quadratic_coefficient *  1.0 / blender_light.distance
             else:
                 continue
             
+            light['positional'] = positional 
+            
             if blender_light.type == 'SPOT':
-                light['fallOffAngle'] = blender_light.spot_size
-                light['fallOffExponent'] = 128.0 * blender_light.spot_blend
+                spot = {}
+                
+                spot['fallOffAngle'] = blender_light.spot_size
+                spot['fallOffExponent'] = 128.0 * blender_light.spot_blend
+                
+                positional['spot'] = spot
 
         light['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy, blender_light.color[2] * blender_light.energy]
         
@@ -944,19 +953,19 @@ def generate_lights(operator,
     #
 
     if len (lights) > 0:
-        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights')
-        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights')
+        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights_cmn')
+        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights_cmn')
 
         if glTF.get('extensions') is None:
             glTF['extensions'] = {}
             
         extensions = glTF['extensions']
         
-        extensions_lights = {}
+        extensions_lights_cmn = {}
 
-        extensions['KHR_lights'] = extensions_lights
+        extensions['KHR_lights_cmn'] = extensions_lights_cmn
         
-        extensions_lights['lights'] = lights
+        extensions_lights_cmn['lights'] = lights
 
 
 def generate_meshes(operator,
@@ -1456,12 +1465,12 @@ def generate_node_instance(operator,
                     nodes.append(correction_node)
     
     
-        if export_settings['gltf_lights']:
+        if export_settings['gltf_lights_cmn']:
             if blender_object.type == 'LAMP':
                 light = get_light_index(glTF, blender_object.data.name)
                 if light >= 0:
-                    khr_lights = {'light' : light}
-                    extensions = {'KHR_lights' : khr_lights}
+                    khr_lights_cmn = {'light' : light}
+                    extensions = {'KHR_lights_cmn' : khr_lights_cmn}
                     
                     # Add correction node for light, as default direction is different to Blender.
                     correction_node = {}
@@ -1726,7 +1735,7 @@ def generate_nodes(operator,
                     children.append(child_index)
 
         # Light
-        if export_settings['gltf_lights']:
+        if export_settings['gltf_lights_cmn']:
             if blender_object.type == 'LAMP':
                 child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
                 if child_index >= 0:
@@ -2289,25 +2298,15 @@ def generate_materials(operator,
                                 }
                                 common['diffuseTexture'] = diffuseTexture
                         #
-                        # Specular texture
+                        # Specular shininess texture
                         #
                         if blender_texture_slot.use_map_color_spec:
                             index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
                             if index >= 0:
-                                specularTexture = {
+                                specularShininessTexture = {
                                     'index' : index
                                 }
-                                common['specularTexture'] = specularTexture
-                        #
-                        # Shininess texture
-                        #
-                        if blender_texture_slot.use_map_hardness:
-                            index = get_texture_index_by_filepath(export_settings, glTF, blender_texture_slot.texture.image.filepath)
-                            if index >= 0:
-                                shininessTexture = {
-                                    'index' : index
-                                }
-                                common['shininessTexture'] = shininessTexture
+                                common['specularShininessTexture'] = specularShininessTexture
                         #
                         # Ambient texture
                         #
@@ -2560,11 +2559,11 @@ def generate_scenes(operator,
                 
         #
 
-        if export_settings['gltf_lights']:
+        if export_settings['gltf_lights_cmn']:
             light = get_light_index(glTF, 'Ambient_' + blender_scene.name)
             if light >= 0:
-                khr_lights = {'light' : light}
-                extensions = {'KHR_lights' : khr_lights}
+                khr_lights_cmn = {'light' : light}
+                extensions = {'KHR_lights_cmn' : khr_lights_cmn}
                 scene['extensions'] = extensions
 
         #
@@ -2649,9 +2648,9 @@ def generate_glTF(operator,
         profile_end('cameras')
         bpy.context.window_manager.progress_update(40)
         
-    if export_settings['gltf_lights']:
+    if export_settings['gltf_lights_cmn']:
         profile_start()
-        generate_lights(operator, context, export_settings, glTF)        
+        generate_lights_cmn(operator, context, export_settings, glTF)        
         profile_end('lights')
         bpy.context.window_manager.progress_update(50)
     

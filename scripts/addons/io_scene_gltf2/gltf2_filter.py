@@ -218,8 +218,6 @@ def filter_apply(export_settings):
                                 accept = True
                             if blender_texture_slot.use_map_color_spec:
                                 accept = True
-                            if blender_texture_slot.use_map_hardness:
-                                accept = True
     
                             if blender_texture_slot.use_map_ambient:
                                 accept = True
@@ -306,7 +304,7 @@ def filter_apply(export_settings):
     #
     #
     
-    filtered_lights = []
+    filtered_lights_cmn = []
     
     for blender_light in bpy.data.lamps:
         
@@ -320,9 +318,9 @@ def filter_apply(export_settings):
         if blender_light.type == 'AREA' or blender_light.type == 'HEMI':
             continue
 
-        filtered_lights.append(blender_light)
+        filtered_lights_cmn.append(blender_light)
                 
-    export_settings['filtered_lights'] = filtered_lights
+    export_settings['filtered_lights_cmn'] = filtered_lights_cmn
     
     #
     #

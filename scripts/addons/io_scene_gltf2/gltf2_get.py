@@ -327,15 +327,15 @@ def get_light_index(glTF, name):
     
     extensions = glTF['extensions']
         
-    if extensions.get('KHR_lights') is None:
+    if extensions.get('KHR_lights_cmn') is None:
         return -1
     
-    khr_lights = extensions['KHR_lights']
+    khr_lights_cmn = extensions['KHR_lights_cmn']
 
-    if khr_lights.get('lights') is None:
+    if khr_lights_cmn.get('lights') is None:
         return -1
 
-    lights = khr_lights['lights']
+    lights = khr_lights_cmn['lights']
 
     index = 0
     for light in lights:

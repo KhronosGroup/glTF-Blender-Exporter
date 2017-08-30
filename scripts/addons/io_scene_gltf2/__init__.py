@@ -234,8 +234,8 @@ class ExportGLTF2_Base():
             default=True
     )
 
-    export_lights = BoolProperty(
-            name='Export lights',
+    export_lights_cmn = BoolProperty(
+            name='Export lights common',
             description='',
             default=False
     )
@@ -310,7 +310,7 @@ class ExportGLTF2_Base():
         else:
             export_settings['gltf_morph_tangent'] = False
         
-        export_settings['gltf_lights'] = self.export_lights
+        export_settings['gltf_lights_cmn'] = self.export_lights_cmn
         export_settings['gltf_common'] = self.export_common
         export_settings['gltf_displacement'] = self.export_displacement
         
@@ -380,7 +380,7 @@ class ExportGLTF2_Base():
 
         col = layout.box().column()
         col.label('Experimental:', icon='RADIO')
-        col.prop(self, 'export_lights')
+        col.prop(self, 'export_lights_cmn')
         col.prop(self, 'export_common')
         col.prop(self, 'export_displacement')
 
