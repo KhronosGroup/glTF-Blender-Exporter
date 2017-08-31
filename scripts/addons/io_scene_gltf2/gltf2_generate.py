@@ -1552,10 +1552,27 @@ def generate_node_instance(operator,
     
         if export_settings['gltf_lights_cmn']:
             if blender_object.type == 'LAMP':
-                light = get_light_index(glTF, blender_object.data.name)
+                light = get_light_index_cmn(glTF, blender_object.data.name)
                 if light >= 0:
                     khr_lights_cmn = {'light' : light}
                     extensions = {'KHR_lights_cmn' : khr_lights_cmn}
+                    
+                    # Add correction node for light, as default direction is different to Blender.
+                    correction_node = {}
+                    
+                    correction_node['name'] = 'Correction_' + blender_object.name
+                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2], correction_quaternion[3], correction_quaternion[0]]
+                    
+                    correction_node['extensions'] = extensions
+                    
+                    nodes.append(correction_node)
+
+        if export_settings['gltf_lights_pbr']:
+            if blender_object.type == 'LAMP':
+                light = get_light_index_pbr(glTF, blender_object.data.name)
+                if light >= 0:
+                    khr_lights_pbr = {'light' : light}
+                    extensions = {'KHR_lights_pbr' : khr_lights_pbr}
                     
                     # Add correction node for light, as default direction is different to Blender.
                     correction_node = {}
@@ -1819,8 +1836,15 @@ def generate_nodes(operator,
                 if child_index >= 0:
                     children.append(child_index)
 
-        # Light
+        # Light CMN
         if export_settings['gltf_lights_cmn']:
+            if blender_object.type == 'LAMP':
+                child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
+                if child_index >= 0:
+                    children.append(child_index)
+
+        # Light PBR
+        if export_settings['gltf_lights_pbr']:
             if blender_object.type == 'LAMP':
                 child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
                 if child_index >= 0:
@@ -2645,7 +2669,7 @@ def generate_scenes(operator,
         #
 
         if export_settings['gltf_lights_cmn']:
-            light = get_light_index(glTF, 'Ambient_' + blender_scene.name)
+            light = get_light_index_cmn(glTF, 'Ambient_' + blender_scene.name)
             if light >= 0:
                 khr_lights_cmn = {'light' : light}
                 extensions = {'KHR_lights_cmn' : khr_lights_cmn}
