@@ -959,6 +959,100 @@ def generate_lights_cmn(operator,
         extensions_lights_cmn['lights'] = lights
 
 
+def generate_lights_pbr(operator,
+                    context,
+                    export_settings,
+                    glTF):
+    """
+    Generates the top level lights entry.
+    Note: This is currently an experimental feature.
+    """
+
+    lights = []
+
+    #
+    #
+    
+    filtered_lights_pbr = export_settings['filtered_lights_pbr']
+    
+    for blender_light in filtered_lights_pbr:
+
+        #
+        # Property: light
+        #
+
+        light = {'profile' : 'PBR'}
+        
+        #
+        
+        blender_light_node = None
+        
+        for blender_node in blender_light.node_tree.nodes:
+            if blender_node.name.startswith('glTF Directional Light'):
+                light['type'] = 'directional'
+                blender_light_node = blender_node 
+                break
+            if blender_node.name.startswith('glTF Point Light'):
+                light['type'] = 'point'
+                blender_light_node = blender_node
+                break
+            if blender_node.name.startswith('glTF Spot Light'):
+                light['type'] = 'spot'
+                blender_light_node = blender_node
+                break
+            
+        if blender_light_node is None:
+            continue
+        
+        #
+        
+        if light['type'] == 'point' or light['type'] == 'spot':
+            
+            positional = {}
+
+            positional['radius'] = blender_light_node.inputs['Radius'].default_value
+            
+            light['positional'] = positional 
+            
+            if light['type'] == 'spot':
+                spot = {}
+                
+                spot['fallOffAngle'] = blender_light.spot_size
+                spot['fallOffExponent'] = 128.0 * blender_light.spot_blend
+
+                positional['spot'] = spot
+
+        light['color'] = [blender_light_node.inputs['Color'].default_value[0], blender_light_node.inputs['Color'].default_value[1], blender_light_node.inputs['Color'].default_value[2]]
+        light['strength'] = blender_light_node.inputs['Strength'].default_value
+        
+        #
+        
+        light['name'] = blender_light.name
+        
+        #
+        #
+        
+        lights.append(light)
+        
+    #
+    #
+
+    if len (lights) > 0:
+        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights_pbr')
+        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights_pbr')
+
+        if glTF.get('extensions') is None:
+            glTF['extensions'] = {}
+            
+        extensions = glTF['extensions']
+        
+        extensions_lights_pbr = {}
+
+        extensions['KHR_lights_pbr'] = extensions_lights_pbr
+        
+        extensions_lights_pbr['lights'] = lights
+
+
 def generate_meshes(operator,
                   context,
                   export_settings,
@@ -2642,7 +2736,13 @@ def generate_glTF(operator,
     if export_settings['gltf_lights_cmn']:
         profile_start()
         generate_lights_cmn(operator, context, export_settings, glTF)        
-        profile_end('lights')
+        profile_end('lights cmn')
+        bpy.context.window_manager.progress_update(50)
+    
+    if export_settings['gltf_lights_pbr']:
+        profile_start()
+        generate_lights_pbr(operator, context, export_settings, glTF)        
+        profile_end('lights pbr')
         bpy.context.window_manager.progress_update(50)
     
     bpy.context.window_manager.progress_update(50)

@@ -321,6 +321,38 @@ def filter_apply(export_settings):
         filtered_lights_cmn.append(blender_light)
                 
     export_settings['filtered_lights_cmn'] = filtered_lights_cmn
+
+    #
+    #
+    
+    filtered_lights_pbr = []
+    
+    for blender_light in bpy.data.lamps:
+        
+        if blender_light.users == 0:
+            continue
+
+        if export_settings['gltf_selected']:
+            if blender_light not in filtered_objects:
+                continue 
+
+        if blender_light.type == 'AREA' or blender_light.type == 'HEMI':
+            continue
+
+        if not blender_light.use_nodes or blender_light.node_tree is None:
+            continue
+        
+        add_light = False
+        
+        for blender_node in blender_light.node_tree.nodes:
+            if blender_node.name.startswith('glTF Directional Light') or blender_node.name.startswith('glTF Point Light') or blender_node.name.startswith('glTF Spot Light'):
+                add_light = True
+                break 
+
+        if add_light:
+            filtered_lights_pbr.append(blender_light)
+                
+    export_settings['filtered_lights_pbr'] = filtered_lights_pbr
     
     #
     #
