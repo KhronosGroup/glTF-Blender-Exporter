@@ -411,13 +411,13 @@ def generate_animations_parameter(operator,
                 
                 final_keys.append(key - key_offset)
                 
-                for i in range(0, len(in_tangent_value)):
-                    if interpolation == 'CUBICSPLINE':
+                if interpolation == 'CUBICSPLINE':
+                    for i in range(0, len(in_tangent_value)):
                         values.append(in_tangent_data[key][i])
                 for i in range(0, len(value_data[key])):
                     values.append(value_data[key][i])
-                for i in range(0, len(out_tangent_value)):
-                    if interpolation == 'CUBICSPLINE':
+                if interpolation == 'CUBICSPLINE':
+                    for i in range(0, len(out_tangent_value)):
                         values.append(out_tangent_data[key][i])
     
             #
