@@ -345,9 +345,10 @@ def filter_apply(export_settings):
         add_light = False
         
         for blender_node in blender_light.node_tree.nodes:
-            if blender_node.name.startswith('glTF Directional Light') or blender_node.name.startswith('glTF Point Light') or blender_node.name.startswith('glTF Spot Light'):
-                add_light = True
-                break 
+            if isinstance(blender_node, bpy.types.ShaderNodeGroup):
+                if blender_node.node_tree.name.startswith('glTF Directional Light') or blender_node.node_tree.name.startswith('glTF Point Light') or blender_node.node_tree.name.startswith('glTF Spot Light'):
+                    add_light = True
+                    break 
 
         if add_light:
             filtered_lights_pbr.append(blender_light)

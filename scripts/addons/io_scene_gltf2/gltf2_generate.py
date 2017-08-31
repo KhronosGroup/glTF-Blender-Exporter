@@ -988,18 +988,19 @@ def generate_lights_pbr(operator,
         blender_light_node = None
         
         for blender_node in blender_light.node_tree.nodes:
-            if blender_node.name.startswith('glTF Directional Light'):
-                light['type'] = 'directional'
-                blender_light_node = blender_node 
-                break
-            if blender_node.name.startswith('glTF Point Light'):
-                light['type'] = 'point'
-                blender_light_node = blender_node
-                break
-            if blender_node.name.startswith('glTF Spot Light'):
-                light['type'] = 'spot'
-                blender_light_node = blender_node
-                break
+            if isinstance(blender_node, bpy.types.ShaderNodeGroup):
+                if blender_node.node_tree.name.startswith('glTF Directional Light'):
+                    light['type'] = 'directional'
+                    blender_light_node = blender_node 
+                    break
+                if blender_node.node_tree.name.startswith('glTF Point Light'):
+                    light['type'] = 'point'
+                    blender_light_node = blender_node
+                    break
+                if blender_node.node_tree.name.startswith('glTF Spot Light'):
+                    light['type'] = 'spot'
+                    blender_light_node = blender_node
+                    break
             
         if blender_light_node is None:
             continue

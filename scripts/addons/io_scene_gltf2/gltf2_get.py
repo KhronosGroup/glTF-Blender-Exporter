@@ -360,12 +360,12 @@ def get_light_index_pbr(glTF, name):
     if extensions.get('KHR_lights_pbr') is None:
         return -1
     
-    khr_lights_cmn = extensions['KHR_lights_pbr']
+    khr_lights_pbr = extensions['KHR_lights_pbr']
 
-    if khr_lights_cmn.get('lights') is None:
+    if khr_lights_pbr.get('lights') is None:
         return -1
 
-    lights = khr_lights_cmn['lights']
+    lights = khr_lights_pbr['lights']
 
     index = 0
     for light in lights:
