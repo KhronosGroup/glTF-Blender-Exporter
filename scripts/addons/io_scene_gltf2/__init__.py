@@ -235,25 +235,25 @@ class ExportGLTF2_Base():
     )
 
     export_lights_pbr = BoolProperty(
-            name='Export lights PBR',
+            name='Export KHR_lights_pbr',
             description='',
             default=False
     )
 
     export_lights_cmn = BoolProperty(
-            name='Export lights common',
+            name='Export KHR_lights_cmn',
             description='',
             default=False
     )
 
     export_common = BoolProperty(
-            name='Export material Blinn-Phong',
+            name='Export KHR_materials_cmnBlinnPhong',
             description='',
             default=False
     )
 
     export_displacement = BoolProperty(
-            name='Export displacement',
+            name='Export KHR_materials_displacement',
             description='',
             default=False
     )
