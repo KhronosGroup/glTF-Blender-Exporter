@@ -178,6 +178,17 @@ def filter_apply(export_settings):
             for compare_blender_material in blender_mesh.materials:
                 if compare_blender_material == blender_material and blender_material not in filtered_materials:
                     filtered_materials.append(blender_material)
+        
+        #
+
+        for blender_object in filtered_objects:
+            if blender_object.material_slots:
+                for blender_material_slot in blender_object.material_slots:
+                    if blender_material_slot.link == 'DATA':
+                        continue
+                    
+                    if blender_material_slot.material not in filtered_materials:
+                        filtered_materials.append(blender_material_slot.material)
                     
     export_settings['filtered_materials'] = filtered_materials                
 

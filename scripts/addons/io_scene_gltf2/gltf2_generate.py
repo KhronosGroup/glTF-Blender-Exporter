@@ -18,6 +18,7 @@
 
 import base64
 import bpy
+import copy
 
 from .gltf2_animate import *
 from .gltf2_create import *
@@ -1465,6 +1466,46 @@ def generate_meshes(operator,
         glTF['meshes'] = meshes
 
 
+def generate_dublicate_mesh(operator,
+                  context,
+                  export_settings,
+                  glTF, blender_object):
+    """
+    Helper function for dublicating meshes with linked object materials.
+    """
+    
+    if blender_object is None:
+        return -1
+    
+    mesh_index = get_mesh_index(glTF, blender_object.data.name)
+    
+    if mesh_index == -1:
+        return False
+    
+    new_mesh = copy.deepcopy(glTF['meshes'][mesh_index])
+    
+    #
+
+    primitives = new_mesh['primitives']
+    
+    primitive_index = 0
+    for blender_material_slot in blender_object.material_slots:
+        if blender_material_slot.link == 'OBJECT':
+            primitives[primitive_index]['material'] = get_material_index(glTF, blender_material_slot.material.name)
+            
+        primitive_index += 1
+
+    #
+    
+    new_name = blender_object.data.name + '_' + blender_object.name
+    
+    new_mesh['name'] = new_name
+    
+    glTF['meshes'].append(new_mesh)
+    
+    return get_mesh_index(glTF, new_name)
+
+
 def generate_node_parameter(operator,
                   context,
                   export_settings,
@@ -1530,7 +1571,22 @@ def generate_node_instance(operator,
                 mesh = get_mesh_index(glTF, blender_object.data.name)
                 
                 if mesh >= 0:
-                    node['mesh'] = mesh
+                    
+                    need_dublicate = False
+                    
+                    if blender_object.material_slots:
+                        for blender_material_slot in blender_object.material_slots:
+                            if blender_material_slot.link == 'OBJECT':
+                                need_dublicate = True
+                                break
+
+                    if need_dublicate:
+                        mesh = generate_dublicate_mesh(operator, context, export_settings, glTF, blender_object)
+                    
+                    #
+                    
+                    if mesh >= 0:
+                        node['mesh'] = mesh
         
         #
         #
