@@ -900,8 +900,10 @@ def generate_lights_cmn(operator,
             if blender_light.type == 'SPOT':
                 spot = {}
                 
-                spot['fallOffAngle'] = blender_light.spot_size
-                spot['fallOffExponent'] = 128.0 * blender_light.spot_blend
+                angle = blender_light.spot_size * 0.5
+                
+                spot['outerAngle'] = angle
+                spot['innerAngle'] = angle - angle * blender_light.spot_blend
                 
                 positional['spot'] = spot
 
@@ -1019,8 +1021,10 @@ def generate_lights_pbr(operator,
             if light['type'] == 'spot':
                 spot = {}
                 
-                spot['fallOffAngle'] = blender_light.spot_size
-                spot['fallOffExponent'] = 128.0 * blender_light.spot_blend
+                angle = blender_light.spot_size * 0.5
+                
+                spot['outerAngle'] = angle
+                spot['innerAngle'] = angle - angle * blender_light.spot_blend
 
                 positional['spot'] = spot
 
