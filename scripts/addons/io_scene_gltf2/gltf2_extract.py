@@ -574,8 +574,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     t = convert_swizzle_tangent(face_tangent)
                 
             if blender_mesh.uv_layers.active:
-                for textcoord_index in range(0, texcoord_max):
-                    uv = blender_mesh.uv_layers[textcoord_index].data[loop_index].uv
+                for texcoord_index in range(0, texcoord_max):
+                    uv = blender_mesh.uv_layers[texcoord_index].data[loop_index].uv
                     uvs.append([uv.x, 1.0 - uv.y])
                     
             #
@@ -707,9 +707,9 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for texcoord_index in range(0, texcoord_max):
                     uv = uvs[texcoord_index]
                     
-                    textcoord_id = 'TEXCOORD_' + str(textcoord_index)
+                    texcoord_id = 'TEXCOORD_' + str(texcoord_index)
                     for i in range(0, 2):
-                        if attributes[textcoord_id][current_new_index * 2 + i] != uv[i]:
+                        if attributes[texcoord_id][current_new_index * 2 + i] != uv[i]:
                             found = False
                             break
                 
@@ -790,13 +790,13 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 attributes['TANGENT'].extend(t)
                 
             if blender_mesh.uv_layers.active:
-                for textcoord_index in range(0, texcoord_max):
-                    textcoord_id = 'TEXCOORD_' + str(textcoord_index)
+                for texcoord_index in range(0, texcoord_max):
+                    texcoord_id = 'TEXCOORD_' + str(texcoord_index)
                     
-                    if attributes.get(textcoord_id) is None:
-                        attributes[textcoord_id] = []
+                    if attributes.get(texcoord_id) is None:
+                        attributes[texcoord_id] = []
                     
-                    attributes[textcoord_id].extend(uvs[textcoord_index])
+                    attributes[texcoord_id].extend(uvs[texcoord_index])
 
             if export_color:
                 for color_index in range(0, color_max):
@@ -939,10 +939,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             pending_attributes['NORMAL'].extend(normal)
             if use_tangents:
                 pending_attributes['TANGENT'].extend(tangent)
-            textcoord_index = 0
-            for textcoord in texcoords:
-                pending_attributes['TEXCOORD_' + str(texcoord_index)] = textcoord
-                textcoord_index += 1
+            texcoord_index = 0
+            for texcoord in texcoords:
+                pending_attributes['TEXCOORD_' + str(texcoord_index)] = texcoord
+                texcoord_index += 1
             if export_color:
                 color_index = 0
                 for color in colors:
