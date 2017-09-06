@@ -99,7 +99,7 @@ class ExportGLTF2_Base():
         items=(('UNSIGNED_BYTE', 'Unsigned Byte', ''),
         ('UNSIGNED_SHORT', 'Unsigned Short', ''),
         ('UNSIGNED_INT', 'Unsigned Integer', '')),
-        default='UNSIGNED_SHORT'
+        default='UNSIGNED_INT'
     )
 
     export_force_indices = BoolProperty(
