@@ -772,8 +772,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             new_index = 0
             
-            if len(indices) > 0:
-                new_index = max(indices) + 1
+            if primitive.get('max_index') is not None:
+                new_index = primitive['max_index'] + 1
+            
+            primitive['max_index'] = new_index 
 
             vertex_index_to_new_indices[vertex_index].append(new_index)
             
