@@ -20,7 +20,6 @@ import bpy
 import os
 
 from .gltf2_debug import *
-from bgl import GL_MAP1_COLOR_4
 
 #
 # Globals
