@@ -45,13 +45,23 @@ def animate_get_interpolation(export_settings, blender_fcurve_list):
     
     interpolation = None
     
+    keyframeCount = None
+    
     for blender_fcurve in blender_fcurve_list:
         if blender_fcurve is None:
             continue
         
         #
         
-        if len(blender_fcurve.keyframe_points) > 0 and blender_fcurve.keyframe_points[0].co[0] < 0:
+        currentKeyframeCount = len(blender_fcurve.keyframe_points)
+
+        if keyframeCount is None:
+            keyframeCount = currentKeyframeCount
+        
+        if currentKeyframeCount > 0 and blender_fcurve.keyframe_points[0].co[0] < 0:
+            return 'CONVERSION_NEEDED'
+            
+        if keyframeCount != currentKeyframeCount:
             return 'CONVERSION_NEEDED'
         
         #
