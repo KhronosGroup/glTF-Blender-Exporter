@@ -230,8 +230,8 @@ def animate_location(export_settings, location, interpolation, node_type, node_n
 
                         translation[channel_index] = blender_key_frame.co[1]
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / (blender_key_frame.co[0] - blender_key_frame.handle_left[0]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / (blender_key_frame.handle_right[0] - blender_key_frame.co[0]) 
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                     
@@ -404,8 +404,8 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
 
                         rotation[channel_index] = blender_key_frame.co[1]
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / (blender_key_frame.co[0] - blender_key_frame.handle_left[0]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / (blender_key_frame.handle_right[0] - blender_key_frame.co[0]) 
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                         
@@ -473,8 +473,8 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
 
                         scale_data[channel_index] = blender_key_frame.co[1]
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / (blender_key_frame.co[0] - blender_key_frame.handle_left[0]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / (blender_key_frame.handle_right[0] - blender_key_frame.co[0]) 
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                         
@@ -521,8 +521,8 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
 
                     value_data.append(blender_key_frame.co[1])
                     
-                    in_tangent.append(3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / (blender_key_frame.co[0] - blender_key_frame.handle_left[0])) 
-                    out_tangent.append(3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / (blender_key_frame.handle_right[0] - blender_key_frame.co[0])) 
+                    in_tangent.append(3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1])) 
+                    out_tangent.append(3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1])) 
                 else: 
                     value = blender_fcurve.evaluate(keys[keyframe_index]) 
                     
