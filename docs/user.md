@@ -287,3 +287,4 @@ You can also download our [export preset file](gltf2.spexp), and place it under 
 
 - **Windows**: C:\Users\USERNAME\Documents\Allegorithmic\Substance Painter\shelf\export-presets (for Painter 2 : C:\User\USERNAME\Documents\Substance Painter 2)
 - **Mac OS**: Macintosh > Users > USERNAME > Documents > Substance Painter > shelf > export-presets
+
