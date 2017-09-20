@@ -282,3 +282,9 @@ At point of writing, the exporter of Substance Painter does not have a preset fo
 Important is the order of `occlusion`: red channel, `roughness`: green chanel, `metallic`: blue channel. Even the glTF 2.0 property is named `metallicRoughnessTexture`, the above channel order assignment is the only valid one.
 
 Furthermore, please make sure, that the `normal` is exported for `OpenGL`. Even your render engine is using a different graphics API, this is the only valid one.
+
+You can also download our [export preset file](gltf2.spexp), and place it under the folder *export-presets* of Substance Painter, which is located here:
+
+- **Windows**: C:\Users\USERNAME\Documents\Allegorithmic\Substance Painter\shelf\export-presets (for Painter 2 : C:\User\USERNAME\Documents\Substance Painter 2)
+- **Mac OS**: Macintosh > Users > USERNAME > Documents > Substance Painter > shelf > export-presets
+
