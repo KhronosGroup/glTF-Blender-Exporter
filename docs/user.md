@@ -283,4 +283,7 @@ Important is the order of `occlusion`: red channel, `roughness`: green chanel, `
 
 Furthermore, please make sure, that the `normal` is exported for `OpenGL`. Even your render engine is using a different graphics API, this is the only valid one.
 
-You can also download our [export preset file](gltf2.spexp), and place it in *C:\Users\USER\Documents\Allegorithmic\Substance Painter\shelf\export-presets* folder.
+You can also download our [export preset file](gltf2.spexp), and place it under the folder *export-presets* of Substance Painter, which is located here:
+
+- **Windows**: C:\Users\USERNAME\Documents\Allegorithmic\Substance Painter\shelf\export-presets (for Painter 2 : C:\User\USERNAME\Documents\Substance Painter 2)
+- **Mac OS**: Macintosh > Users > USERNAME > Documents > Substance Painter > shelf > export-presets
