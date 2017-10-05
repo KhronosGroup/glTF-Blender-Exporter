@@ -16,6 +16,7 @@
 # Imports
 #
 
+import json
 import struct
 import zlib
 
@@ -28,6 +29,17 @@ from .gltf2_debug import *
 #
 # Functions
 #
+
+
+def is_json(data):
+    """
+    Test, if a data set can be expressed as JSON.
+    """
+    try:
+        json.dumps(data)
+        return True
+    except:
+        return False
 
 def create_extensionsUsed(operator,
                          context,
@@ -337,6 +349,10 @@ def create_custom_property(blender_element):
         if hasattr(value, "to_list"):
             value = value.to_list()
             add_value = True
+            
+        if hasattr(value, "to_dict"):
+            value = value.to_dict()
+            add_value = is_json(value)            
         
         if add_value:
             extras[custom_property] = value
