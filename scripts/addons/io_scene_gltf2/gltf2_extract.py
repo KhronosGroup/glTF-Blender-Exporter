@@ -42,6 +42,10 @@ def convert_swizzle_tangent(tan):
     """
     Converts a tangent from Blender coordinate system to glTF coordinate system.
     """
+    
+    if tan[0] == 0.0 and tan[1] == 0.0 and tan[2] == 0.0:
+        print_console('WARNING', 'Tangent has zero length.')
+    
     return mathutils.Vector((tan[0], tan[2], -tan[1], 1.0))
 
 
