@@ -78,6 +78,14 @@ Any Euler or Angle rotation is first converted to a Quaternion rotation. For qua
 
 ### References
 
+#### Blender - Python Development tools
+
+The repository does include a PyDev project file:  
+[PyDev](http://www.pydev.org/)  
+
+Using this project file in combination with the Eclipse IDE, Blender and its scripts can be debugged visually:  
+[Debugging Blender from Eclipse](https://wiki.blender.org/index.php/Dev:Doc/Tools/Debugging/Python_Eclipse)  
+
 #### glTF 2.0 specifications
 [glTF 2.0](https://github.com/KhronosGroup/glTF)
 
