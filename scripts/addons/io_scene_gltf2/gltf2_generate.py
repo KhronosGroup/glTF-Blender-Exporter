@@ -1495,7 +1495,13 @@ def generate_dublicate_mesh(operator,
     primitive_index = 0
     for blender_material_slot in blender_object.material_slots:
         if blender_material_slot.link == 'OBJECT':
-            primitives[primitive_index]['material'] = get_material_index(glTF, blender_material_slot.material.name)
+            material = get_material_index(glTF, blender_material_slot.material.name)
+            
+            # Meshes/primitives without material are allowed.
+            if material >= 0:
+                primitives[primitive_index]['material'] = material
+            else:
+                print_console('WARNING', 'Material ' + blender_material_slot.material.name + ' not found. Please assign glTF 2.0 material or enable Blinn-Phong material in export.')
             
         primitive_index += 1
 
