@@ -532,16 +532,16 @@ def get_vec4(default_value, init_value = [0.0, 0.0, 0.0, 1.0]):
     return return_value
 
 
-def get_index(list, name):
+def get_index(elements, name):
     """
     Return index of a glTF element by a given name.
     """
 
-    if list is None or name is None:
+    if elements is None or name is None:
         return -1
     
     index = 0
-    for element in list:
+    for element in elements:
         if element.get('name') is None:
             return -1
     
