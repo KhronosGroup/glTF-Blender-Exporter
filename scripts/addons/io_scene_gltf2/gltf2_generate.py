@@ -1560,7 +1560,7 @@ def generate_meshes(operator,
         glTF['meshes'] = meshes
 
 
-def generate_dublicate_mesh(glTF, blender_object):
+def generate_duplicate_mesh(glTF, blender_object):
     """
     Helper function for dublicating meshes with linked object materials.
     """
@@ -1668,16 +1668,16 @@ def generate_node_instance(context,
 
             if mesh >= 0:
 
-                need_dublicate = False
+                need_duplicate = False
 
                 if blender_object.material_slots:
                     for blender_material_slot in blender_object.material_slots:
                         if blender_material_slot.link == 'OBJECT':
-                            need_dublicate = True
+                            need_duplicate = True
                             break
 
-                if need_dublicate:
-                    mesh = generate_dublicate_mesh(context, glTF)
+                if need_duplicate:
+                    mesh = generate_duplicate_mesh(context, glTF)
 
                 #
 
