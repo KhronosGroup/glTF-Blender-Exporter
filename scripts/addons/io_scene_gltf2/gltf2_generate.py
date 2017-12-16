@@ -624,12 +624,15 @@ def generate_animations(operator,
 
                 #
 
-                axis_basis_change = mathutils.Matrix(
-                    ((1.0, 0.0, 0.0, 0.0),
-                     (0.0, 0.0, 1.0, 0.0),
-                     (0.0, -1.0, 0.0, 0.0),
-                     (0.0, 0.0, 0.0, 1.0))
-                )
+                if export_settings['gltf_yup']:
+                    axis_basis_change = mathutils.Matrix(
+                        ((1.0, 0.0, 0.0, 0.0),
+                         (0.0, 0.0, 1.0, 0.0),
+                         (0.0, -1.0, 0.0, 0.0),
+                         (0.0, 0.0, 0.0, 1.0))
+                    )
+                else:
+                    axis_basis_change = mathutils.Matrix.Identity(4)
 
                 # Precalculate joint animation data.
 
@@ -1642,7 +1645,7 @@ def generate_node_instance(context,
     Helper function for storing node instances.
     """
 
-    correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(-90.0)))
+    correction_quaternion = convert_swizzle_rotation(mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(-90.0)), export_settings)
 
     #
     # Property: node
@@ -1653,7 +1656,7 @@ def generate_node_instance(context,
     #
     #
 
-    generate_node_parameter(context, blender_object.matrix_local, node, 'NODE')
+    generate_node_parameter(export_settings, blender_object.matrix_local, node, 'NODE')
 
     #
     #
@@ -1692,52 +1695,61 @@ def generate_node_instance(context,
                 camera = get_camera_index(glTF, blender_object.data.name)
 
                 if camera >= 0:
-                    # Add correction node for camera, as default direction is different to Blender.
-                    correction_node = {}
+                    if export_settings['gltf_yup']:
+                        # Add correction node for camera, as default direction is different to Blender.
+                        correction_node = {}
 
-                    correction_node['name'] = 'Correction_' + blender_object.name
-                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
-                                                   correction_quaternion[3], correction_quaternion[0]]
+                        correction_node['name'] = 'Correction_' + blender_object.name
+                        correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
+                                                       correction_quaternion[3], correction_quaternion[0]]
 
-                    correction_node['camera'] = camera
+                        correction_node['camera'] = camera
 
-                    nodes.append(correction_node)
+                        nodes.append(correction_node)
+                    else:
+                        node['camera'] = camera
 
         if export_settings['gltf_lights_cmn']:
             if blender_object.type == 'LAMP':
                 light = get_light_index_cmn(glTF, blender_object.data.name)
                 if light >= 0:
-                    khr_lights_cmn = {'light': light}
-                    extensions = {'KHR_lights_cmn': khr_lights_cmn}
+                    if export_settings['gltf_yup']:
+                        khr_lights_cmn = {'light': light}
+                        extensions = {'KHR_lights_cmn': khr_lights_cmn}
 
-                    # Add correction node for light, as default direction is different to Blender.
-                    correction_node = {}
+                        # Add correction node for light, as default direction is different to Blender.
+                        correction_node = {}
 
-                    correction_node['name'] = 'Correction_' + blender_object.name
-                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
-                                                   correction_quaternion[3], correction_quaternion[0]]
+                        correction_node['name'] = 'Correction_' + blender_object.name
+                        correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
+                                                       correction_quaternion[3], correction_quaternion[0]]
 
-                    correction_node['extensions'] = extensions
+                        correction_node['extensions'] = extensions
 
-                    nodes.append(correction_node)
+                        nodes.append(correction_node)
+                    else:
+                        node['extensions'] = extensions
 
         if export_settings['gltf_lights_pbr']:
             if blender_object.type == 'LAMP':
                 light = get_light_index_pbr(glTF, blender_object.data.name)
                 if light >= 0:
-                    khr_lights_pbr = {'light': light}
-                    extensions = {'KHR_lights_pbr': khr_lights_pbr}
+                    if export_settings['gltf_yup']:
+                        khr_lights_pbr = {'light': light}
+                        extensions = {'KHR_lights_pbr': khr_lights_pbr}
 
-                    # Add correction node for light, as default direction is different to Blender.
-                    correction_node = {}
+                        # Add correction node for light, as default direction is different to Blender.
+                        correction_node = {}
 
-                    correction_node['name'] = 'Correction_' + blender_object.name
-                    correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
-                                                   correction_quaternion[3], correction_quaternion[0]]
+                        correction_node['name'] = 'Correction_' + blender_object.name
+                        correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
+                                                       correction_quaternion[3], correction_quaternion[0]]
 
-                    correction_node['extensions'] = extensions
+                        correction_node['extensions'] = extensions
 
-                    nodes.append(correction_node)
+                        nodes.append(correction_node)
+                    else:
+                        node['extensions'] = extensions
 
     #
 
@@ -1806,7 +1818,7 @@ def generate_nodes(operator,
 
                 node['name'] = 'Duplication_Offset_' + blender_object.name
 
-                translation = convert_swizzle_location(blender_object.dupli_group.dupli_offset)
+                translation = convert_swizzle_location(blender_object.dupli_group.dupli_offset, export_settings)
 
                 node['translation'] = [-translation[0], -translation[1], -translation[2]]
 
@@ -1863,8 +1875,11 @@ def generate_nodes(operator,
 
                 for blender_bone in blender_object.pose.bones:
 
-                    axis_basis_change = mathutils.Matrix(
-                        ((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0)))
+                    if export_settings['gltf_yup']:
+                        axis_basis_change = mathutils.Matrix(
+                            ((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0)))
+                    else:
+                        axis_basis_change = mathutils.Matrix.Identity(4)
 
                     if not joints_written:
                         node = {}
@@ -1880,7 +1895,7 @@ def generate_nodes(operator,
                             matrix_basis = blender_object.convert_space(blender_bone, blender_bone.matrix,
                                                                         from_space='POSE', to_space='LOCAL')
 
-                        generate_node_parameter(context, correction_matrix_local * matrix_basis, node, 'JOINT')
+                        generate_node_parameter(export_settings, correction_matrix_local * matrix_basis, node, 'JOINT')
 
                         #
 
