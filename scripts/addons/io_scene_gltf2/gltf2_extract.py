@@ -31,14 +31,17 @@ GLTF_MAX_COLORS = 2
 # Functions
 #
 
-def convert_swizzle_location(loc):
+def convert_swizzle_location(loc, export_settings):
     """
     Converts a location from Blender coordinate system to glTF coordinate system.
     """
-    return mathutils.Vector((loc[0], loc[2], -loc[1]))
+    if export_settings['gltf_yup']:
+        return mathutils.Vector((loc[0], loc[2], -loc[1]))
+    else:
+        return mathutils.Vector((loc[0], loc[1], loc[2]))
 
 
-def convert_swizzle_tangent(tan):
+def convert_swizzle_tangent(tan, export_settings):
     """
     Converts a tangent from Blender coordinate system to glTF coordinate system.
     """
@@ -46,22 +49,31 @@ def convert_swizzle_tangent(tan):
     if tan[0] == 0.0 and tan[1] == 0.0 and tan[2] == 0.0:
         print_console('WARNING', 'Tangent has zero length.')
     
-    return mathutils.Vector((tan[0], tan[2], -tan[1], 1.0))
+    if export_settings['gltf_yup']:
+        return mathutils.Vector((tan[0], tan[2], -tan[1], 1.0))
+    else:
+        return mathutils.Vector((tan[0], tan[1], tan[2], 1.0))
 
 
-def convert_swizzle_rotation(rot):
+def convert_swizzle_rotation(rot, export_settings):
     """
     Converts a quaternion rotation from Blender coordinate system to glTF coordinate system.
     'w' is still at first position.
     """
-    return mathutils.Quaternion((rot[0], rot[1], rot[3], -rot[2]))
+    if export_settings['gltf_yup']:
+        return mathutils.Quaternion((rot[0], rot[1], rot[3], -rot[2]))
+    else:
+        return mathutils.Quaternion((rot[0], rot[1], rot[2], rot[3]))
 
 
-def convert_swizzle_scale(scale):
+def convert_swizzle_scale(scale, export_settings):
     """
     Converts a scale from Blender coordinate system to glTF coordinate system.
     """
-    return mathutils.Vector((scale[0], scale[2], scale[1]))
+    if export_settings['gltf_yup']:
+        return mathutils.Vector((scale[0], scale[2], scale[1]))
+    else:
+        return mathutils.Vector((scale[0], scale[1], scale[2]))
 
 
 def decompose_transition(matrix, context, export_settings):
@@ -71,9 +83,9 @@ def decompose_transition(matrix, context, export_settings):
     """
 
     if context == 'NODE':
-        translation = convert_swizzle_location(translation)
-        rotation = convert_swizzle_rotation(rotation)
-        scale =  convert_swizzle_scale(scale)
+        translation = convert_swizzle_location(translation, export_settings)
+        rotation = convert_swizzle_rotation(rotation, export_settings)
+        scale = convert_swizzle_scale(scale, export_settings)
     
     # Put w at the end.    
     rotation = mathutils.Quaternion((rotation[1], rotation[2], rotation[3], rotation[0]))
@@ -567,15 +579,15 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             
             vertex = blender_mesh.vertices[vertex_index]
             
-            v = convert_swizzle_location(vertex.co)
+            v = convert_swizzle_location(vertex.co, export_settings)
             if blender_polygon.use_smooth:
-                n = convert_swizzle_location(vertex.normal)
+                n = convert_swizzle_location(vertex.normal, export_settings)
                 if use_tangents:
-                    t = convert_swizzle_tangent(blender_mesh.loops[loop_index].tangent)
+                    t = convert_swizzle_tangent(blender_mesh.loops[loop_index].tangent, export_settings)
             else:
-                n = convert_swizzle_location(face_normal)
+                n = convert_swizzle_location(face_normal, export_settings)
                 if use_tangents:
-                    t = convert_swizzle_tangent(face_tangent)
+                    t = convert_swizzle_tangent(face_tangent, export_settings)
                 
             if blender_mesh.uv_layers.active:
                 for texcoord_index in range(0, texcoord_max):
@@ -646,7 +658,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for morph_index in range(0, morph_max):
                     blender_shape_key = blender_shape_keys[morph_index]
                     
-                    v_morph = convert_swizzle_location(blender_shape_key.data[vertex_index].co)
+                    v_morph = convert_swizzle_location(blender_shape_key.data[vertex_index].co, export_settings)
                     
                     # Store delta.
                     v_morph -= v
@@ -664,7 +676,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         temp_normals = blender_shape_key.normals_polygon_get()
                         n_morph = (temp_normals[blender_polygon.index * 3 + 0], temp_normals[blender_polygon.index * 3 + 1], temp_normals[blender_polygon.index * 3 + 2])
                         
-                    n_morph = convert_swizzle_location(n_morph)
+                    n_morph = convert_swizzle_location(n_morph, export_settings)
 
                     # Store delta.
                     n_morph -= n

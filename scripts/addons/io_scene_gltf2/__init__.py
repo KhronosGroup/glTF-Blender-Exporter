@@ -39,7 +39,7 @@ if 'bpy' in locals():
     if 'gltf2_get' in locals():
         imp.reload(gltf2_get)
 
-        
+
 from bpy.props import (CollectionProperty,
                        StringProperty,
                        BoolProperty,
@@ -168,6 +168,12 @@ class ExportGLTF2_Base():
             default=False
     )
 
+    export_yup = BoolProperty(
+            name='Convert Z up to Y up',
+            description='',
+            default=True
+    )
+
     export_apply = BoolProperty(
             name='Apply modifiers',
             description='',
@@ -262,7 +268,7 @@ class ExportGLTF2_Base():
 
     def execute(self, context):
         from . import gltf2_export
-        
+
         # All custom export settings are stored in this container.
         export_settings = {}
 
@@ -289,6 +295,7 @@ class ExportGLTF2_Base():
         export_settings['gltf_selected'] = self.export_selected
         export_settings['gltf_layers'] = self.export_layers
         export_settings['gltf_extras'] = self.export_extras
+        export_settings['gltf_yup'] = self.export_yup
         export_settings['gltf_apply'] = self.export_apply
         export_settings['gltf_animations'] = self.export_animations
         if self.export_animations:
@@ -315,15 +322,15 @@ class ExportGLTF2_Base():
             export_settings['gltf_morph_tangent'] = self.export_morph_tangent
         else:
             export_settings['gltf_morph_tangent'] = False
-        
+
         export_settings['gltf_lights_pbr'] = self.export_lights_pbr
         export_settings['gltf_lights_cmn'] = self.export_lights_cmn
         export_settings['gltf_common'] = self.export_common
         export_settings['gltf_displacement'] = self.export_displacement
-        
+
         export_settings['gltf_uri'] = []
         export_settings['gltf_binary'] = bytearray()
-        export_settings['gltf_binaryfilename'] = os.path.splitext(os.path.basename(self.filepath))[0] + '.bin' 
+        export_settings['gltf_binaryfilename'] = os.path.splitext(os.path.basename(self.filepath))[0] + '.bin'
 
         return gltf2_export.save(self, context, export_settings)
 
@@ -345,6 +352,7 @@ class ExportGLTF2_Base():
         col.prop(self, 'export_selected')
         col.prop(self, 'export_layers')
         col.prop(self, 'export_extras')
+        col.prop(self, 'export_yup')
 
         col = layout.box().column()
         col.label('Meshes:', icon='MESH_DATA')
@@ -379,7 +387,7 @@ class ExportGLTF2_Base():
         col.prop(self, 'export_skins')
         if self.export_skins:
             col.prop(self, 'export_bake_skins')
-        col.prop(self, 'export_morph')            
+        col.prop(self, 'export_morph')
         if self.export_morph:
             col.prop(self, 'export_morph_normal')
             if self.export_morph_normal:
@@ -400,7 +408,7 @@ class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
 
     filename_ext = '.gltf'
     filter_glob = StringProperty(default='*.gltf', options={'HIDDEN'})
-    
+
     export_format = 'ASCII'
 
 
@@ -411,7 +419,7 @@ class ExportGLTF2_GLB(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
 
     filename_ext = '.glb'
     filter_glob = StringProperty(default='*.glb', options={'HIDDEN'})
-    
+
     export_format = 'BINARY'
 
 

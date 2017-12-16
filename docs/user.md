@@ -80,7 +80,7 @@ By default, all objects and it assets are exported. If enabled, only the selecte
 
 #### Export for all layers
 
-In Blender, objects can be assigned to different layers. By default, all objects on all layers are exported. It is a common use case, that helper objects are placed on other layers and only the first layer contains the correct visual output. In such a case, objects could appear dublicated or in a wrong context. Enable this setting, if only the objects on the first layers should be exported.
+In Blender, objects can be assigned to different layers. By default, all objects on all layers are exported. It is a common use case, that helper objects are placed on other layers and only the first layer contains the correct visual output. In such a case, objects could appear duplicated or in a wrong context. Enable this setting, if only the objects on the first layers should be exported.
 
 #### Export extras
 

@@ -249,9 +249,9 @@ def animate_location(export_settings, location, interpolation, node_type, node_n
                 
                 channel_index += 1 
         
-            translation = convert_swizzle_location(translation)
-            in_tangent = convert_swizzle_location(in_tangent)
-            out_tangent = convert_swizzle_location(out_tangent)
+            translation = convert_swizzle_location(translation, export_settings)
+            in_tangent = convert_swizzle_location(in_tangent, export_settings)
+            out_tangent = convert_swizzle_location(out_tangent, export_settings)
         
         result[time] = translation
         result_in_tangent[time] = in_tangent
@@ -305,7 +305,7 @@ def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolat
             rotation = animate_convert_rotation_axis_angle(axis_angle_rotation)
         
             # Bring back to internal Quaternion notation. 
-            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]])
+            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]], export_settings)
             
         # Bring back to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
@@ -360,7 +360,7 @@ def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, inter
             rotation = animate_convert_rotation_euler(euler_rotation, rotation_mode)
         
             # Bring back to internal Quaternion notation. 
-            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]])
+            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]], export_settings)
             
         # Bring back to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
@@ -423,9 +423,9 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
                 
                 channel_index += 1 
         
-            rotation = convert_swizzle_rotation(rotation)
-            in_tangent = convert_swizzle_rotation(in_tangent)
-            out_tangent = convert_swizzle_rotation(out_tangent)
+            rotation = convert_swizzle_rotation(rotation, export_settings)
+            in_tangent = convert_swizzle_rotation(in_tangent, export_settings)
+            out_tangent = convert_swizzle_rotation(out_tangent, export_settings)
 
         # Bring to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
@@ -492,9 +492,9 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
                 
                 channel_index += 1 
         
-            scale_data = convert_swizzle_scale(scale_data)
-            in_tangent = convert_swizzle_scale(in_tangent)
-            out_tangent = convert_swizzle_scale(out_tangent)
+            scale_data = convert_swizzle_scale(scale_data, export_settings)
+            in_tangent = convert_swizzle_scale(in_tangent, export_settings)
+            out_tangent = convert_swizzle_scale(out_tangent, export_settings)
         
         result[time] = scale_data
         result_in_tangent[time] = in_tangent
