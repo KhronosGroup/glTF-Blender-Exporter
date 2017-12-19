@@ -141,7 +141,7 @@ class ExportGLTF2_Base():
     export_cameras = BoolProperty(
             name='Export cameras',
             description='',
-            default=True
+            default=False
     )
 
     export_camera_infinite = BoolProperty(
