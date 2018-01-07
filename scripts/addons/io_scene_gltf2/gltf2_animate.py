@@ -213,7 +213,7 @@ def animate_location(export_settings, location, interpolation, node_type, node_n
     result_out_tangent = {}
     
     keyframe_index = 0
-    for time in times:
+    for timeIndex, time in enumerate(times):
         translation = [0.0, 0.0, 0.0]
         in_tangent = [0.0, 0.0, 0.0]
         out_tangent = [0.0, 0.0, 0.0]
@@ -239,9 +239,19 @@ def animate_location(export_settings, location, interpolation, node_type, node_n
                         blender_key_frame = blender_fcurve.keyframe_points[keyframe_index]
 
                         translation[channel_index] = blender_key_frame.co[1]
+
+                        if timeIndex == 0:
+                            in_tangent_div = 1.0
+                        else:
+                            in_tangent_div = (time - times[timeIndex - 1])
+
+                        if timeIndex == len(times) - 1:
+                            out_tangent_div = 1.0
+                        else:
+                            out_tangent_div = (times[timeIndex + 1] - time)
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / in_tangent_div
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / out_tangent_div
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                     
@@ -388,7 +398,7 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
     result_out_tangent = {}
 
     keyframe_index = 0
-    for time in times:
+    for timeIndex, time in enumerate(times):
         rotation = [1.0, 0.0, 0.0, 0.0]
         in_tangent = [1.0, 0.0, 0.0, 0.0]
         out_tangent = [1.0, 0.0, 0.0, 0.0]
@@ -414,8 +424,18 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
 
                         rotation[channel_index] = blender_key_frame.co[1]
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
+                        if timeIndex == 0:
+                            in_tangent_div = 1.0
+                        else:
+                            in_tangent_div = (time - times[timeIndex - 1])
+
+                        if timeIndex == len(times) - 1:
+                            out_tangent_div = 1.0
+                        else:
+                            out_tangent_div = (times[timeIndex + 1] - time)
+
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / in_tangent_div
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / out_tangent_div
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                         
@@ -457,7 +477,7 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
     result_out_tangent = {}
 
     keyframe_index = 0
-    for time in times:
+    for timeIndex, time in enumerate(times):
         scale_data = [1.0, 1.0, 1.0]
         in_tangent = [0.0, 0.0, 0.0]
         out_tangent = [0.0, 0.0, 0.0]
@@ -483,8 +503,18 @@ def animate_scale(export_settings, scale, interpolation, node_type, node_name, m
 
                         scale_data[channel_index] = blender_key_frame.co[1]
                         
-                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) 
-                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) 
+                        if timeIndex == 0:
+                            in_tangent_div = 1.0
+                        else:
+                            in_tangent_div = (time - times[timeIndex - 1])
+
+                        if timeIndex == len(times) - 1:
+                            out_tangent_div = 1.0
+                        else:
+                            out_tangent_div = (times[timeIndex + 1] - time)
+
+                        in_tangent[channel_index] = 3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / in_tangent_div
+                        out_tangent[channel_index] = 3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / out_tangent_div
                     else: 
                         value = blender_fcurve.evaluate(keys[keyframe_index]) 
                         
@@ -518,7 +548,7 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
     result_out_tangent = {}
 
     keyframe_index = 0
-    for time in times:
+    for timeIndex, time in enumerate(times):
         value_data = []
         in_tangent = []
         out_tangent = []
@@ -530,9 +560,19 @@ def animate_value(export_settings, value_parameter, interpolation, node_type, no
                     blender_key_frame = blender_fcurve.keyframe_points[keyframe_index]
 
                     value_data.append(blender_key_frame.co[1])
-                    
-                    in_tangent.append(3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1])) 
-                    out_tangent.append(3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1])) 
+
+                    if timeIndex == 0:
+                        in_tangent_div = 1.0
+                    else:
+                        in_tangent_div = (time - times[timeIndex - 1])
+
+                    if timeIndex == len(times) - 1:
+                        out_tangent_div = 1.0
+                    else:
+                        out_tangent_div = (times[timeIndex + 1] - time)
+
+                    in_tangent.append(3.0 * (blender_key_frame.co[1] - blender_key_frame.handle_left[1]) / in_tangent_div)
+                    out_tangent.append(3.0 * (blender_key_frame.handle_right[1] - blender_key_frame.co[1]) / out_tangent_div)
                 else: 
                     value = blender_fcurve.evaluate(keys[keyframe_index]) 
                     
