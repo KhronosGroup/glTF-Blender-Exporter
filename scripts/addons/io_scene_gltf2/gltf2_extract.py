@@ -524,12 +524,15 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         face_normal = blender_polygon.normal
         face_tangent = mathutils.Vector((0.0, 0.0, 0.0))
+        face_bitangent = mathutils.Vector((0.0, 0.0, 0.0))
         if use_tangents:
             for loop_index in blender_polygon.loop_indices:
                 temp_vertex = blender_mesh.loops[loop_index]
                 face_tangent += temp_vertex.tangent
+                face_bitangent += temp_vertex.bitangent
                 
             face_tangent.normalize() 
+            face_bitangent.normalize()
         
         #
         
@@ -568,6 +571,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
             v = None
             n = None
             t = None
+            b = None
             uvs = []
             colors = []
             joints = []
@@ -584,10 +588,20 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 n = convert_swizzle_location(vertex.normal, export_settings)
                 if use_tangents:
                     t = convert_swizzle_tangent(blender_mesh.loops[loop_index].tangent, export_settings)
+                    b = convert_swizzle_location(blender_mesh.loops[loop_index].bitangent, export_settings)
             else:
                 n = convert_swizzle_location(face_normal, export_settings)
                 if use_tangents:
                     t = convert_swizzle_tangent(face_tangent, export_settings)
+                    b = convert_swizzle_location(face_bitangent, export_settings)
+
+            if use_tangents:
+                tv = mathutils.Vector((t[0], t[1], t[2]))
+                bv = mathutils.Vector((b[0], b[1], b[2]))
+                nv = mathutils.Vector((n[0], n[1], n[2]))
+                
+                if (nv.cross(tv)).dot(bv) < 0.0:
+                    t[3] = -1.0
                 
             if blender_mesh.uv_layers.active:
                 for texcoord_index in range(0, texcoord_max):
