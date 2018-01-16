@@ -1571,6 +1571,9 @@ def generate_duplicate_mesh(glTF, blender_object):
     if blender_object is None:
         return -1
 
+    if 'data' not in blender_object:
+        return -1
+      
     mesh_index = get_mesh_index(glTF, blender_object.data.name)
 
     if mesh_index == -1:
