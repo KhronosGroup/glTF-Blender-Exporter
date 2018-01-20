@@ -28,6 +28,16 @@ from .gltf2_debug import *
 GLTF_MAX_COLORS = 2
 
 #
+# Classes
+#
+
+class ShapeKey:
+    def __init__(self, shape_key, vertex_normals, polygon_normals):
+        self.shape_key = shape_key
+        self.vertex_normals = vertex_normals
+        self.polygon_normals = polygon_normals
+
+#
 # Functions
 #
 
@@ -495,7 +505,11 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
         
         for blender_shape_key in blender_mesh.shape_keys.key_blocks:
             if blender_shape_key != blender_shape_key.relative_key:
-                blender_shape_keys.append(blender_shape_key) 
+                blender_shape_keys.append(ShapeKey(
+                    blender_shape_key,
+                    blender_shape_key.normals_vertex_get(),   # calculate vertex normals for this shape key
+                    blender_shape_key.normals_polygon_get())) # calculate polygon normals for this shape key
+
         
     #
     # Convert polygon to primitive indices and eliminate invalid ones. Assign to material.
@@ -672,7 +686,7 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for morph_index in range(0, morph_max):
                     blender_shape_key = blender_shape_keys[morph_index]
                     
-                    v_morph = convert_swizzle_location(blender_shape_key.data[vertex_index].co, export_settings)
+                    v_morph = convert_swizzle_location(blender_shape_key.shape_key.data[vertex_index].co, export_settings)
                     
                     # Store delta.
                     v_morph -= v
@@ -684,10 +698,10 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                     n_morph = None
                     
                     if blender_polygon.use_smooth:
-                        temp_normals = blender_shape_key.normals_vertex_get()
+                        temp_normals = blender_shape_key.vertex_normals
                         n_morph = (temp_normals[vertex_index * 3 + 0], temp_normals[vertex_index * 3 + 1], temp_normals[vertex_index * 3 + 2])
                     else:
-                        temp_normals = blender_shape_key.normals_polygon_get()
+                        temp_normals = blender_shape_key.polygon_normals
                         n_morph = (temp_normals[blender_polygon.index * 3 + 0], temp_normals[blender_polygon.index * 3 + 1], temp_normals[blender_polygon.index * 3 + 2])
                         
                     n_morph = convert_swizzle_location(n_morph, export_settings)
