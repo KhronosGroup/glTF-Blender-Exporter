@@ -1523,27 +1523,34 @@ def generate_meshes(operator,
 
         #
 
-        if export_settings['gltf_morph']:
-            if blender_mesh.shape_keys is not None:
-                morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
-                if morph_max > 0:
-                    weights = []
-
-                    for blender_shape_key in blender_mesh.shape_keys.key_blocks:
-                        if blender_shape_key != blender_shape_key.relative_key:
-                            weights.append(blender_shape_key.value)
-
-                    mesh['weights'] = weights
-
-        #
-
         if export_settings['gltf_extras']:
             extras = create_custom_property(blender_mesh)
 
             if extras is not None:
                 mesh['extras'] = extras
 
-                #
+        #
+
+        if export_settings['gltf_morph']:
+            if blender_mesh.shape_keys is not None:
+                morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
+                if morph_max > 0:
+                    weights = []
+                    targetNames = []
+
+                    for blender_shape_key in blender_mesh.shape_keys.key_blocks:
+                        if blender_shape_key != blender_shape_key.relative_key:
+                            weights.append(blender_shape_key.value)
+                            targetNames.append(blender_shape_key.name)
+
+                    mesh['weights'] = weights
+
+                    if not 'extras' in mesh:
+                        mesh['extras'] = {}
+
+                    mesh['extras']['targetNames'] = targetNames
+
+        #
 
         mesh['primitives'] = primitives
 
