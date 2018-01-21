@@ -1536,19 +1536,19 @@ def generate_meshes(operator,
                 morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
                 if morph_max > 0:
                     weights = []
-                    targetNames = []
+                    target_names = []
 
                     for blender_shape_key in blender_mesh.shape_keys.key_blocks:
                         if blender_shape_key != blender_shape_key.relative_key:
                             weights.append(blender_shape_key.value)
-                            targetNames.append(blender_shape_key.name)
+                            target_names.append(blender_shape_key.name)
 
                     mesh['weights'] = weights
 
                     if not 'extras' in mesh:
                         mesh['extras'] = {}
 
-                    mesh['extras']['targetNames'] = targetNames
+                    mesh['extras']['targetNames'] = target_names
 
         #
 
