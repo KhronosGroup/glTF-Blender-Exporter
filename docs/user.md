@@ -279,6 +279,8 @@ At point of writing, the exporter of Substance Painter does not have a preset fo
 
 ![glTF SubstancePainter](glTF_SubstancePainter.png)
 
-Important is the order of `occlusion`: red channel, `roughness`: green chanel, `metallic`: blue channel. Even the glTF 2.0 property is named `metallicRoughnessTexture`, the above channel order assignment is the only valid one.
+Important is the order of `occlusion`: red channel, `roughness`: green chanel, `metallic`: blue channel. Even the glTF 2.0 property is named `metallicRoughnessTexture`, the above channel order assignment is the only valid one. The combined occlusion-roughness-metallic map can then be used to connect to the MetallicRoughness and the Occlusion channel. The node group selects the appropriate channel that it needs internally. It should be noted that the image texture data type must be changed to non-color data for the normal and occlusion-roughness-metallic maps.
+
+![glTF Proper Node Connections](glTF_Proper_Node_connections.png)
 
 Furthermore, please make sure, that the `normal` is exported for `OpenGL`. Even your render engine is using a different graphics API, this is the only valid one.
