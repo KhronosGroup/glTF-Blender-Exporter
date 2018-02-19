@@ -2279,7 +2279,7 @@ def generate_materials(operator,
     materials = []
 
     KHR_materials_pbrSpecularGlossiness_Used = False
-    KHR_materials_common_Used = False
+    KHR_materials_unlit_Used = False
     KHR_materials_displacement_Used = False
 
     #
@@ -2548,16 +2548,19 @@ def generate_materials(operator,
             # Blender Render.
             #
 
-            if export_settings['gltf_common']:
-                KHR_materials_common_Used = True
+            if export_settings['gltf_unlit']:
+                KHR_materials_unlit_Used = True
 
                 # 
-                # Property: Common Material
+                # Property: Unlit Material
                 #
 
-                common = {}
+                material['extensions'] = {'KHR_materials_unlit': {}}
 
-                material['extensions'] = {'KHR_materials_cmnBlinnPhong': common}
+                if not 'pbrMetallicRoughness' in material:
+                    material['pbrMetallicRoughness'] = {}
+
+                pbrMetallicRoughness = material['pbrMetallicRoughness']
 
                 alpha = 1.0
                 alphaMode = 'OPAQUE'
@@ -2568,7 +2571,7 @@ def generate_materials(operator,
                     else:
                         alphaMode = 'BLEND'
 
-                common['diffuseFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity,
+                pbrMetallicRoughness['baseColorFactor'] = [blender_material.diffuse_color[0] * blender_material.diffuse_intensity,
                                            blender_material.diffuse_color[1] * blender_material.diffuse_intensity,
                                            blender_material.diffuse_color[2] * blender_material.diffuse_intensity,
                                            alpha]
@@ -2576,79 +2579,21 @@ def generate_materials(operator,
                 if alphaMode != 'OPAQUE':
                     material['alphaMode'] = alphaMode
 
-                common['specularFactor'] = [blender_material.specular_color[0] * blender_material.specular_intensity,
-                                            blender_material.specular_color[1] * blender_material.specular_intensity,
-                                            blender_material.specular_color[2] * blender_material.specular_intensity]
-
-                shininessFactor = 128.0 * (float(blender_material.specular_hardness) - 1.0) / 510.0
-
-                common['shininessFactor'] = shininessFactor
-
-                #
-
-                material['emissiveFactor'] = [blender_material.emit * blender_material.diffuse_color[0],
-                                              blender_material.emit * blender_material.diffuse_color[1],
-                                              blender_material.emit * blender_material.diffuse_color[2]]
-
                 #
 
                 for blender_texture_slot in blender_material.texture_slots:
                     if blender_texture_slot and blender_texture_slot.texture and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None:
                         #
-                        # Diffuse texture
+                        # Base color texture
                         #
                         if blender_texture_slot.use_map_color_diffuse:
                             index = get_texture_index_by_filepath(export_settings, glTF,
                                                                   blender_texture_slot.texture.image.filepath)
                             if index >= 0:
-                                diffuseTexture = {
+                                baseColorTexture = {
                                     'index': index
                                 }
-                                common['diffuseTexture'] = diffuseTexture
-                        #
-                        # Specular shininess texture
-                        #
-                        if blender_texture_slot.use_map_color_spec:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
-                            if index >= 0:
-                                specularShininessTexture = {
-                                    'index': index
-                                }
-                                common['specularShininessTexture'] = specularShininessTexture
-                        #
-                        # Ambient texture
-                        #
-                        if blender_texture_slot.use_map_ambient:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
-                            if index >= 0:
-                                ambientTexture = {
-                                    'index': index
-                                }
-                                common['ambientTexture'] = ambientTexture
-                        #
-                        # Emissive texture
-                        #
-                        if blender_texture_slot.use_map_emit:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
-                            if index >= 0:
-                                emissiveTexture = {
-                                    'index': index
-                                }
-                                material['emissiveTexture'] = emissiveTexture
-                        #
-                        # Normal texture
-                        #
-                        if blender_texture_slot.use_map_normal:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
-                            if index >= 0:
-                                normalTexture = {
-                                    'index': index
-                                }
-                                material['normalTexture'] = normalTexture
+                                pbrMetallicRoughness['baseColorTexture'] = baseColorTexture
 
                         #
                         # Displacement textue
@@ -2836,9 +2781,9 @@ def generate_materials(operator,
             create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
             create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_pbrSpecularGlossiness')
 
-        if KHR_materials_common_Used:
-            create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
-            create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_cmnBlinnPhong')
+        if KHR_materials_unlit_Used:
+            create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_unlit')
+            create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_materials_unlit')
 
         if KHR_materials_displacement_Used:
             create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_materials_displacement')

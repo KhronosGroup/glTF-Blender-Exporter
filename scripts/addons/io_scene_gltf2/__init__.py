@@ -252,8 +252,8 @@ class ExportGLTF2_Base():
             default=False
     )
 
-    export_common = BoolProperty(
-            name='Export KHR_materials_cmnBlinnPhong',
+    export_unlit = BoolProperty(
+            name='Export KHR_materials_unlit',
             description='',
             default=False
     )
@@ -325,7 +325,7 @@ class ExportGLTF2_Base():
 
         export_settings['gltf_lights_pbr'] = self.export_lights_pbr
         export_settings['gltf_lights_cmn'] = self.export_lights_cmn
-        export_settings['gltf_common'] = self.export_common
+        export_settings['gltf_unlit'] = self.export_unlit
         export_settings['gltf_displacement'] = self.export_displacement
 
         export_settings['gltf_uri'] = []
@@ -370,10 +370,15 @@ class ExportGLTF2_Base():
 
         col = layout.box().column()
         col.label('Objects:', icon='OBJECT_DATA')
-        col.prop(self, 'export_materials')
         col.prop(self, 'export_cameras')
         if self.export_cameras:
             col.prop(self, 'export_camera_infinite')
+
+        col = layout.box().column()
+        col.label('Materials:', icon='MATERIAL_DATA')
+        col.prop(self, 'export_materials')
+        if self.export_materials:
+            col.prop(self, 'export_unlit')
 
         col = layout.box().column()
         col.label('Animation:', icon='OUTLINER_DATA_POSE')
@@ -399,7 +404,6 @@ class ExportGLTF2_Base():
             col.label('Experimental:', icon='RADIO')
             col.prop(self, 'export_lights_pbr')
             col.prop(self, 'export_lights_cmn')
-            col.prop(self, 'export_common')
             col.prop(self, 'export_displacement')
 
 

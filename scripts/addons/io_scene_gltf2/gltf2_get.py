@@ -93,18 +93,9 @@ def get_material_requires_texcoords(glTF, index):
     if material.get('specularGlossinessTexture') is not None:
         return True
     
-    # Common Material
+    # Unlit Material
 
     if material.get('diffuseTexture') is not None:
-        return True
-
-    if material.get('specularTexture') is not None:
-        return True
-
-    if material.get('shininessTexture') is not None:
-        return True
-    
-    if material.get('ambientTexture') is not None:
         return True
 
     return False

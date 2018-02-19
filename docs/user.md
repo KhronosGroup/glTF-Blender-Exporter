@@ -9,7 +9,9 @@ At point of writing, Blender supports two material settings: One for `Blender Re
 
 However, this custom node tree needs to be imported and linked to a Blender file. For the future, it is planned to use the `Eevee` shader node, which will replace the current node group.
 
-#### Integrating glTF 2.0 Materials
+For shadeless materials, glTF 2.0 also has an Unlit material extension. Unlit materials use Diffuse or vertex colors as input, and cannot currently be created with Cycles nodes. For correct preview in Blender, enable the *Shadeless* setting on each material. During export, enable *Materials → Export KHR_materials_unlit*.
+
+#### Integrating glTF 2.0 PBR Materials
 
 Following picture shows a basic Blender scene using the Cycles renderer.
 
@@ -275,12 +277,4 @@ The following section describes several tools, how they can optimal be used with
 
 #### Substance Painter
 [Substance Painter](https://www.allegorithmic.com/products/substance-painter) is a 3D painting software allowing you to texture, render and share your work.  
-At point of writing, the exporter of Substance Painter does not have a preset for glTF 2.0 Metallic Roughness export. However, this can be easily configured:  
-
-![glTF SubstancePainter](glTF_SubstancePainter.png)
-
-Important is the order of `occlusion`: red channel, `roughness`: green chanel, `metallic`: blue channel. Even the glTF 2.0 property is named `metallicRoughnessTexture`, the above channel order assignment is the only valid one. The combined occlusion-roughness-metallic map can then be used to connect to the MetallicRoughness and the Occlusion channel. The node group selects the appropriate channel that it needs internally. It should be noted that the image texture data type must be changed to non-color data for the normal and occlusion-roughness-metallic maps.
-
-![glTF Proper Node Connections](glTF_Proper_Node_connections.png)
-
-Furthermore, please make sure, that the `normal` is exported for `OpenGL`. Even your render engine is using a different graphics API, this is the only valid one.
+Substance Painter 2017.3 and newer versions provide glTF 2.0 PBR presets.

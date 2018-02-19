@@ -218,7 +218,7 @@ def filter_apply(export_settings):
                         filtered_textures.append(blender_node)
                         # TODO: Add displacement texture, as not stored in node tree.
         else:
-            if export_settings['gltf_common']:
+            if export_settings['gltf_unlit']:
                 for blender_texture_slot in blender_material.texture_slots:
 
                     if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0 and blender_texture_slot.texture.image.size[0] > 0 and  blender_texture_slot.texture.image.size[1] > 0:
@@ -226,15 +226,6 @@ def filter_apply(export_settings):
                             accept = False
                             
                             if blender_texture_slot.use_map_color_diffuse:
-                                accept = True
-                            if blender_texture_slot.use_map_color_spec:
-                                accept = True
-    
-                            if blender_texture_slot.use_map_ambient:
-                                accept = True
-                            if blender_texture_slot.use_map_emit:
-                                accept = True
-                            if blender_texture_slot.use_map_normal:
                                 accept = True
 
                             if export_settings['gltf_displacement']:
