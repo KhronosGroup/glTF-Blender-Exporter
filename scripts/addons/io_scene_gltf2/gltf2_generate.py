@@ -430,7 +430,7 @@ def generate_animations_parameter(
             samplers.append(sampler)
 
     #
-    #  
+    #
 
     if len(value) > 0 and is_morph_data:
         sampler_name = prefix + action.name + "_weights"
@@ -571,7 +571,7 @@ def generate_animations_parameter(
                 'node': get_node_index(glTF, target_name)
             }
 
-            # 
+            #
 
             channels.append(channel)
 
@@ -895,7 +895,7 @@ def generate_cameras(export_settings, glTF):
 
             orthographic = {}
 
-            #    
+            #
 
             orthographic['xmag'] = blender_camera.ortho_scale
             orthographic['ymag'] = blender_camera.ortho_scale
@@ -903,7 +903,7 @@ def generate_cameras(export_settings, glTF):
             orthographic['znear'] = blender_camera.clip_start
             orthographic['zfar'] = blender_camera.clip_end
 
-            # 
+            #
 
             camera['orthographic'] = orthographic
         else:
@@ -1083,6 +1083,10 @@ def generate_lights_pbr(operator,
                     light['type'] = 'spot'
                     blender_light_node = blender_node
                     break
+                if blender_node.node_tree.name.startswith('glTF Area Light'):
+                    light['type'] = 'area'
+                    blender_light_node = blender_node
+                    break
 
         if blender_light_node is None:
             continue
@@ -1107,10 +1111,27 @@ def generate_lights_pbr(operator,
 
                 positional['spot'] = spot
 
+        elif light['type'] == 'area':
+
+            positional = {}
+
+            positional['width'] = blender_light.size
+
+            light['positional'] = positional
+
+            if blender_light.shape == 'RECTANGLE':
+
+                positional['height'] = blender_light.size_y
+
         light['color'] = [blender_light_node.inputs['Color'].default_value[0],
                           blender_light_node.inputs['Color'].default_value[1],
                           blender_light_node.inputs['Color'].default_value[2]]
-        light['strength'] = blender_light_node.inputs['Strength'].default_value
+
+        # Uses watts/m^2 for sun (and mesh lights) but watts for everything else.
+        if light['type'] == 'directional':
+            light['intensity'] = blender_light_node.inputs['Strength'].default_value
+        else:
+            light['intensity'] = blender_light_node.inputs['Strength'].default_value
 
         #
 
@@ -1752,8 +1773,13 @@ def generate_node_instance(context,
                         correction_node = {}
 
                         correction_node['name'] = 'Correction_' + blender_object.name
-                        correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
-                                                       correction_quaternion[3], correction_quaternion[0]]
+
+                        if blender_object.data.type == 'AREA':
+                            correction_node['rotation'] = [-correction_quaternion[1], correction_quaternion[2],
+                                                           correction_quaternion[3], correction_quaternion[0]]
+                        else:
+                            correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
+                                                           correction_quaternion[3], correction_quaternion[0]]
 
                         correction_node['extensions'] = extensions
 
@@ -2082,7 +2108,7 @@ def generate_nodes(operator,
                         if blender_child_node.parent_type == 'BONE':
                             blender_object_to_bone[blender_child_node.name] = blender_child_node.parent_bone
 
-                # 
+                #
 
                 for blender_bone in blender_object.pose.bones:
 
@@ -2286,7 +2312,7 @@ def generate_materials(operator,
     #
 
     for blender_material in filtered_materials:
-        # 
+        #
         # Property: material
         #
 
@@ -2306,7 +2332,7 @@ def generate_materials(operator,
                     alpha = 1.0
 
                     if blender_node.node_tree.name.startswith('glTF Metallic Roughness'):
-                        # 
+                        #
                         # Property: pbrMetallicRoughness
                         #
 
@@ -2371,7 +2397,7 @@ def generate_materials(operator,
                     if blender_node.node_tree.name.startswith('glTF Specular Glossiness'):
                         KHR_materials_pbrSpecularGlossiness_Used = True
 
-                        # 
+                        #
                         # Property: Specular Glossiness Material
                         #
 
@@ -2551,7 +2577,7 @@ def generate_materials(operator,
             if export_settings['gltf_common']:
                 KHR_materials_common_Used = True
 
-                # 
+                #
                 # Property: Common Material
                 #
 
@@ -2660,7 +2686,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2772,7 +2798,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2858,7 +2884,7 @@ def generate_scenes(export_settings,
     #
 
     for blender_scene in bpy.data.scenes:
-        # 
+        #
         # Property: scene
         #
 

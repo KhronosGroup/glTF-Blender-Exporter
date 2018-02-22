@@ -347,7 +347,7 @@ def filter_apply(export_settings):
             if blender_light not in filtered_objects:
                 continue 
 
-        if blender_light.type == 'AREA' or blender_light.type == 'HEMI':
+        if blender_light.type == 'HEMI':
             continue
 
         if not blender_light.use_nodes or blender_light.node_tree is None:
@@ -357,9 +357,12 @@ def filter_apply(export_settings):
         
         for blender_node in blender_light.node_tree.nodes:
             if isinstance(blender_node, bpy.types.ShaderNodeGroup):
-                if blender_node.node_tree.name.startswith('glTF Directional Light') or blender_node.node_tree.name.startswith('glTF Point Light') or blender_node.node_tree.name.startswith('glTF Spot Light'):
+                if (blender_node.node_tree.name.startswith('glTF Directional Light') or
+                        blender_node.node_tree.name.startswith('glTF Point Light') or
+                        blender_node.node_tree.name.startswith('glTF Spot Light') or
+                        blender_node.node_tree.name.startswith('glTF Area Light')):
                     add_light = True
-                    break 
+                    break
 
         if add_light:
             filtered_lights_pbr.append(blender_light)
