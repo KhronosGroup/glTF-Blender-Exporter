@@ -9,7 +9,7 @@ At point of writing, Blender supports two material settings: One for `Blender Re
 
 However, this custom node tree needs to be imported and linked to a Blender file. For the future, it is planned to use the `Eevee` shader node, which will replace the current node group.
 
-For shadeless materials, glTF 2.0 also has an Unlit material extension. Unlit materials use Diffuse or vertex colors as input, and cannot currently be created with Cycles nodes. For correct preview in Blender, enable the *Shadeless* setting on each material. During export, enable *Materials → Export KHR_materials_unlit*.
+For shadeless materials, glTF 2.0 also has an Unlit material extension. Unlit materials use Diffuse or vertex colors as input, and cannot currently be created with Cycles nodes. Materials with the *Shadeless* setting enabled will automatically use the glTF 2.0 Unlit extension.
 
 #### Integrating glTF 2.0 PBR Materials
 

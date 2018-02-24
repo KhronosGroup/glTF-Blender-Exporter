@@ -2548,7 +2548,7 @@ def generate_materials(operator,
             # Blender Render.
             #
 
-            if export_settings['gltf_unlit']:
+            if blender_material.use_shadeless:
                 KHR_materials_unlit_Used = True
 
                 # 

@@ -218,24 +218,7 @@ def filter_apply(export_settings):
                         filtered_textures.append(blender_node)
                         # TODO: Add displacement texture, as not stored in node tree.
         else:
-            if export_settings['gltf_unlit']:
-                for blender_texture_slot in blender_material.texture_slots:
 
-                    if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0 and blender_texture_slot.texture.image.size[0] > 0 and  blender_texture_slot.texture.image.size[1] > 0:
-                        if blender_texture_slot not in filtered_textures and blender_texture_slot.name not in temp_filtered_texture_names:
-                            accept = False
-                            
-                            if blender_texture_slot.use_map_color_diffuse:
-                                accept = True
-
-                            if export_settings['gltf_displacement']:
-                                if blender_texture_slot.use_map_displacement:
-                                    accept = True
-                                
-                            if accept:
-                                filtered_textures.append(blender_texture_slot)
-                                temp_filtered_texture_names.append(blender_texture_slot.name)
-            else:
                 for blender_texture_slot in blender_material.texture_slots:
 
                     if blender_texture_slot is not None and blender_texture_slot.texture and blender_texture_slot.texture.users != 0 and blender_texture_slot.texture.type == 'IMAGE' and blender_texture_slot.texture.image is not None and blender_texture_slot.texture.image.users != 0 and blender_texture_slot.texture.image.size[0] > 0 and  blender_texture_slot.texture.image.size[1] > 0:

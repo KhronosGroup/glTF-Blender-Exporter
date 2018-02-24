@@ -252,12 +252,6 @@ class ExportGLTF2_Base():
             default=False
     )
 
-    export_unlit = BoolProperty(
-            name='Export KHR_materials_unlit',
-            description='',
-            default=False
-    )
-
     export_displacement = BoolProperty(
             name='Export KHR_materials_displacement',
             description='',
@@ -325,7 +319,6 @@ class ExportGLTF2_Base():
 
         export_settings['gltf_lights_pbr'] = self.export_lights_pbr
         export_settings['gltf_lights_cmn'] = self.export_lights_cmn
-        export_settings['gltf_unlit'] = self.export_unlit
         export_settings['gltf_displacement'] = self.export_displacement
 
         export_settings['gltf_uri'] = []
@@ -377,8 +370,6 @@ class ExportGLTF2_Base():
         col = layout.box().column()
         col.label('Materials:', icon='MATERIAL_DATA')
         col.prop(self, 'export_materials')
-        if self.export_materials:
-            col.prop(self, 'export_unlit')
 
         col = layout.box().column()
         col.label('Animation:', icon='OUTLINER_DATA_POSE')
