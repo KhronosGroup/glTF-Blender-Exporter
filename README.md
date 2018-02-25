@@ -11,20 +11,26 @@ Version
 
 Introduction
 ------------
-This is the offical Khronos Blender glTF 2.0 exporter. This repository mainly contains Python scripts to export the internal Blender data structure to glTF 2.0. Furthermore, node groups are provided, which do simulate the Physically-Based Rendering (PBR) materials using the Cycles renderer. Finally, several Blender scenes are provided, which do demonstrate each feature individually. 
+This is the offical Khronos Blender glTF 2.0 exporter. This repository mainly contains Python scripts to export the internal Blender data structure to glTF 2.0. Node groups are also provided, to simulate glTF Physically-Based Rendering (PBR) materials using the Cycles renderer. Finally, several Blender scenes are provided demonstrating each feature individually. 
 
 Installation
 ------------
-At point of writing, the Khronos glTF 2.0 exporter is not part of any offical, community or testing Blender add-on, which can be activated in the "User Preferences ..." Add-ons tab.  
-Because of this, the exporter has to be added manually, which is described in the [scripts](scripts/) section.
+The Khronos glTF 2.0 exporter is not available in the *Add-ons* tab by default, and must be installed manually by copying the `scripts/addons/io_scene_gltf2` folder into the `scripts/addons/` directory of the Blender installation, then enabling it under the *Add-ons* tab. Read [detailed installation instructions here](scripts/).
 
-Exporter usage
+Using the exporter
 --------------
-The glTF 2.0 exporter provides several export settings. At the point of writing, to export PBR materials, specific node groups have to be used.
-Details about this can be found in the [docs](docs/) section.
+Refer to [user documentation](docs/user.md). For best results with PBR materials, use the node groups provided with the exporter.
+
+Features
+--------------
+
+This exporter supports meshes, materials, animation (keyframes, skinning, and shape keys), and more. For a complete list of features available in glTF 2.0, see the [official specification](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md) and [list of extensions](https://github.com/KhronosGroup/glTF/tree/master/extensions#extensions-for-gltf-20). This exporter allows the following extensions:
+
+* [Specular-Glossiness PBR materials](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/README.md)
+* Unlit materials *(coming soon)*
 
 Folders
--------
+--------------
 
 [docs](docs/)  
 Documentation about the Blender glTF 2.0 exporter and its usage.  
