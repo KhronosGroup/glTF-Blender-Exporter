@@ -735,21 +735,30 @@ def generate_animations(operator,
     #
     #
 
-    processed_meshes = []
+    processed_meshes = {}
 
-    def process_mesh_object(blender_object):
+    def process_mesh_object(blender_object, blender_action):
         blender_mesh = blender_object.data
 
-        if blender_mesh in processed_meshes:
+        if not blender_action.name in processed_meshes:
+            processed_meshes[blender_action.name] = []
+
+        if blender_mesh in processed_meshes[blender_action.name]:
             return
 
-        if blender_mesh.shape_keys is None or blender_mesh.shape_keys.animation_data is None:
-            return
+        #
 
-        blender_action = blender_mesh.shape_keys.animation_data.action
+        if blender_action.name not in animations:
+            animations[blender_action.name] = {
+                'name': blender_action.name,
+                'channels': [],
+                'samplers': []
+            }
 
-        if blender_action is None:
-            return
+        channels = animations[blender_action.name]['channels']
+        samplers = animations[blender_action.name]['samplers']
+
+        #
 
         correction_matrix_local = mathutils.Matrix.Identity(4)
         matrix_basis = mathutils.Matrix.Identity(4)
@@ -758,32 +767,64 @@ def generate_animations(operator,
                                       blender_object.name, None, blender_object.rotation_mode, correction_matrix_local,
                                       matrix_basis, True)
 
-        processed_meshes.append(blender_mesh)
+        processed_meshes[blender_action.name].append(blender_mesh)
 
     for blender_object in filtered_objects:
         animation_data = blender_object.animation_data
         if animation_data is None:
             continue
+
         object_actions = []
+
         # Collect active action.
         if animation_data.action:
             object_actions.append(animation_data.action)
+
         # Collect associated strips from NLA tracks.
         for track in animation_data.nla_tracks:
             for strip in track.strips:
                 object_actions.append(strip.action)
+
         # Remove duplicate actions.
         object_actions = list(set(object_actions))
+
         # Export all collected actions.
         for action in object_actions:
             active_action = animation_data.action
             animation_data.action = action
+
             process_object_animations(blender_object, action)
+
             animation_data.action = active_action
-        # Export morph targets animation data.
-        if blender_object.type != 'MESH' or blender_object.data is None:
+
+        #
+
+        # Export shape keys.
+        if (blender_object.type != 'MESH'
+                or blender_object.data is None
+                or blender_object.data.shape_keys is None
+                or blender_object.data.shape_keys.animation_data is None):
             continue
-        process_mesh_object(blender_object)
+
+        shape_keys = blender_object.data.shape_keys
+        shape_key_actions = []
+
+        if shape_keys.animation_data.action:
+            shape_key_actions.append(shape_keys.animation_data.action)
+
+        for track in shape_keys.animation_data.nla_tracks:
+            for strip in track.strips:
+                shape_key_actions.append(strip.action)
+
+        for action in shape_key_actions:
+            active_action = shape_keys.animation_data.action
+            shape_keys.animation_data.action = action
+
+            process_mesh_object(blender_object, action)
+
+            shape_keys.animation_data.action = active_action
+
+    #
 
     if export_settings['gltf_bake_skins']:
         for blender_object in filtered_objects:
