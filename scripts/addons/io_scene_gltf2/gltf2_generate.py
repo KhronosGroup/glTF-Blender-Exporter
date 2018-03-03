@@ -226,7 +226,12 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
             #
     #
@@ -335,7 +340,12 @@ def generate_animations_parameter(
 
         sampler['name'] = sampler_name
 
-        samplers.append(sampler)
+        #
+
+        if sampler['output'] != -1 and sampler['input'] != -1:
+            samplers.append(sampler)
+        else:
+            print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
         #
     #
@@ -429,10 +439,15 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
     #
-    #  
+    #
 
     if len(value) > 0 and is_morph_data:
         sampler_name = prefix + action.name + "_weights"
@@ -516,7 +531,12 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
     #
     #
@@ -555,15 +575,20 @@ def generate_animations_parameter(
     for path in ['translation', 'rotation', 'scale', 'weights']:
 
         if write_transform[write_transform_index]:
-            channel = {}
-
-            #
-
             sampler_name = prefix + action.name + "_" + path
 
-            channel['sampler'] = get_index(samplers, sampler_name)
+            sampler_index = get_index(samplers, sampler_name)
+
+            # Skip channels containing skipped samplers.
+            if sampler_index == -1:
+                print_console('WARNING', 'Skipped channel in action ' + action.name + ', missing sampler.')
+                continue
 
             #
+
+            channel = {}
+            channel['sampler'] = sampler_index
+
             #
 
             target_name = name + postfix
@@ -573,7 +598,7 @@ def generate_animations_parameter(
                 'node': get_node_index(glTF, target_name)
             }
 
-            # 
+            #
 
             channels.append(channel)
 
@@ -746,7 +771,6 @@ def generate_animations(operator,
         # Collect associated strips from NLA tracks.
         for track in animation_data.nla_tracks:
             for strip in track.strips:
-                print(blender_object.name, 'uses', strip.action.name)
                 object_actions.append(strip.action)
         # Remove duplicate actions.
         object_actions = list(set(object_actions))
@@ -770,11 +794,13 @@ def generate_animations(operator,
     #
 
     if len(animations) > 0:
+        glTF['animations'] = []
         # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
         for animation in animations.values():
             for sampler in animation['samplers']:
-            del sampler['name']
-        glTF['animations'] = list(animations.values())
+                del sampler['name']
+            if len(animation['channels']) > 0:
+                glTF['animations'].append(animation)
 
 
 def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, export_settings):
@@ -899,7 +925,7 @@ def generate_cameras(export_settings, glTF):
 
             orthographic = {}
 
-            #    
+            #
 
             orthographic['xmag'] = blender_camera.ortho_scale
             orthographic['ymag'] = blender_camera.ortho_scale
@@ -907,7 +933,7 @@ def generate_cameras(export_settings, glTF):
             orthographic['znear'] = blender_camera.clip_start
             orthographic['zfar'] = blender_camera.clip_end
 
-            # 
+            #
 
             camera['orthographic'] = orthographic
         else:
@@ -1472,7 +1498,7 @@ def generate_duplicate_mesh(glTF, blender_object):
 
     if not hasattr(blender_object, 'data'):
         return -1
-      
+
     mesh_index = get_mesh_index(glTF, blender_object.data.name)
 
     if mesh_index == -1:
@@ -1946,7 +1972,7 @@ def generate_nodes(operator,
                         if blender_child_node.parent_type == 'BONE':
                             blender_object_to_bone[blender_child_node.name] = blender_child_node.parent_bone
 
-                # 
+                #
 
                 for blender_bone in blender_object.pose.bones:
 
@@ -2151,7 +2177,7 @@ def generate_materials(operator,
     #
 
     for blender_material in filtered_materials:
-        # 
+        #
         # Property: material
         #
 
@@ -2171,7 +2197,7 @@ def generate_materials(operator,
                     alpha = 1.0
 
                     if blender_node.node_tree.name.startswith('glTF Metallic Roughness'):
-                        # 
+                        #
                         # Property: pbrMetallicRoughness
                         #
 
@@ -2236,7 +2262,7 @@ def generate_materials(operator,
                     if blender_node.node_tree.name.startswith('glTF Specular Glossiness'):
                         KHR_materials_pbrSpecularGlossiness_Used = True
 
-                        # 
+                        #
                         # Property: Specular Glossiness Material
                         #
 
@@ -2416,7 +2442,7 @@ def generate_materials(operator,
             if blender_material.use_shadeless:
                 KHR_materials_unlit_Used = True
 
-                # 
+                #
                 # Property: Unlit Material
                 #
 
@@ -2473,7 +2499,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2580,7 +2606,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2665,7 +2691,7 @@ def generate_scenes(export_settings,
     #
 
     for blender_scene in bpy.data.scenes:
-        # 
+        #
         # Property: scene
         #
 
