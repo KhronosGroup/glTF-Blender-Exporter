@@ -161,6 +161,7 @@ def generate_animations_parameter(
                 interpolation,
                 node_type,
                 used_node_name,
+                action.name,
                 matrix_correction,
                 matrix_basis
             )
@@ -244,7 +245,7 @@ def generate_animations_parameter(
             if interpolation == 'CUBICSPLINE':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type,
-                                                        used_node_name, matrix_correction, matrix_basis)
+                                                        used_node_name, action.name, matrix_correction, matrix_basis)
 
         if rotation_euler.count(None) < 3:
             interpolation = animate_get_interpolation(export_settings, rotation_euler)
@@ -252,15 +253,15 @@ def generate_animations_parameter(
             if interpolation == 'CUBICSPLINE':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation,
-                                                   node_type, used_node_name, matrix_correction, matrix_basis)
+                                                   node_type, used_node_name, action.name, matrix_correction, matrix_basis)
 
         if rotation_quaternion.count(None) < 4:
             interpolation = animate_get_interpolation(export_settings, rotation_quaternion)
             if interpolation == 'CUBICSPLINE' and node_type == 'JOINT':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data, rotation_in_tangent_data, rotation_out_tangent_data = animate_rotation_quaternion(
-                export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction,
-                matrix_basis)
+                export_settings, rotation_quaternion, interpolation, node_type, used_node_name, action.name,
+                matrix_correction, matrix_basis)
 
     if rotation_data is not None:
 
@@ -362,6 +363,7 @@ def generate_animations_parameter(
                 interpolation,
                 node_type,
                 used_node_name,
+                action.name,
                 matrix_correction,
                 matrix_basis
             )
@@ -585,23 +587,21 @@ def generate_animations(operator,
                         export_settings,
                         glTF):
     """
-    Generates the top level animations, channels and samplers entry.
+    Generates the top level animations entry.
     """
-
-    def process_object_animations(blender_object):
-        if blender_object.animation_data is None:
-            return
-
-        blender_action = blender_object.animation_data.action
-
-        if blender_action is None:
-            return
-
-        #
-        #
-
+    def process_object_animations(blender_object, blender_action):
         correction_matrix_local = blender_object.matrix_parent_inverse
         matrix_basis = mathutils.Matrix.Identity(4)
+
+        if blender_action.name not in animations:
+            animations[blender_action.name] = {
+                'name': blender_action.name,
+                'channels': [],
+                'samplers': []
+            }
+
+        channels = animations[blender_action.name]['channels']
+        samplers = animations[blender_action.name]['samplers']
 
         generate_animations_parameter(
             operator,
@@ -636,7 +636,12 @@ def generate_animations(operator,
 
                 # Precalculate joint animation data.
 
-                start, end = compute_action_range(export_settings)
+                start, end = compute_action_range(export_settings, [blender_action])
+
+                gltf_joint_cache = export_settings['gltf_joint_cache']
+
+                if not gltf_joint_cache.get(blender_action.name):
+                    gltf_joint_cache[blender_action.name] = {}
 
                 # Iterate over frames in export range
                 for frame in range(int(start), int(end) + 1):
@@ -652,16 +657,14 @@ def generate_animations(operator,
                             export_settings
                         )
 
-                        gltf_joint_cache = export_settings['gltf_joint_cache']
-
-                        if not gltf_joint_cache.get(blender_bone.name):
-                            gltf_joint_cache[blender_bone.name] = {}
+                        if not gltf_joint_cache[blender_action.name].get(blender_bone.name):
+                            gltf_joint_cache[blender_action.name][blender_bone.name] = {}
 
                         matrix = correction_matrix_local * matrix_basis
 
                         tmp_location, tmp_rotation, tmp_scale = matrix.decompose()
 
-                        gltf_joint_cache[blender_bone.name][float(frame)] = [tmp_location, tmp_rotation, tmp_scale]
+                        gltf_joint_cache[blender_action.name][blender_bone.name][float(frame)] = [tmp_location, tmp_rotation, tmp_scale]
 
                 #
 
@@ -689,11 +692,7 @@ def generate_animations(operator,
                         False
                     )
 
-    animations = []
-
-    channels = []
-
-    samplers = []
+    animations = {}
 
     #
     #
@@ -737,7 +736,26 @@ def generate_animations(operator,
         processed_meshes.append(blender_mesh)
 
     for blender_object in filtered_objects:
-        process_object_animations(blender_object)
+        animation_data = blender_object.animation_data
+        if animation_data is None:
+            continue
+        object_actions = []
+        # Collect active action.
+        if animation_data.action:
+            object_actions.append(animation_data.action)
+        # Collect associated strips from NLA tracks.
+        for track in animation_data.nla_tracks:
+            for strip in track.strips:
+                print(blender_object.name, 'uses', strip.action.name)
+                object_actions.append(strip.action)
+        # Remove duplicate actions.
+        object_actions = list(set(object_actions))
+        # Export all collected actions.
+        for action in object_actions:
+            active_action = animation_data.action
+            animation_data.action = action
+            process_object_animations(blender_object, action)
+            animation_data.action = active_action
         # Export morph targets animation data.
         if blender_object.type != 'MESH' or blender_object.data is None:
             continue
@@ -751,26 +769,12 @@ def generate_animations(operator,
     #
     #
 
-    if len(channels) > 0 or len(samplers) > 0:
-
-        # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
-        for sampler in samplers:
-            del sampler['name']
-
-        #
-
-        animation = {
-            'channels': channels,
-            'samplers': samplers
-        }
-
-        animations.append(animation)
-
-    #
-    #
-
     if len(animations) > 0:
-        glTF['animations'] = animations
+        # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
+        for animation in animations.values():
+            for sampler in animation['samplers']:
+            del sampler['name']
+        glTF['animations'] = list(animations.values())
 
 
 def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, export_settings):
@@ -795,7 +799,7 @@ def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, expor
 
 
 def export_bake_skins(blender_backup_action, export_settings, filtered_objects):
-    start, end = compute_action_range(export_settings)
+    start, end = compute_action_range(export_settings, bpy.data.actions)
     #
     for blender_object in filtered_objects:
         if blender_object.animation_data is not None:
@@ -809,10 +813,10 @@ def export_bake_skins(blender_backup_action, export_settings, filtered_objects):
                          clear_constraints=False, use_current_action=False, bake_types={'POSE'})
 
 
-def compute_action_range(export_settings):
+def compute_action_range(export_settings, actions):
     start = None
     end = None
-    for current_blender_action in bpy.data.actions:
+    for current_blender_action in actions:
         for current_blender_fcurve in current_blender_action.fcurves:
             if current_blender_fcurve is None:
                 continue
