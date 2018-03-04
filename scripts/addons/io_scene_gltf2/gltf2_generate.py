@@ -628,6 +628,14 @@ def generate_animations(operator,
         channels = animations[blender_action.name]['channels']
         samplers = animations[blender_action.name]['samplers']
 
+        # Add entry to joint cache. Current action may not need skinnning,
+        # but there are too many places to check for and add it later.
+        gltf_joint_cache = export_settings['gltf_joint_cache']
+        if not gltf_joint_cache.get(blender_action.name):
+            gltf_joint_cache[blender_action.name] = {}
+
+        #
+
         generate_animations_parameter(
             operator,
             context,
@@ -662,11 +670,6 @@ def generate_animations(operator,
                 # Precalculate joint animation data.
 
                 start, end = compute_action_range(export_settings, [blender_action])
-
-                gltf_joint_cache = export_settings['gltf_joint_cache']
-
-                if not gltf_joint_cache.get(blender_action.name):
-                    gltf_joint_cache[blender_action.name] = {}
 
                 # Iterate over frames in export range
                 for frame in range(int(start), int(end) + 1):
