@@ -600,7 +600,7 @@ def generate_animations(operator,
         #
         #
 
-        correction_matrix_local = mathutils.Matrix.Identity(4)
+        correction_matrix_local = blender_object.matrix_parent_inverse
         matrix_basis = mathutils.Matrix.Identity(4)
 
         generate_animations_parameter(
