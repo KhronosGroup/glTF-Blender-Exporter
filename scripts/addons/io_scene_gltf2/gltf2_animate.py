@@ -319,13 +319,14 @@ def animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolat
 
             rotation = animate_convert_rotation_axis_angle(axis_angle_rotation)
         
-            # Bring back to internal Quaternion notation. 
-            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]], export_settings)
-
             # handle parent inverse
+            rotation = mathutils.Quaternion((rotation[3], rotation[0], rotation[1], rotation[2]))
             matrix = rotation.to_matrix().to_4x4()
             matrix = matrix_correction * matrix
             rotation = matrix.to_quaternion()
+
+            # Bring back to internal Quaternion notation.
+            rotation = convert_swizzle_rotation([rotation[0], rotation[1], rotation[2], rotation[3]], export_settings)
             
         # Bring back to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
@@ -378,14 +379,15 @@ def animate_rotation_euler(export_settings, rotation_euler, rotation_mode, inter
                 channel_index += 1
     
             rotation = animate_convert_rotation_euler(euler_rotation, rotation_mode)
-        
-            # Bring back to internal Quaternion notation. 
-            rotation = convert_swizzle_rotation([rotation[3], rotation[0], rotation[1], rotation[2]], export_settings)
-
+                    
             # handle parent inverse
+            rotation = mathutils.Quaternion((rotation[3], rotation[0], rotation[1], rotation[2]))
             matrix = rotation.to_matrix().to_4x4()
             matrix = matrix_correction * matrix
             rotation = matrix.to_quaternion()
+
+            # Bring back to internal Quaternion notation.
+            rotation = convert_swizzle_rotation([rotation[0], rotation[1], rotation[2], rotation[3]], export_settings)
             
         # Bring back to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
@@ -458,7 +460,7 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
                 
                 channel_index += 1 
         
-            rotation = convert_swizzle_rotation(rotation, export_settings)
+            rotation = mathutils.Quaternion((rotation[0], rotation[1], rotation[2], rotation[3]))
             in_tangent = convert_swizzle_rotation(in_tangent, export_settings)
             out_tangent = convert_swizzle_rotation(out_tangent, export_settings)
 
@@ -466,6 +468,9 @@ def animate_rotation_quaternion(export_settings, rotation_quaternion, interpolat
             matrix = rotation.to_matrix().to_4x4()
             matrix = matrix_correction * matrix
             rotation = matrix.to_quaternion()
+
+            # Bring back to internal Quaternion notation.
+            rotation = convert_swizzle_rotation([rotation[0], rotation[1], rotation[2], rotation[3]], export_settings)
 
         # Bring to glTF Quaternion notation.
         rotation = [rotation[1], rotation[2], rotation[3], rotation[0]]
