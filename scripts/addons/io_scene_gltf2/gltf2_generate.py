@@ -2147,7 +2147,13 @@ def generate_images(operator,
         # Property: image
         #
 
-        image = {}
+        image = { 'name': get_image_name(blender_image) }
+
+        file_format = 'JPEG'
+        mime_type = 'image/jpeg'
+        if get_image_use_alpha(export_settings, blender_image):
+            file_format = 'PNG'
+            mime_type = 'image/png'
 
         #
 
@@ -2156,21 +2162,21 @@ def generate_images(operator,
             if export_settings['gltf_embed_images']:
                 # Embed image as Base64.
 
-                png_data = create_png_data(blender_image)
+                image_data = create_image_data(context, export_settings, blender_image, file_format)
 
                 # Required
 
-                image['uri'] = 'data:image/png;base64,' + base64.b64encode(png_data).decode('ascii')
+                image['mimeType'] = mime_type
+
+                image['uri'] = 'data:' + mime_type +  ';base64,' + base64.b64encode(image_data).decode('ascii')
 
             else:
                 # Store image external.
 
-                uri = get_uri(blender_image.filepath)
+                uri = get_image_uri(export_settings, blender_image)
+                path = export_settings['gltf_filedirectory'] + uri
 
-                context.scene.render.image_settings.file_format = 'PNG'
-                context.scene.render.image_settings.color_depth = '8'
-
-                blender_image.save_render(export_settings['gltf_filedirectory'] + uri, context.scene)
+                create_image_file(context, blender_image, path, file_format)
 
                 # Required
 
@@ -2179,20 +2185,18 @@ def generate_images(operator,
         else:
             # Store image as glb.
 
-            png_data = create_png_data(blender_image)
+            image_data = create_image_data(context, export_settings, blender_image, file_format)
 
-            bufferView = create_bufferView(operator, context, export_settings, glTF, png_data, 0, 0)
+            bufferView = create_bufferView(operator, context, export_settings, glTF, image_data, 0, 0)
 
             # Required
 
-            image['mimeType'] = 'image/png'
+            image['mimeType'] = mime_type
 
             image['bufferView'] = bufferView
 
         #
         #
-
-        export_settings['gltf_uri'].append(get_uri(blender_image.filepath))
 
         images.append(image)
 
@@ -2237,7 +2241,7 @@ def generate_textures(operator,
 
             texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
 
-            texture['source'] = get_image_index(export_settings, get_uri(blender_texture.image.filepath))
+            texture['source'] = get_image_index(glTF, blender_texture.image)
 
             #
             #
@@ -2252,7 +2256,7 @@ def generate_textures(operator,
 
             texture['sampler'] = create_sampler(operator, context, export_settings, glTF, magFilter, wrap)
 
-            texture['source'] = get_image_index(export_settings, get_uri(blender_texture.texture.image.filepath))
+            texture['source'] = get_image_index(glTF, blender_texture.texture.image)
 
             #
             #
@@ -2317,7 +2321,7 @@ def generate_materials(operator,
                         #
                         # Base color texture
                         #
-                        index = get_texture_index(export_settings, glTF, 'BaseColor', blender_node)
+                        index = get_texture_index_by_node_group(export_settings, glTF, 'BaseColor', blender_node)
                         if index >= 0:
                             baseColorTexture = {
                                 'index': index
@@ -2356,7 +2360,7 @@ def generate_materials(operator,
                         #
                         # Metallic roughness texture
                         #
-                        index = get_texture_index(export_settings, glTF, 'MetallicRoughness', blender_node)
+                        index = get_texture_index_by_node_group(export_settings, glTF, 'MetallicRoughness', blender_node)
                         if index >= 0:
                             metallicRoughnessTexture = {
                                 'index': index
@@ -2382,7 +2386,7 @@ def generate_materials(operator,
                         #
                         # Diffuse texture
                         #
-                        index = get_texture_index(export_settings, glTF, 'Diffuse', blender_node)
+                        index = get_texture_index_by_node_group(export_settings, glTF, 'Diffuse', blender_node)
                         if index >= 0:
                             diffuseTexture = {
                                 'index': index
@@ -2407,8 +2411,8 @@ def generate_materials(operator,
                         #
                         # Specular texture
                         #
-                        index_a = get_texture_index(export_settings, glTF, 'Specular', blender_node)
-                        index_b = get_texture_index(export_settings, glTF, 'Glossiness', blender_node)
+                        index_a = get_texture_index_by_node_group(export_settings, glTF, 'Specular', blender_node)
+                        index_b = get_texture_index_by_node_group(export_settings, glTF, 'Glossiness', blender_node)
                         if index_a >= 0 and index_b >= 0 and index_a == index_b:
                             specularGlossinessTexture = {
                                 'index': index_a
@@ -2439,7 +2443,7 @@ def generate_materials(operator,
                     #
                     # Emissive texture
                     #
-                    index = get_texture_index(export_settings, glTF, 'Emissive', blender_node)
+                    index = get_texture_index_by_node_group(export_settings, glTF, 'Emissive', blender_node)
                     if index >= 0:
                         emissiveTexture = {
                             'index': index
@@ -2461,7 +2465,7 @@ def generate_materials(operator,
                     #
                     # Normal texture
                     #
-                    index = get_texture_index(export_settings, glTF, 'Normal', blender_node)
+                    index = get_texture_index_by_node_group(export_settings, glTF, 'Normal', blender_node)
                     if index >= 0:
                         normalTexture = {
                             'index': index
@@ -2482,7 +2486,7 @@ def generate_materials(operator,
                     # Occlusion texture
                     #
                     if len(blender_node.inputs['Occlusion'].links) > 0:
-                        index = get_texture_index(export_settings, glTF, 'Occlusion', blender_node)
+                        index = get_texture_index_by_node_group(export_settings, glTF, 'Occlusion', blender_node)
                         if index >= 0:
                             occlusionTexture = {
                                 'index': index
@@ -2502,7 +2506,7 @@ def generate_materials(operator,
                     #
                     # Alpha
                     #
-                    index = get_texture_index(export_settings, glTF, 'Alpha', blender_node)
+                    index = get_texture_index_by_node_group(export_settings, glTF, 'Alpha', blender_node)
                     if index >= 0 or alpha < 1.0:
                         alphaMode = 'BLEND'
                         if get_scalar(blender_node.inputs['AlphaMode'].default_value, 0.0) >= 0.5:
@@ -2590,21 +2594,21 @@ def generate_materials(operator,
                         # Base color texture
                         #
                         if blender_texture_slot.use_map_color_diffuse:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
+                            index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                             if index >= 0:
                                 baseColorTexture = {
                                     'index': index
                                 }
                                 pbrMetallicRoughness['baseColorTexture'] = baseColorTexture
+                            else:
+                                print('failed to find image: ' + blender_texture_slot.texture.image.name)
 
                         #
                         # Displacement textue
                         #
                         if export_settings['gltf_displacement']:
                             if blender_texture_slot.use_map_displacement:
-                                index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                      blender_texture_slot.texture.image.filepath)
+                                index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                                 if index >= 0:
                                     extensions = material['extensions']
 
@@ -2666,8 +2670,7 @@ def generate_materials(operator,
                         # Diffuse texture becmomes baseColorTexture
                         #
                         if blender_texture_slot.use_map_color_diffuse:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
+                            index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                             if index >= 0:
                                 baseColorTexture = {
                                     'index': index
@@ -2678,8 +2681,7 @@ def generate_materials(operator,
                         # Ambient texture becomes occlusionTexture
                         #
                         if blender_texture_slot.use_map_ambient:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
+                            index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                             if index >= 0:
                                 ambientTexture = {
                                     'index': index
@@ -2690,8 +2692,7 @@ def generate_materials(operator,
                         # Emissive texture
                         #
                         if blender_texture_slot.use_map_emit:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
+                            index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                             if index >= 0:
                                 emissiveTexture = {
                                     'index': index
@@ -2702,8 +2703,7 @@ def generate_materials(operator,
                         # Normal texture
                         #
                         if blender_texture_slot.use_map_normal:
-                            index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                  blender_texture_slot.texture.image.filepath)
+                            index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                             if index >= 0:
                                 normalTexture = {
                                     'index': index
@@ -2715,8 +2715,7 @@ def generate_materials(operator,
                         #
                         if export_settings['gltf_displacement']:
                             if blender_texture_slot.use_map_displacement:
-                                index = get_texture_index_by_filepath(export_settings, glTF,
-                                                                      blender_texture_slot.texture.image.filepath)
+                                index = get_texture_index_by_image(glTF, blender_texture_slot.texture.image)
                                 if index >= 0:
                                     extensions = material['extensions']
 

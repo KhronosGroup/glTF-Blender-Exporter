@@ -19,9 +19,13 @@
 import json
 import struct
 import zlib
+import os
+
+from shutil import copyfile
 
 from .gltf2_debug import *
 from .gltf2_constants import *
+from .gltf2_get import *
 
 
 #
@@ -320,13 +324,61 @@ def create_accessor(
 
     return len(accessors) - 1
 
-
-def create_png_data(blender_image):
+def create_image_file(context, blender_image, dst_path, file_format):
     """
-    Creates a PNG byte array from a given Blender image.
+    Creates JPEG or PNG file from a given Blender image.
+    """
+
+    if file_format == blender_image.file_format:
+        # Copy source image to destination, keeping original format.
+
+        src_path = bpy.path.abspath(blender_image.filepath, library=blender_image.library)
+
+        copyfile(src_path, dst_path)
+
+    else:
+        # Render a new image to destination, converting to target format.
+
+        # TODO: Reusing the existing scene means settings like exposure are applied on export,
+        # which we don't want, but I'm not sure how to create a new Scene object through the
+        # Python API. See: https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/184.
+
+        context.scene.render.image_settings.file_format = file_format
+        context.scene.render.image_settings.color_depth = '8'
+        blender_image.save_render(dst_path, context.scene)
+
+
+def create_image_data(context, export_settings, blender_image, file_format):
+    """
+    Creates JPEG or PNG byte array from a given Blender image.
     """
     if blender_image is None:
         return None
+
+    if file_format == 'PNG':
+        return _create_png_data(context, export_settings, blender_image)
+    else:
+        return _create_jpg_data(context, export_settings, blender_image)
+
+
+def _create_jpg_data(context, export_settings, blender_image):
+    """
+    Creates a JPEG byte array from a given Blender image.
+    """
+
+    uri = get_image_uri(export_settings, blender_image)
+    path = export_settings['gltf_filedirectory'] + uri
+
+    create_image_file(context, blender_image, path, 'JPEG')
+
+    jpg_data = open(path, 'rb').read()
+    os.remove(path)
+    return jpg_data
+
+def _create_png_data(context, export_settings, blender_image):
+    """
+    Creates a PNG byte array from a given Blender image.
+    """
 
     width = blender_image.size[0]
     height = blender_image.size[1]
