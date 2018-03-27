@@ -248,25 +248,25 @@ def filter_apply(export_settings):
     #
 
     filtered_images = []
+    filtered_images_use_alpha = {}
 
     for blender_texture in filtered_textures:
         
         if isinstance(blender_texture, bpy.types.ShaderNodeTexImage):
             if blender_texture.image is not None and blender_texture.image not in filtered_images and blender_texture.image.users != 0 and blender_texture.image.size[0] > 0 and blender_texture.image.size[1] > 0:
-                
-                if blender_texture.image.filepath == '':
-                    blender_texture.image.filepath = 'glTF_Generated_' + blender_texture.image.name + '.png'
-                
                 filtered_images.append(blender_texture.image)
+                alpha_socket = blender_texture.outputs.get('Alpha')
+                if alpha_socket is not None and alpha_socket.is_linked:
+                    filtered_images_use_alpha[blender_texture.image.name] = True
+
         else:
             if blender_texture.texture.image is not None and blender_texture.texture.image not in filtered_images and blender_texture.texture.image.users != 0 and blender_texture.texture.image.size[0] > 0 and blender_texture.texture.image.size[1] > 0:
-                
-                if blender_texture.texture.image.filepath == '':
-                    blender_texture.texture.image.filepath = 'glTF_Generated_' + blender_texture.texture.image.name + '.png'
-
                 filtered_images.append(blender_texture.texture.image)
+                if blender_texture.use_map_alpha or blender_texture.texture.image.use_alpha:
+                    filtered_images_use_alpha[blender_texture.texture.image.name] = True
                     
     export_settings['filtered_images'] = filtered_images
+    export_settings['filtered_images_use_alpha'] = filtered_images_use_alpha
     
     #
     #

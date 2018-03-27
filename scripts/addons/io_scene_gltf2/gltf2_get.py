@@ -109,50 +109,27 @@ def get_material_requires_normals(glTF, index):
     return get_material_requires_texcoords(glTF, index)
 
 
-def get_image_index(export_settings, uri):
-    """
-    Return the image index in the glTF array.
-    """
-
-    if export_settings['gltf_uri'] is None:
-        return -1
-
-    if uri in export_settings['gltf_uri']:
-        return export_settings['gltf_uri'].index(uri)
-
-    return -1
-
-
-def get_texture_index_by_filepath(export_settings, glTF, filepath):
+def get_texture_index_by_image(glTF, image):
     """
     Return the texture index in the glTF array by a given filepath.
     """
 
-    if filepath is None:
-        return -1
-    
-    uri = get_uri(filepath)
-
-    if export_settings['gltf_uri'] is None:
-        return -1
-
     if glTF.get('textures') is None:
         return -1
+    
+    image_index = get_image_index(glTF, image)
 
-    image_uri = export_settings['gltf_uri']        
+    if image_index == -1:
+        return -1
 
-    index = 0
-    for texture in glTF['textures']:
-        current_image_uri = image_uri[texture['source']]
-        if current_image_uri == uri:
-            return index
+    for texture_index, texture in enumerate(glTF['textures']):
+        if image_index == texture['source']:
+            return texture_index
         
-        index += 1
-
     return -1
 
 
-def get_texture_index(export_settings, glTF, name, shader_node_group):
+def get_texture_index_by_node_group(export_settings, glTF, name, shader_node_group):
     """
     Return the texture index in the glTF array.
     """
@@ -179,7 +156,7 @@ def get_texture_index(export_settings, glTF, name, shader_node_group):
     if from_node.image is None or from_node.image.size[0] == 0 or from_node.image.size[1] == 0:
         return -1
 
-    return get_texture_index_by_filepath(export_settings, glTF, from_node.image.filepath)
+    return get_texture_index_by_image(glTF, from_node.image)
 
 
 def get_texcoord_index(glTF, name, shader_node_group):
@@ -403,12 +380,53 @@ def get_scene_index(glTF, name):
     return -1
 
 
-def get_uri(filepath):
+def get_image_name(blender_image):
     """
-    Return the final PNG uri depending on a filepath.
+    Return user-facing, extension-agnostic name for image.
     """
 
-    return os.path.splitext(bpy.path.basename(filepath))[0] + '.png'
+    return os.path.splitext(blender_image.name)[0]
+
+
+def get_image_uri(export_settings, blender_image):
+    """
+    Return the final URI depending on a filepath.
+    """
+
+    extension = '.jpg'
+    if get_image_use_alpha(export_settings, blender_image):
+        extension = '.png'
+
+    return get_image_name(blender_image) + extension
+
+
+def get_image_use_alpha(export_settings, blender_image):
+    """
+    Return true if image uses alpha channel.
+    """
+
+    use_alpha = export_settings['filtered_images_use_alpha'].get(blender_image.name)
+
+    if use_alpha is not None:
+        return use_alpha
+
+    return False
+
+def get_image_index(glTF, image):
+    """
+    Return the image index in the glTF array.
+    """
+
+    if glTF.get('images') is None:
+        return -1
+
+    image_name = get_image_name(image)
+
+    for index, current_image in enumerate(glTF['images']):
+        if image_name == current_image['name']:
+            return index
+
+    return -1
 
 
 def get_node(data_path):
