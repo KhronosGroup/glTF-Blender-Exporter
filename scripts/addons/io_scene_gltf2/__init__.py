@@ -69,6 +69,25 @@ bl_info = {
 #  Functions / Classes.
 #
 
+class GLTF2ExportSettings(bpy.types.Operator):
+    """Save the current export settings (gets saved in .blend)"""
+    bl_label = "Save Settings"
+    bl_idname = "scene.gltf2_export_settings_set"
+    scene_key = "glTF2ExportSettings"
+
+
+    def execute(self, context):
+        # find all export_ props
+        all_props = context.active_operator.properties
+        export_props = {x:all_props.get(x) for x in dir(all_props)
+            if x.startswith("export_") and all_props.get(x) is not None}
+
+        context.scene[self.scene_key] = export_props
+
+        self.report({"INFO"}, "glTF2 Export Settings Saved")
+
+        return {"FINISHED"}
+
 class ExportGLTF2_Base():
     export_copyright = StringProperty(
             name='Copyright',
@@ -260,6 +279,19 @@ class ExportGLTF2_Base():
 
     #
 
+    def invoke(self, context, event):
+        settings = context.scene.get(GLTF2ExportSettings.scene_key)
+        if settings:
+            try:
+                for (k,v) in settings.items():
+                    setattr(self, k, v)
+
+            except AttributeError:
+                self.report({"ERROR"}, "Loading export settings failed. Removed corrupted settings")
+                del context.scene[GLTF2ExportSettings.scene_key]
+
+        return ExportHelper.invoke(self, context, event)
+
     def execute(self, context):
         from . import gltf2_export
 
@@ -396,8 +428,15 @@ class ExportGLTF2_Base():
             col.prop(self, 'export_lights_cmn')
             col.prop(self, 'export_displacement')
 
+        has_settings = context.scene.get(GLTF2ExportSettings.scene_key, False)
+        row = layout.row()
+        row.operator(
+            GLTF2ExportSettings.bl_idname,
+            GLTF2ExportSettings.bl_label,
+            icon="%s" % "PINNED" if has_settings else "UNPINNED")
 
-class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
+
+class ExportGLTF2_GLTF(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     '''Export scene as glTF 2.0 file'''
     bl_idname = 'export_scene.gltf'
     bl_label = 'Export glTF 2.0'
@@ -408,7 +447,7 @@ class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
     export_format = 'ASCII'
 
 
-class ExportGLTF2_GLB(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
+class ExportGLTF2_GLB(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     '''Export scene as glTF 2.0 file'''
     bl_idname = 'export_scene.glb'
     bl_label = 'Export glTF 2.0 binary'
