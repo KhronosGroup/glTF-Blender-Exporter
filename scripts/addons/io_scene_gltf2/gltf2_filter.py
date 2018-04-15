@@ -265,7 +265,7 @@ def filter_apply(export_settings):
         else:
             if blender_texture.texture.image is not None and blender_texture.texture.image not in filtered_images and blender_texture.texture.image.users != 0 and blender_texture.texture.image.size[0] > 0 and blender_texture.texture.image.size[1] > 0:
                 filtered_images.append(blender_texture.texture.image)
-                if blender_texture.use_map_alpha or blender_texture.texture.image.use_alpha:
+                if blender_texture.use_map_alpha:
                     filtered_images_use_alpha[blender_texture.texture.image.name] = True
                     
     export_settings['filtered_images'] = filtered_images
