@@ -177,7 +177,7 @@ def animate_gather_keys(export_settings, fcurve_list, interpolation):
         while key <= end:
             if not export_settings['gltf_frame_range'] or (export_settings['gltf_frame_range'] and key >= bpy.context.scene.frame_start and key <= bpy.context.scene.frame_end): 
                 keys.append(key)
-            key += 1.0
+            key += export_settings['gltf_frame_step']
             
         keys.sort()
         

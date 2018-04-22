@@ -618,6 +618,13 @@ def generate_animations(operator,
         correction_matrix_local = blender_object.matrix_parent_inverse
         matrix_basis = mathutils.Matrix.Identity(4)
 
+        #
+
+        if export_settings['gltf_bake_skins']:
+            blender_action = bake_action(export_settings, blender_object, blender_action)
+
+        #
+
         if blender_action.name not in animations:
             animations[blender_action.name] = {
                 'name': blender_action.name,
@@ -730,14 +737,6 @@ def generate_animations(operator,
     #
     #
 
-    blender_backup_action = {}
-
-    if export_settings['gltf_bake_skins']:
-        export_bake_skins(blender_backup_action, export_settings, filtered_objects)
-
-    #
-    #
-
     processed_meshes = {}
 
     def process_mesh_object(blender_object, blender_action):
@@ -828,13 +827,6 @@ def generate_animations(operator,
             shape_keys.animation_data.action = active_action
 
     #
-
-    if export_settings['gltf_bake_skins']:
-        for blender_object in filtered_objects:
-            if blender_backup_action.get(blender_object.name) is not None:
-                blender_object.animation_data.action = blender_backup_action[blender_object.name]
-
-    #
     #
 
     if len(animations) > 0:
@@ -868,19 +860,23 @@ def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, expor
     return correction_matrix_local, matrix_basis
 
 
-def export_bake_skins(blender_backup_action, export_settings, filtered_objects):
-    start, end = compute_action_range(export_settings, bpy.data.actions)
+def bake_action(export_settings, blender_object, blender_action):
+    start, end = compute_action_range(export_settings, [blender_action])
+    step = export_settings['gltf_frame_step']
+
     #
-    for blender_object in filtered_objects:
-        if blender_object.animation_data is not None:
-            blender_backup_action[blender_object.name] = blender_object.animation_data.action
 
-        bpy.context.scene.objects.active = blender_object
+    bpy.context.scene.objects.active = blender_object
+    blender_object.animation_data.action = blender_action
 
-        #
+    #
 
-        bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True,
-                         clear_constraints=False, use_current_action=False, bake_types={'POSE'})
+    bpy.ops.nla.bake(frame_start=start, frame_end=end, step=step, only_selected=True, visual_keying=True,
+                     clear_constraints=False, use_current_action=True, bake_types={'POSE'})
+
+    #
+
+    return blender_object.animation_data.action
 
 
 def compute_action_range(export_settings, actions):
