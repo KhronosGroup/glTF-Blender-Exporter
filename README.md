@@ -27,7 +27,7 @@ Features
 This exporter supports meshes, materials, animation (keyframes, skinning, and shape keys), and more. For a complete list of features available in glTF 2.0, see the [official specification](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md) and [list of extensions](https://github.com/KhronosGroup/glTF/tree/master/extensions#extensions-for-gltf-20). This exporter allows the following extensions:
 
 * [Specular-Glossiness PBR materials](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/README.md)
-* Unlit materials *(coming soon)*
+* [Unlit materials](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit/README.md)
 
 Folders
 --------------
