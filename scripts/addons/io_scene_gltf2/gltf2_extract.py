@@ -103,6 +103,17 @@ def decompose_transition(matrix, context, export_settings):
     return translation, rotation, scale
 
 
+def color_srgb_to_scene_linear(c):
+    """
+    Convert from sRGB to scene linear colorspace.
+    Source: Cycles addon implementation, node_color.h.
+    """
+    if c < 0.04045:
+        return 0.0 if c < 0.0 else c * (1.0 / 12.92)
+    else:
+        return pow((c + 0.055) * (1.0 / 1.055), 2.4)
+
+
 def extract_primitive_floor(a, indices, use_tangents):
     """
     Shift indices, that the first one starts with 0. It is assumed, that the indices are packed.
@@ -628,7 +639,12 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                 for color_index in range(0, color_max):
                     color_name = 'COLOR_' + str(color_index)
                     color = vertex_colors[color_name].data[loop_index].color
-                    colors.append([color[0], color[1], color[2], 1.0])
+                    colors.append([
+                        color_srgb_to_scene_linear(color[0]),
+                        color_srgb_to_scene_linear(color[1]),
+                        color_srgb_to_scene_linear(color[2]),
+                        1.0
+                    ])
             
             #
             
@@ -764,7 +780,8 @@ def extract_primitives(glTF, blender_mesh, blender_vertex_groups, export_setting
                         color_id = 'COLOR_' + str(color_index)
                         for i in range(0, 3):
                             # Alpha is always 1.0 - see above.
-                            if attributes[color_id][current_new_index * 4 + i] != color[i]:
+                            current_color = attributes[color_id][current_new_index * 4 + i]
+                            if color_srgb_to_scene_linear(current_color) != color[i]:
                                 found = False
                                 break
 
