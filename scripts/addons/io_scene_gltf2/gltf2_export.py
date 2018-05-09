@@ -90,8 +90,9 @@ def save(operator,
 
     if export_settings['gltf_format'] == 'ASCII' and not export_settings['gltf_strip']:
         indent = 4
-        separators = separators=(', ', ' : ')
-    
+        # The comma is typically followed by a newline, so no trailing whitespace is needed on it.
+        separators = separators=(',', ' : ')
+
     glTF_encoded = json.dumps(glTF, indent=indent, separators=separators, sort_keys=True)
     
     #
