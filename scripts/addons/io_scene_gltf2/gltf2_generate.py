@@ -772,32 +772,32 @@ def generate_animations(operator,
         processed_meshes[blender_action.name].append(blender_mesh)
 
     for blender_object in filtered_objects:
+
         animation_data = blender_object.animation_data
-        if animation_data is None:
-            continue
 
-        object_actions = []
+        if animation_data is not None:
+            object_actions = []
 
-        # Collect active action.
-        if animation_data.action:
-            object_actions.append(animation_data.action)
+            # Collect active action.
+            if animation_data.action:
+                object_actions.append(animation_data.action)
 
-        # Collect associated strips from NLA tracks.
-        for track in animation_data.nla_tracks:
-            for strip in track.strips:
-                object_actions.append(strip.action)
+            # Collect associated strips from NLA tracks.
+            for track in animation_data.nla_tracks:
+                for strip in track.strips:
+                    object_actions.append(strip.action)
 
-        # Remove duplicate actions.
-        object_actions = list(set(object_actions))
+            # Remove duplicate actions.
+            object_actions = list(set(object_actions))
 
-        # Export all collected actions.
-        for action in object_actions:
-            active_action = animation_data.action
-            animation_data.action = action
+            # Export all collected actions.
+            for action in object_actions:
+                active_action = animation_data.action
+                animation_data.action = action
 
-            process_object_animations(blender_object, action)
+                process_object_animations(blender_object, action)
 
-            animation_data.action = active_action
+                animation_data.action = active_action
 
         #
 
