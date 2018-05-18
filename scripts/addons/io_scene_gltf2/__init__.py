@@ -69,6 +69,20 @@ bl_info = {
 #  Functions / Classes.
 #
 
+class GLTF2ExportSettings(bpy.types.Operator):
+    """Save the export settings on export (saved in .blend).
+Toggle off to clear settings"""
+    bl_label = "Save Settings"
+    bl_idname = "scene.gltf2_export_settings_set"
+
+    def execute(self, context):
+        operator = context.active_operator
+        operator.will_save_settings = not operator.will_save_settings
+        if not operator.will_save_settings and context.scene.get(operator.scene_key, False):
+            # clear settings
+            del context.scene[operator.scene_key]
+        return {"FINISHED"}
+
 class ExportGLTF2_Base():
     export_copyright = StringProperty(
             name='Copyright',
@@ -258,10 +272,42 @@ class ExportGLTF2_Base():
             default=False
     )
 
+    will_save_settings = BoolProperty(default=False)
+
+    # Custom scene property for saving settings
+    scene_key = "glTF2ExportSettings"
+
     #
+
+    def invoke(self, context, event):
+        settings = context.scene.get(self.scene_key)
+        self.will_save_settings = False
+        if settings:
+            try:
+                for (k,v) in settings.items():
+                    setattr(self, k, v)
+                self.will_save_settings = True
+
+            except AttributeError:
+                self.report({"ERROR"}, "Loading export settings failed. Removed corrupted settings")
+                del context.scene[self.scene_key]
+            
+
+        return ExportHelper.invoke(self, context, event)
+
+    def save_settings(self, context):
+        # find all export_ props
+        all_props = self.properties
+        export_props = {x:all_props.get(x) for x in dir(all_props)
+            if x.startswith("export_") and all_props.get(x) is not None}
+
+        context.scene[self.scene_key] = export_props
 
     def execute(self, context):
         from . import gltf2_export
+
+        if self.will_save_settings:
+            self.save_settings(context)
 
         # All custom export settings are stored in this container.
         export_settings = {}
@@ -396,8 +442,14 @@ class ExportGLTF2_Base():
             col.prop(self, 'export_lights_cmn')
             col.prop(self, 'export_displacement')
 
+        row = layout.row()
+        row.operator(
+            GLTF2ExportSettings.bl_idname,
+            GLTF2ExportSettings.bl_label,
+            icon="%s" % "PINNED" if self.will_save_settings else "UNPINNED")
 
-class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
+
+class ExportGLTF2_GLTF(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     '''Export scene as glTF 2.0 file'''
     bl_idname = 'export_scene.gltf'
     bl_label = 'Export glTF 2.0'
@@ -408,7 +460,7 @@ class ExportGLTF2_GLTF(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
     export_format = 'ASCII'
 
 
-class ExportGLTF2_GLB(bpy.types.Operator, ExportHelper, ExportGLTF2_Base):
+class ExportGLTF2_GLB(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     '''Export scene as glTF 2.0 file'''
     bl_idname = 'export_scene.glb'
     bl_label = 'Export glTF 2.0 binary'
