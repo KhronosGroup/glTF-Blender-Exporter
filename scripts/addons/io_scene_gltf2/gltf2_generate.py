@@ -925,7 +925,7 @@ def generate_cameras(export_settings, glTF):
         glTF['cameras'] = cameras
 
 
-def generate_lights_cmn(operator,
+def generate_lights(operator,
                         context,
                         export_settings,
                         glTF):
@@ -939,15 +939,15 @@ def generate_lights_cmn(operator,
     #
     #
 
-    filtered_lights_cmn = export_settings['filtered_lights_cmn']
+    filtered_lights = export_settings['filtered_lights']
 
-    for blender_light in filtered_lights_cmn:
+    for blender_light in filtered_lights:
 
         #
         # Property: light
         #
 
-        light = {'profile': 'CMN'}
+        light = {}
 
         if blender_light.type == 'SUN':
             light['type'] = 'directional'
@@ -958,37 +958,19 @@ def generate_lights_cmn(operator,
         else:
             continue
 
-        if blender_light.type == 'POINT' or blender_light.type == 'SPOT':
+        if blender_light.type == 'SPOT':
+            spot = {}
 
-            positional = {}
+            angle = blender_light.spot_size * 0.5
 
-            if blender_light.falloff_type == 'CONSTANT':
-                positional['constantAttenuation'] = 1.0
-            elif blender_light.falloff_type == 'INVERSE_LINEAR':
-                positional['linearAttenuation'] = 1.0 / blender_light.distance
-            elif blender_light.falloff_type == 'INVERSE_SQUARE':
-                positional['quadraticAttenuation'] = 1.0 / blender_light.distance
-            elif blender_light.falloff_type == 'INVERSE_COEFFICIENTS':
-                positional['constantAttenuation'] = blender_light.constant_coefficient * 1.0
-                positional['linearAttenuation'] = blender_light.linear_coefficient * 1.0 / blender_light.distance
-                positional['quadraticAttenuation'] = blender_light.quadratic_coefficient * 1.0 / blender_light.distance
-            else:
-                continue
+            spot['outerConeAngle'] = angle
+            spot['innerConeAngle'] = angle - angle * blender_light.spot_blend
 
-            light['positional'] = positional
+            light['spot'] = spot
 
-            if blender_light.type == 'SPOT':
-                spot = {}
-
-                angle = blender_light.spot_size * 0.5
-
-                spot['outerAngle'] = angle
-                spot['innerAngle'] = angle - angle * blender_light.spot_blend
-
-                positional['spot'] = spot
-
-        light['color'] = [blender_light.color[0] * blender_light.energy, blender_light.color[1] * blender_light.energy,
-                          blender_light.color[2] * blender_light.energy]
+        light['color'] = [blender_light.color[0], blender_light.color[1], blender_light.color[2]]
+        
+        light['intensity'] = blender_light.energy
 
         #
 
@@ -1028,112 +1010,15 @@ def generate_lights_cmn(operator,
     #
 
     if len(lights) > 0:
-        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights_cmn')
-        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights_cmn')
+        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights')
+        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights')
 
         if glTF.get('extensions') is None:
             glTF['extensions'] = {}
 
         extensions = glTF['extensions']
 
-        extensions['KHR_lights_cmn'] = {
-            'lights': lights
-        }
-
-
-def generate_lights_pbr(operator,
-                        context,
-                        export_settings,
-                        glTF):
-    """
-    Generates the top level lights entry.
-    Note: This is currently an experimental feature.
-    """
-
-    lights = []
-
-    #
-    #
-
-    filtered_lights_pbr = export_settings['filtered_lights_pbr']
-
-    for blender_light in filtered_lights_pbr:
-
-        #
-        # Property: light
-        #
-
-        light = {'profile': 'PBR'}
-
-        #
-
-        blender_light_node = None
-
-        for blender_node in blender_light.node_tree.nodes:
-            if isinstance(blender_node, bpy.types.ShaderNodeGroup):
-                if blender_node.node_tree.name.startswith('glTF Directional Light'):
-                    light['type'] = 'directional'
-                    blender_light_node = blender_node
-                    break
-                if blender_node.node_tree.name.startswith('glTF Point Light'):
-                    light['type'] = 'point'
-                    blender_light_node = blender_node
-                    break
-                if blender_node.node_tree.name.startswith('glTF Spot Light'):
-                    light['type'] = 'spot'
-                    blender_light_node = blender_node
-                    break
-
-        if blender_light_node is None:
-            continue
-
-        #
-
-        if light['type'] == 'point' or light['type'] == 'spot':
-
-            positional = {}
-
-            positional['radius'] = blender_light_node.inputs['Radius'].default_value
-
-            light['positional'] = positional
-
-            if light['type'] == 'spot':
-                spot = {}
-
-                angle = blender_light.spot_size * 0.5
-
-                spot['outerAngle'] = angle
-                spot['innerAngle'] = angle - angle * blender_light.spot_blend
-
-                positional['spot'] = spot
-
-        light['color'] = [blender_light_node.inputs['Color'].default_value[0],
-                          blender_light_node.inputs['Color'].default_value[1],
-                          blender_light_node.inputs['Color'].default_value[2]]
-        light['strength'] = blender_light_node.inputs['Strength'].default_value
-
-        #
-
-        light['name'] = blender_light.name
-
-        #
-        #
-
-        lights.append(light)
-
-    #
-    #
-
-    if len(lights) > 0:
-        create_extensionsUsed(operator, context, export_settings, glTF, 'KHR_lights_pbr')
-        create_extensionsRequired(operator, context, export_settings, glTF, 'KHR_lights_pbr')
-
-        if glTF.get('extensions') is None:
-            glTF['extensions'] = {}
-
-        extensions = glTF['extensions']
-
-        extensions['KHR_lights_pbr'] = {
+        extensions['KHR_lights'] = {
             'lights': lights
         }
 
@@ -1719,34 +1604,13 @@ def generate_node_instance(context,
                     else:
                         node['camera'] = camera
 
-        if export_settings['gltf_lights_cmn']:
+        if export_settings['gltf_lights']:
             if blender_object.type == 'LAMP':
-                light = get_light_index_cmn(glTF, blender_object.data.name)
+                light = get_light_index(glTF, blender_object.data.name)
                 if light >= 0:
                     if export_settings['gltf_yup']:
-                        khr_lights_cmn = {'light': light}
-                        extensions = {'KHR_lights_cmn': khr_lights_cmn}
-
-                        # Add correction node for light, as default direction is different to Blender.
-                        correction_node = {}
-
-                        correction_node['name'] = 'Correction_' + blender_object.name
-                        correction_node['rotation'] = [correction_quaternion[1], correction_quaternion[2],
-                                                       correction_quaternion[3], correction_quaternion[0]]
-
-                        correction_node['extensions'] = extensions
-
-                        nodes.append(correction_node)
-                    else:
-                        node['extensions'] = extensions
-
-        if export_settings['gltf_lights_pbr']:
-            if blender_object.type == 'LAMP':
-                light = get_light_index_pbr(glTF, blender_object.data.name)
-                if light >= 0:
-                    if export_settings['gltf_yup']:
-                        khr_lights_pbr = {'light': light}
-                        extensions = {'KHR_lights_pbr': khr_lights_pbr}
+                        khr_lights = {'light': light}
+                        extensions = {'KHR_lights': khr_lights}
 
                         # Add correction node for light, as default direction is different to Blender.
                         correction_node = {}
@@ -2020,15 +1884,8 @@ def generate_nodes(operator,
                 if child_index >= 0:
                     children.append(child_index)
 
-        # Light CMN
-        if export_settings['gltf_lights_cmn']:
-            if blender_object.type == 'LAMP':
-                child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
-                if child_index >= 0:
-                    children.append(child_index)
-
-        # Light PBR
-        if export_settings['gltf_lights_pbr']:
+        # Light
+        if export_settings['gltf_lights']:
             if blender_object.type == 'LAMP':
                 child_index = get_node_index(glTF, 'Correction_' + blender_object.name)
                 if child_index >= 0:
@@ -2825,11 +2682,11 @@ def generate_scenes(export_settings,
 
         #
 
-        if export_settings['gltf_lights_cmn']:
-            light = get_light_index_cmn(glTF, 'Ambient_' + blender_scene.name)
+        if export_settings['gltf_lights']:
+            light = get_light_index(glTF, 'Ambient_' + blender_scene.name)
             if light >= 0:
-                khr_lights_cmn = {'light': light}
-                extensions = {'KHR_lights_cmn': khr_lights_cmn}
+                khr_lights = {'light': light}
+                extensions = {'KHR_lights': khr_lights}
                 scene['extensions'] = extensions
 
         #
@@ -2911,16 +2768,10 @@ def generate_glTF(operator,
         profile_end('cameras')
         bpy.context.window_manager.progress_update(40)
 
-    if export_settings['gltf_lights_cmn']:
+    if export_settings['gltf_lights']:
         profile_start()
-        generate_lights_cmn(operator, context, export_settings, glTF)
-        profile_end('lights cmn')
-        bpy.context.window_manager.progress_update(50)
-
-    if export_settings['gltf_lights_pbr']:
-        profile_start()
-        generate_lights_pbr(operator, context, export_settings, glTF)
-        profile_end('lights pbr')
+        generate_lights(operator, context, export_settings, glTF)
+        profile_end('lights')
         bpy.context.window_manager.progress_update(50)
 
     bpy.context.window_manager.progress_update(50)

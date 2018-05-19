@@ -254,14 +254,8 @@ class ExportGLTF2_Base():
             default=True
     )
 
-    export_lights_pbr = BoolProperty(
-            name='Export KHR_lights_pbr',
-            description='',
-            default=False
-    )
-
-    export_lights_cmn = BoolProperty(
-            name='Export KHR_lights_cmn',
+    export_lights = BoolProperty(
+            name='Export KHR_lights',
             description='',
             default=False
     )
@@ -363,8 +357,7 @@ class ExportGLTF2_Base():
         else:
             export_settings['gltf_morph_tangent'] = False
 
-        export_settings['gltf_lights_pbr'] = self.export_lights_pbr
-        export_settings['gltf_lights_cmn'] = self.export_lights_cmn
+        export_settings['gltf_lights'] = self.export_lights
         export_settings['gltf_displacement'] = self.export_displacement
 
         export_settings['gltf_binary'] = bytearray()
@@ -438,8 +431,7 @@ class ExportGLTF2_Base():
         if addon_prefs.experimental:
             col = layout.box().column()
             col.label('Experimental:', icon='RADIO')
-            col.prop(self, 'export_lights_pbr')
-            col.prop(self, 'export_lights_cmn')
+            col.prop(self, 'export_lights')
             col.prop(self, 'export_displacement')
 
         row = layout.row()

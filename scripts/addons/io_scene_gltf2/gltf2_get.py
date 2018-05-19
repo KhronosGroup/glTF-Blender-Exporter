@@ -284,7 +284,7 @@ def get_camera_index(glTF, name):
     return -1
 
 
-def get_light_index_cmn(glTF, name):
+def get_light_index(glTF, name):
     """
     Return the light index in the glTF array.
     """
@@ -294,45 +294,15 @@ def get_light_index_cmn(glTF, name):
     
     extensions = glTF['extensions']
         
-    if extensions.get('KHR_lights_cmn') is None:
+    if extensions.get('KHR_lights') is None:
         return -1
     
-    khr_lights_cmn = extensions['KHR_lights_cmn']
+    khr_lights = extensions['KHR_lights']
 
-    if khr_lights_cmn.get('lights') is None:
+    if khr_lights.get('lights') is None:
         return -1
 
-    lights = khr_lights_cmn['lights']
-
-    index = 0
-    for light in lights:
-        if light['name'] == name:
-            return index
-        
-        index += 1
-
-    return -1
-
-
-def get_light_index_pbr(glTF, name):
-    """
-    Return the light index in the glTF array.
-    """
-
-    if glTF.get('extensions') is None:
-        return -1
-    
-    extensions = glTF['extensions']
-        
-    if extensions.get('KHR_lights_pbr') is None:
-        return -1
-    
-    khr_lights_pbr = extensions['KHR_lights_pbr']
-
-    if khr_lights_pbr.get('lights') is None:
-        return -1
-
-    lights = khr_lights_pbr['lights']
+    lights = khr_lights['lights']
 
     index = 0
     for light in lights:
