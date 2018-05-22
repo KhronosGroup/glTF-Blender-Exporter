@@ -970,6 +970,9 @@ def generate_lights(operator,
 
         light['color'] = [blender_light.color[0], blender_light.color[1], blender_light.color[2]]
         
+        # Blender Render lamps have no real-world units, while glTF lights use candela
+        # (for punctual lights) and lux (for ambient and directional lights). For lack
+        # of a better conversion, use the unitless energy value here.
         light['intensity'] = blender_light.energy
 
         #
