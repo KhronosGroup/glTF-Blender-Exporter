@@ -36,15 +36,25 @@ from .gltf2_get import *
 # Functions
 #
 
+from bpy import types
+
+class BlenderEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, types.ID):
+            return obj.name
+
+        return super(BlenderEncoder, self).default(obj)
 
 def is_json(data):
     """
     Test, if a data set can be expressed as JSON.
     """
     try:
-        json.dumps(data)
+        json.dumps(data, cls=BlenderEncoder)
         return True
     except:
+        import logging
+        logging.exception("failed to json.dump custom properties.")
         return False
 
 

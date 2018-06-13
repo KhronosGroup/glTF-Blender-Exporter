@@ -23,6 +23,7 @@ import struct
 from .gltf2_debug import *
 from .gltf2_filter import *
 from .gltf2_generate import *
+from .gltf2_create import BlenderEncoder
 
 #
 # Globals
@@ -93,7 +94,7 @@ def save(operator,
         # The comma is typically followed by a newline, so no trailing whitespace is needed on it.
         separators = separators=(',', ' : ')
 
-    glTF_encoded = json.dumps(glTF, indent=indent, separators=separators, sort_keys=True)
+    glTF_encoded = json.dumps(glTF, indent=indent, separators=separators, sort_keys=True, cls=BlenderEncoder)
     
     #
 
