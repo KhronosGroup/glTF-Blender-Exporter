@@ -1466,7 +1466,7 @@ def generate_duplicate_mesh(glTF, blender_object):
     if blender_object is None:
         return -1
 
-    if 'data' not in blender_object:
+    if not hasattr(blender_object, 'data'):
         return -1
       
     mesh_index = get_mesh_index(glTF, blender_object.data.name)
@@ -1578,7 +1578,7 @@ def generate_node_instance(context,
                             break
 
                 if need_duplicate:
-                    mesh = generate_duplicate_mesh(context, glTF)
+                    mesh = generate_duplicate_mesh(glTF, blender_object)
 
                 #
 
