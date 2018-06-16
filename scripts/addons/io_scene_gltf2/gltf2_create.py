@@ -436,6 +436,8 @@ def create_custom_property(blender_element):
         value = blender_element[custom_property]
 
         add_value = False
+        if isinstance(value, types.ID):
+            value = value.name
 
         if isinstance(value, str):
             add_value = True
