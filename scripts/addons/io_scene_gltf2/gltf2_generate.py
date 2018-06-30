@@ -784,6 +784,10 @@ def generate_animations(operator,
 
             # Collect associated strips from NLA tracks.
             for track in animation_data.nla_tracks:
+                # Multi-strip tracks do not export correctly yet (they need to be baked),
+                # so skip them for now and only write single-strip tracks.
+                if track.strips is None or len(track.strips) != 1:
+                    continue
                 for strip in track.strips:
                     object_actions.append(strip.action)
 
