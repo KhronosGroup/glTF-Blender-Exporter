@@ -52,7 +52,7 @@ def filter_apply(export_settings):
         if export_settings['gltf_selected'] or not export_settings['gltf_layers']:
             current_parent = blender_object.parent
             while current_parent:
-                if current_parent not in filtered_objects and current_parent not in implicit_filtered_objects:
+                if current_parent not in implicit_filtered_objects:
                     implicit_filtered_objects.append(current_parent)
                 
                 current_parent = current_parent.parent
@@ -313,8 +313,10 @@ def filter_apply(export_settings):
     #
     #
     
-    filtered_objects.extend(implicit_filtered_objects)
-    
+    for implicit_object in implicit_filtered_objects:
+        if implicit_object not in filtered_objects:
+            filtered_objects.append(implicit_object)
+
     #
     #
     #
