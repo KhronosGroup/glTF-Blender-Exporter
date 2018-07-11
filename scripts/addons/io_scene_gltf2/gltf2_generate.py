@@ -161,6 +161,7 @@ def generate_animations_parameter(
                 interpolation,
                 node_type,
                 used_node_name,
+                action.name,
                 matrix_correction,
                 matrix_basis
             )
@@ -225,7 +226,12 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
             #
     #
@@ -244,7 +250,7 @@ def generate_animations_parameter(
             if interpolation == 'CUBICSPLINE':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_axis_angle(export_settings, rotation_axis_angle, interpolation, node_type,
-                                                        used_node_name, matrix_correction, matrix_basis)
+                                                        used_node_name, action.name, matrix_correction, matrix_basis)
 
         if rotation_euler.count(None) < 3:
             interpolation = animate_get_interpolation(export_settings, rotation_euler)
@@ -252,15 +258,15 @@ def generate_animations_parameter(
             if interpolation == 'CUBICSPLINE':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data = animate_rotation_euler(export_settings, rotation_euler, rotation_mode, interpolation,
-                                                   node_type, used_node_name, matrix_correction, matrix_basis)
+                                                   node_type, used_node_name, action.name, matrix_correction, matrix_basis)
 
         if rotation_quaternion.count(None) < 4:
             interpolation = animate_get_interpolation(export_settings, rotation_quaternion)
             if interpolation == 'CUBICSPLINE' and node_type == 'JOINT':
                 interpolation = 'CONVERSION_NEEDED'
             rotation_data, rotation_in_tangent_data, rotation_out_tangent_data = animate_rotation_quaternion(
-                export_settings, rotation_quaternion, interpolation, node_type, used_node_name, matrix_correction,
-                matrix_basis)
+                export_settings, rotation_quaternion, interpolation, node_type, used_node_name, action.name,
+                matrix_correction, matrix_basis)
 
     if rotation_data is not None:
 
@@ -334,7 +340,12 @@ def generate_animations_parameter(
 
         sampler['name'] = sampler_name
 
-        samplers.append(sampler)
+        #
+
+        if sampler['output'] != -1 and sampler['input'] != -1:
+            samplers.append(sampler)
+        else:
+            print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
         #
     #
@@ -362,6 +373,7 @@ def generate_animations_parameter(
                 interpolation,
                 node_type,
                 used_node_name,
+                action.name,
                 matrix_correction,
                 matrix_basis
             )
@@ -427,10 +439,15 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
     #
-    #  
+    #
 
     if len(value) > 0 and is_morph_data:
         sampler_name = prefix + action.name + "_weights"
@@ -514,7 +531,12 @@ def generate_animations_parameter(
 
             sampler['name'] = sampler_name
 
-            samplers.append(sampler)
+            #
+
+            if sampler['output'] != -1 and sampler['input'] != -1:
+                samplers.append(sampler)
+            else:
+                print_console('WARNING', 'Skipping sampler ' + sampler_name + ', found missing or invalid data.')
 
     #
     #
@@ -553,15 +575,20 @@ def generate_animations_parameter(
     for path in ['translation', 'rotation', 'scale', 'weights']:
 
         if write_transform[write_transform_index]:
-            channel = {}
-
-            #
-
             sampler_name = prefix + action.name + "_" + path
 
-            channel['sampler'] = get_index(samplers, sampler_name)
+            sampler_index = get_index(samplers, sampler_name)
+
+            # Skip channels containing skipped samplers.
+            if sampler_index == -1:
+                print_console('WARNING', 'Skipped channel in action ' + action.name + ', missing sampler.')
+                continue
 
             #
+
+            channel = {}
+            channel['sampler'] = sampler_index
+
             #
 
             target_name = name + postfix
@@ -571,7 +598,7 @@ def generate_animations_parameter(
                 'node': get_node_index(glTF, target_name)
             }
 
-            # 
+            #
 
             channels.append(channel)
 
@@ -585,23 +612,36 @@ def generate_animations(operator,
                         export_settings,
                         glTF):
     """
-    Generates the top level animations, channels and samplers entry.
+    Generates the top level animations entry.
     """
-
-    def process_object_animations(blender_object):
-        if blender_object.animation_data is None:
-            return
-
-        blender_action = blender_object.animation_data.action
-
-        if blender_action is None:
-            return
-
-        #
-        #
-
+    def process_object_animations(blender_object, blender_action):
         correction_matrix_local = blender_object.matrix_parent_inverse
         matrix_basis = mathutils.Matrix.Identity(4)
+
+        #
+
+        if export_settings['gltf_bake_skins']:
+            blender_action = bake_action(export_settings, blender_object, blender_action)
+
+        #
+
+        if blender_action.name not in animations:
+            animations[blender_action.name] = {
+                'name': blender_action.name,
+                'channels': [],
+                'samplers': []
+            }
+
+        channels = animations[blender_action.name]['channels']
+        samplers = animations[blender_action.name]['samplers']
+
+        # Add entry to joint cache. Current action may not need skinnning,
+        # but there are too many places to check for and add it later.
+        gltf_joint_cache = export_settings['gltf_joint_cache']
+        if not gltf_joint_cache.get(blender_action.name):
+            gltf_joint_cache[blender_action.name] = {}
+
+        #
 
         generate_animations_parameter(
             operator,
@@ -636,7 +676,7 @@ def generate_animations(operator,
 
                 # Precalculate joint animation data.
 
-                start, end = compute_action_range(export_settings)
+                start, end = compute_action_range(export_settings, [blender_action])
 
                 # Iterate over frames in export range
                 for frame in range(int(start), int(end) + 1):
@@ -652,16 +692,14 @@ def generate_animations(operator,
                             export_settings
                         )
 
-                        gltf_joint_cache = export_settings['gltf_joint_cache']
-
-                        if not gltf_joint_cache.get(blender_bone.name):
-                            gltf_joint_cache[blender_bone.name] = {}
+                        if not gltf_joint_cache[blender_action.name].get(blender_bone.name):
+                            gltf_joint_cache[blender_action.name][blender_bone.name] = {}
 
                         matrix = correction_matrix_local * matrix_basis
 
                         tmp_location, tmp_rotation, tmp_scale = matrix.decompose()
 
-                        gltf_joint_cache[blender_bone.name][float(frame)] = [tmp_location, tmp_rotation, tmp_scale]
+                        gltf_joint_cache[blender_action.name][blender_bone.name][float(frame)] = [tmp_location, tmp_rotation, tmp_scale]
 
                 #
 
@@ -689,11 +727,7 @@ def generate_animations(operator,
                         False
                     )
 
-    animations = []
-
-    channels = []
-
-    samplers = []
+    animations = {}
 
     #
     #
@@ -703,29 +737,30 @@ def generate_animations(operator,
     #
     #
 
-    blender_backup_action = {}
+    processed_meshes = {}
 
-    if export_settings['gltf_bake_skins']:
-        export_bake_skins(blender_backup_action, export_settings, filtered_objects)
-
-    #
-    #
-
-    processed_meshes = []
-
-    def process_mesh_object(blender_object):
+    def process_mesh_object(blender_object, blender_action):
         blender_mesh = blender_object.data
 
-        if blender_mesh in processed_meshes:
+        if not blender_action.name in processed_meshes:
+            processed_meshes[blender_action.name] = []
+
+        if blender_mesh in processed_meshes[blender_action.name]:
             return
 
-        if blender_mesh.shape_keys is None or blender_mesh.shape_keys.animation_data is None:
-            return
+        #
 
-        blender_action = blender_mesh.shape_keys.animation_data.action
+        if blender_action.name not in animations:
+            animations[blender_action.name] = {
+                'name': blender_action.name,
+                'channels': [],
+                'samplers': []
+            }
 
-        if blender_action is None:
-            return
+        channels = animations[blender_action.name]['channels']
+        samplers = animations[blender_action.name]['samplers']
+
+        #
 
         correction_matrix_local = mathutils.Matrix.Identity(4)
         matrix_basis = mathutils.Matrix.Identity(4)
@@ -734,43 +769,78 @@ def generate_animations(operator,
                                       blender_object.name, None, blender_object.rotation_mode, correction_matrix_local,
                                       matrix_basis, True)
 
-        processed_meshes.append(blender_mesh)
+        processed_meshes[blender_action.name].append(blender_mesh)
 
     for blender_object in filtered_objects:
-        process_object_animations(blender_object)
-        # Export morph targets animation data.
-        if blender_object.type != 'MESH' or blender_object.data is None:
-            continue
-        process_mesh_object(blender_object)
 
-    if export_settings['gltf_bake_skins']:
-        for blender_object in filtered_objects:
-            if blender_backup_action.get(blender_object.name) is not None:
-                blender_object.animation_data.action = blender_backup_action[blender_object.name]
+        animation_data = blender_object.animation_data
 
-    #
-    #
+        if animation_data is not None:
+            object_actions = []
 
-    if len(channels) > 0 or len(samplers) > 0:
+            # Collect active action.
+            if animation_data.action:
+                object_actions.append(animation_data.action)
 
-        # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
-        for sampler in samplers:
-            del sampler['name']
+            # Collect associated strips from NLA tracks.
+            for track in animation_data.nla_tracks:
+                # Multi-strip tracks do not export correctly yet (they need to be baked),
+                # so skip them for now and only write single-strip tracks.
+                if track.strips is None or len(track.strips) != 1:
+                    continue
+                for strip in track.strips:
+                    object_actions.append(strip.action)
+
+            # Remove duplicate actions.
+            object_actions = list(set(object_actions))
+
+            # Export all collected actions.
+            for action in object_actions:
+                active_action = animation_data.action
+                animation_data.action = action
+
+                process_object_animations(blender_object, action)
+
+                animation_data.action = active_action
 
         #
 
-        animation = {
-            'channels': channels,
-            'samplers': samplers
-        }
+        # Export shape keys.
+        if (blender_object.type != 'MESH'
+                or blender_object.data is None
+                or blender_object.data.shape_keys is None
+                or blender_object.data.shape_keys.animation_data is None):
+            continue
 
-        animations.append(animation)
+        shape_keys = blender_object.data.shape_keys
+        shape_key_actions = []
+
+        if shape_keys.animation_data.action:
+            shape_key_actions.append(shape_keys.animation_data.action)
+
+        for track in shape_keys.animation_data.nla_tracks:
+            for strip in track.strips:
+                shape_key_actions.append(strip.action)
+
+        for action in shape_key_actions:
+            active_action = shape_keys.animation_data.action
+            shape_keys.animation_data.action = action
+
+            process_mesh_object(blender_object, action)
+
+            shape_keys.animation_data.action = active_action
 
     #
     #
 
     if len(animations) > 0:
-        glTF['animations'] = animations
+        glTF['animations'] = []
+        # Sampler 'name' is used to gather the index. However, 'name' is no property of sampler and has to be removed.
+        for animation in animations.values():
+            for sampler in animation['samplers']:
+                del sampler['name']
+            if len(animation['channels']) > 0:
+                glTF['animations'].append(animation)
 
 
 def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, export_settings):
@@ -794,25 +864,29 @@ def compute_bone_matrices(axis_basis_change, blender_bone, blender_object, expor
     return correction_matrix_local, matrix_basis
 
 
-def export_bake_skins(blender_backup_action, export_settings, filtered_objects):
-    start, end = compute_action_range(export_settings)
+def bake_action(export_settings, blender_object, blender_action):
+    start, end = compute_action_range(export_settings, [blender_action])
+    step = export_settings['gltf_frame_step']
+
     #
-    for blender_object in filtered_objects:
-        if blender_object.animation_data is not None:
-            blender_backup_action[blender_object.name] = blender_object.animation_data.action
 
-        bpy.context.scene.objects.active = blender_object
+    bpy.context.scene.objects.active = blender_object
+    blender_object.animation_data.action = blender_action
 
-        #
+    #
 
-        bpy.ops.nla.bake(frame_start=start, frame_end=end, only_selected=False, visual_keying=True,
-                         clear_constraints=False, use_current_action=False, bake_types={'POSE'})
+    bpy.ops.nla.bake(frame_start=start, frame_end=end, step=step, only_selected=True, visual_keying=True,
+                     clear_constraints=False, use_current_action=True, bake_types={'POSE'})
+
+    #
+
+    return blender_object.animation_data.action
 
 
-def compute_action_range(export_settings):
+def compute_action_range(export_settings, actions):
     start = None
     end = None
-    for current_blender_action in bpy.data.actions:
+    for current_blender_action in actions:
         for current_blender_fcurve in current_blender_action.fcurves:
             if current_blender_fcurve is None:
                 continue
@@ -895,7 +969,7 @@ def generate_cameras(export_settings, glTF):
 
             orthographic = {}
 
-            #    
+            #
 
             orthographic['xmag'] = blender_camera.ortho_scale
             orthographic['ymag'] = blender_camera.ortho_scale
@@ -903,7 +977,7 @@ def generate_cameras(export_settings, glTF):
             orthographic['znear'] = blender_camera.clip_start
             orthographic['zfar'] = blender_camera.clip_end
 
-            # 
+            #
 
             camera['orthographic'] = orthographic
         else:
@@ -1468,7 +1542,7 @@ def generate_duplicate_mesh(glTF, blender_object):
 
     if not hasattr(blender_object, 'data'):
         return -1
-      
+
     mesh_index = get_mesh_index(glTF, blender_object.data.name)
 
     if mesh_index == -1:
@@ -1942,7 +2016,7 @@ def generate_nodes(operator,
                         if blender_child_node.parent_type == 'BONE':
                             blender_object_to_bone[blender_child_node.name] = blender_child_node.parent_bone
 
-                # 
+                #
 
                 for blender_bone in blender_object.pose.bones:
 
@@ -2147,7 +2221,7 @@ def generate_materials(operator,
     #
 
     for blender_material in filtered_materials:
-        # 
+        #
         # Property: material
         #
 
@@ -2167,7 +2241,7 @@ def generate_materials(operator,
                     alpha = 1.0
 
                     if blender_node.node_tree.name.startswith('glTF Metallic Roughness'):
-                        # 
+                        #
                         # Property: pbrMetallicRoughness
                         #
 
@@ -2232,7 +2306,7 @@ def generate_materials(operator,
                     if blender_node.node_tree.name.startswith('glTF Specular Glossiness'):
                         KHR_materials_pbrSpecularGlossiness_Used = True
 
-                        # 
+                        #
                         # Property: Specular Glossiness Material
                         #
 
@@ -2412,7 +2486,7 @@ def generate_materials(operator,
             if blender_material.use_shadeless:
                 KHR_materials_unlit_Used = True
 
-                # 
+                #
                 # Property: Unlit Material
                 #
 
@@ -2469,7 +2543,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2576,7 +2650,7 @@ def generate_materials(operator,
                                 if index >= 0:
                                     extensions = material['extensions']
 
-                                    # 
+                                    #
 
                                     displacementTexture = {
                                         'index': index,
@@ -2661,7 +2735,7 @@ def generate_scenes(export_settings,
     #
 
     for blender_scene in bpy.data.scenes:
-        # 
+        #
         # Property: scene
         #
 
