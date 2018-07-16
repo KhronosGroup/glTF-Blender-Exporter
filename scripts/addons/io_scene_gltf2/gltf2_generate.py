@@ -1611,10 +1611,10 @@ def generate_node_instance(context,
             if blender_object.type == 'LAMP':
                 light = get_light_index(glTF, blender_object.data.name)
                 if light >= 0:
-                    if export_settings['gltf_yup']:
-                        khr_lights = {'light': light}
-                        extensions = {'KHR_lights': khr_lights}
+                    khr_lights = {'light': light}
+                    extensions = {'KHR_lights': khr_lights}
 
+                    if export_settings['gltf_yup']:
                         # Add correction node for light, as default direction is different to Blender.
                         correction_node = {}
 
