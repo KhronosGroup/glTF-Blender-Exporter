@@ -44,7 +44,8 @@ from bpy.props import (CollectionProperty,
                        StringProperty,
                        BoolProperty,
                        EnumProperty,
-                       FloatProperty)
+                       FloatProperty,
+                       IntProperty)
 
 
 from bpy_extras.io_utils import (ExportHelper)
@@ -206,6 +207,14 @@ class ExportGLTF2_Base():
             default=True
     )
 
+    export_frame_step = IntProperty(
+            name='Frame step size',
+            description='Step size (in frames) for animation export.',
+            default=1,
+            min=1,
+            max=120
+    )
+
     export_move_keyframes = BoolProperty(
             name='Keyframes start with 0',
             description='',
@@ -347,6 +356,7 @@ class ExportGLTF2_Base():
             export_settings['gltf_bake_skins'] = self.export_bake_skins
         else:
             export_settings['gltf_bake_skins'] = False
+        export_settings['gltf_frame_step'] = self.export_frame_step
         export_settings['gltf_morph'] = self.export_morph
         if self.export_morph:
             export_settings['gltf_morph_normal'] = self.export_morph_normal
@@ -414,6 +424,7 @@ class ExportGLTF2_Base():
         col.prop(self, 'export_animations')
         if self.export_animations:
             col.prop(self, 'export_frame_range')
+            col.prop(self, 'export_frame_step')
             col.prop(self, 'export_move_keyframes')
             col.prop(self, 'export_force_sampling')
         else:
