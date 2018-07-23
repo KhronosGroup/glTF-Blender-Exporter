@@ -41,7 +41,10 @@ from bpy import types
 class BlenderEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, types.ID):
-            return obj.name
+            return dict(
+                name=obj.name,
+                type=obj.__class__.__name__
+            )
 
         return super(BlenderEncoder, self).default(obj)
 
