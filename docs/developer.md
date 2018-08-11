@@ -90,5 +90,5 @@ Using this project file in combination with the Eclipse IDE, Blender and its scr
 [glTF 2.0](https://github.com/KhronosGroup/glTF)
 
 #### Blender integration requirements
-[Requirements for contributed Scripts](https://wiki.blender.org/index.php/Dev:Py/Scripts/Guidelines/Addons)  
-[Addons](https://wiki.blender.org/index.php/Dev:Doc/Process/Addons)  
+[Requirements for contributed Scripts](https://wiki.blender.org/wiki/Process/Addons)  
+[Addons](https://wiki.blender.org/wiki/Process/Addons/Guidelines)  
