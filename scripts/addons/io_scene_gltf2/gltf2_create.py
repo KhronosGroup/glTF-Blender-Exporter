@@ -347,7 +347,7 @@ def create_image_file(context, blender_image, dst_path, file_format):
 
         src_path = bpy.path.abspath(blender_image.filepath, library=blender_image.library)
 
-        if dst_path != src_path:
+        if os.path.abspath(dst_path) != os.path.abspath(src_path):
             copyfile(src_path, dst_path)
 
     else:
