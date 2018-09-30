@@ -349,19 +349,19 @@ def create_image_file(context, blender_image, dst_path, file_format):
 
         # Check that source and destination path are not the same using os.path.abspath
         # because bpy.path.abspath seems to not always return an absolute path
-        if os.path.abspath(dst_path) != os.path.abspath(src_path):
+        if os.path.isfile(src_path) and os.path.abspath(dst_path) != os.path.abspath(src_path):
             copyfile(src_path, dst_path)
+            return
 
-    else:
-        # Render a new image to destination, converting to target format.
+    # Render a new image to destination, converting to target format.
 
-        # TODO: Reusing the existing scene means settings like exposure are applied on export,
-        # which we don't want, but I'm not sure how to create a new Scene object through the
-        # Python API. See: https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/184.
+    # TODO: Reusing the existing scene means settings like exposure are applied on export,
+    # which we don't want, but I'm not sure how to create a new Scene object through the
+    # Python API. See: https://github.com/KhronosGroup/glTF-Blender-Exporter/issues/184.
 
-        context.scene.render.image_settings.file_format = file_format
-        context.scene.render.image_settings.color_depth = '8'
-        blender_image.save_render(dst_path, context.scene)
+    context.scene.render.image_settings.file_format = file_format
+    context.scene.render.image_settings.color_depth = '8'
+    blender_image.save_render(dst_path, context.scene)
 
 
 def create_image_data(context, export_settings, blender_image, file_format):
