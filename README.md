@@ -1,4 +1,10 @@
 
+🚨 IMPORTANT: This exporter supports only Blender <2.79b. A newer project,
+[glTF-Blender-IO](https://github.com/KhronosGroup/glTF-Blender-IO), provides
+both export and import for Blender 2.80, and is included by default in the
+[Blender 2.8 Beta](https://www.blender.org/experimental). All future development
+will take place there.
+
 [![Blender](misc/Blender_logo.png)](http://www.blender.org/) [![glTF](misc/glTF_logo.png)](https://www.khronos.org/gltf/)  
 
 Blender glTF 2.0 Exporter
