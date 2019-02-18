@@ -327,7 +327,9 @@ def filter_apply(export_settings):
         for blender_object in filtered_objects:
             if blender_object.type != 'ARMATURE' or len(blender_object.pose.bones) == 0:
                 continue
+            bone_index = 0
             for blender_bone in blender_object.pose.bones:
-                group_index[blender_bone.name] = len(group_index)
+                group_index[blender_bone.name] = bone_index
+                bone_index += 1
 
     export_settings['group_index'] = group_index
