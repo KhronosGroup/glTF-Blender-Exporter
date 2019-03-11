@@ -1810,7 +1810,7 @@ def generate_nodes(operator,
             for blender_check_object in filtered_objects:
                 blender_check_armature = blender_check_object.find_armature()
 
-                if blender_check_armature is not None and blender_check_object not in children_list:
+                if blender_check_armature == blender_object and blender_check_object not in children_list:
                     children_list.append(blender_check_object)
 
             #
