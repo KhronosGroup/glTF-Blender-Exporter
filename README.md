@@ -1,1 +1,1 @@
-**Archived:** Please use [glTF-Blender-IO](https://github.com/KhronosGroup/glTF-Blender-Exporter), included in Blender 2.80+. All future development will happen there, and this project is now archived. See [ARCHIVED_README.md](ARCHIVED_README.md) for the original documentation.
+**Archived:** Please use [glTF-Blender-IO](https://github.com/KhronosGroup/glTF-Blender-IO), included in Blender 2.80+. All future development will happen there, and this project is now archived. See [ARCHIVED_README.md](ARCHIVED_README.md) for the original documentation.
